@@ -1,0 +1,6 @@
+首先安装Python的依赖库：setuptools, distribute, protobuf和urllib3到Python2.7的环境下。
+这些库可以从https://pypi.python.org/pypi网站下载，或者直接从pymodules目录安装。
+
+然后执行
+    sudo python2.7 setup.py install
+就可以安装ots_python_sdk。
