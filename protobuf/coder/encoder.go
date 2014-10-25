@@ -26,9 +26,9 @@ type OTSProtoBufferEncoder map[string]interface{}
 
 var api_encode_list = OTSProtoBufferEncoder{
 	"CreateTable": _encode_create_table,
-	// "DeleteTable":   _encode_delete_table,
-	// "ListTable":     _encode_list_table,
-	// "UpdateTable":   _encode_update_table,
+	"DeleteTable": _encode_delete_table,
+	"ListTable":   _encode_list_table,
+	"UpdateTable": _encode_update_table,
 	// "DescribeTable": _encode_describe_table,
 	// "GetRow":        _encode_get_row,
 	// "PutRow":        _encode_put_row,
@@ -1814,7 +1814,7 @@ func TestEncoder() {
 	// fmt.Println(proto)
 }
 
-// 创建表格
+// 根据表信息创建表
 func _encode_create_table(table_meta *OTSTableMeta, reserved_throughput *OTSReservedThroughput) (req *CreateTableRequest, err error) {
 	proto := new(CreateTableRequest)
 	proto.TableMeta = new(TableMeta)
@@ -1831,7 +1831,7 @@ func _encode_create_table(table_meta *OTSTableMeta, reserved_throughput *OTSRese
 	return proto, nil
 }
 
-// 删除表格
+// 根据表名删除表
 func _encode_delete_table(table_name string) (req *DeleteTableRequest, err error) {
 	proto := new(DeleteTableRequest)
 	proto.TableName = NewString(table_name)
@@ -1839,9 +1839,22 @@ func _encode_delete_table(table_name string) (req *DeleteTableRequest, err error
 	return proto, nil
 }
 
-// 列出所有表格
+// 获取所有表名的列表
 func _encode_list_table() (req *ListTableRequest, err error) {
 	proto := new(ListTableRequest)
+
+	return proto, nil
+}
+
+// 更新表属性，目前只支持修改预留读写吞吐量
+func _encode_update_table(table_name string, reserved_throughput *OTSReservedThroughput) (req *UpdateTableRequest, err error) {
+	proto := new(UpdateTableRequest)
+	proto.TableName = NewString(table_name)
+	proto.ReservedThroughput = new(ReservedThroughput)
+	err = _make_update_reserved_throughput(proto.ReservedThroughput, *reserved_throughput)
+	if err != nil {
+		return nil, err
+	}
 
 	return proto, nil
 }

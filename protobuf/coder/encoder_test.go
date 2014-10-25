@@ -52,3 +52,16 @@ func Test_encode_list_table(t *testing.T) {
 	t.Log("test _encode_list_table ok!")
 	// t.Fail()
 }
+
+func Test_encode_update_table(t *testing.T) {
+	t.Log("testing _encode_update_table...")
+	// ----
+	reserved_throughput := OTSReservedThroughput{
+		OTSCapacityUnit{100, 100},
+	}
+	req, _ := _encode_update_table("myTable", &reserved_throughput)
+	t.Log("UpdateTableRequest:", req)
+	// ----
+	t.Log("test _encode_update_table ok!")
+	// t.Fail()
+}
