@@ -8,7 +8,7 @@ you can use Get to crawl data.
 
 	import "github.com/GiterLab/goots/urllib"
 	
-	str, err := httplib.Get("http://tobyzxj.me/").String()
+	str, err := urllib.Get("http://tobyzxj.me/").String()
 	if err != nil {
         	// error
 	}
@@ -17,7 +17,7 @@ you can use Get to crawl data.
 ## POST
 POST data to remote url
 
-	req := httplib.Post("http://tobyzxj.me/")
+	req := urllib.Post("http://tobyzxj.me/")
 	req.Param("username","tobyzxj")
 	req.Param("password","123456")
 	str, err := req.String()
@@ -35,17 +35,17 @@ The default timeout is `60` seconds, function prototype:
 Exmaple:
 
 	// GET
-	httplib.Get("http://tobyzxj.me/").SetTimeout(100 * time.Second, 30 * time.Second)
+	urllib.Get("http://tobyzxj.me/").SetTimeout(100 * time.Second, 30 * time.Second)
 	
 	// POST
-	httplib.Post("http://tobyzxj.me/").SetTimeout(100 * time.Second, 30 * time.Second)
+	urllib.Post("http://tobyzxj.me/").SetTimeout(100 * time.Second, 30 * time.Second)
 
 
 ## Debug
 
 If you want to debug the request info, set the debug on
 
-	httplib.Get("http://tobyzxj.me/").Debug(true)
+	urllib.Get("http://tobyzxj.me/").Debug(true)
 	
 ## Set HTTP Basic Auth
 
@@ -59,7 +59,7 @@ If you want to debug the request info, set the debug on
 
 If request url is https, You can set the client support TSL:
 
-	httplib.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	urllib.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	
 More info about the `tls.Config` please visit http://golang.org/pkg/crypto/tls/#Config	
 
@@ -67,7 +67,7 @@ More info about the `tls.Config` please visit http://golang.org/pkg/crypto/tls/#
 
 some servers need to specify the protocol version of HTTP
 
-	httplib.Get("http://tobyzxj.me/").SetProtocolVersion("HTTP/1.1")
+	urllib.Get("http://tobyzxj.me/").SetProtocolVersion("HTTP/1.1")
 	
 ## Set Cookie
 
@@ -76,15 +76,15 @@ some http request need setcookie. So set it like this:
 	cookie := &http.Cookie{}
 	cookie.Name = "username"
 	cookie.Value  = "tobyzxj"
-	httplib.Get("http://tobyzxj.me/").SetCookie(cookie)
+	urllib.Get("http://tobyzxj.me/").SetCookie(cookie)
 
 ## Upload file
 
-httplib support mutil file upload, use `req.PostFile()`
+urllib support mutil file upload, use `req.PostFile()`
 
-	req := httplib.Post("http://tobyzxj.me/")
+	req := urllib.Post("http://tobyzxj.me/")
 	req.Param("username","tobyzxj")
-	req.PostFile("uploadfile1", "httplib.pdf")
+	req.PostFile("uploadfile1", "urllib.pdf")
 	str, err := req.String()
 	if err != nil {
         	// error
