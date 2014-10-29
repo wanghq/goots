@@ -57,6 +57,14 @@ func SetDefaultSetting(setting HttpSettings) {
 	}
 }
 
+// Get current default settings
+func GetDefaultSetting() *HttpSettings {
+	settingMutex.Lock()
+	defer settingMutex.Unlock()
+
+	return &defaultSetting
+}
+
 // return *HttpRequest with specific method
 func newRequest(url, method string) *HttpRequest {
 	var resp http.Response
