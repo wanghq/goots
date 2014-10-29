@@ -124,6 +124,8 @@ func New(end_point, accessid, accesskey, instance_name string, kwargs ...interfa
 	}
 	urllib.SetDefaultSetting(url_setting)
 
+	protocol.Set(o.AccessId, o.AccessKey, o.InstanceName, o.Encoding, o.LoggerName)
+
 	return o, nil
 }
 
@@ -154,6 +156,7 @@ type OTSClient struct {
 func (o *OTSClient) String() string {
 	r := ""
 	r = r + fmt.Sprintln("#### OTSClinet Config ####")
+	r = r + fmt.Sprintln("API_VERSION  :", API_VERSION)
 	r = r + fmt.Sprintln("DebugEnable  :", OTSDebugEnable)
 	r = r + fmt.Sprintln("EndPoint     :", o.EndPoint)
 	r = r + fmt.Sprintln("AccessId     :", o.AccessId)
