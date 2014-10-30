@@ -35,6 +35,7 @@ var defaultOTSSetting = OTSClient{
 	DEFAULT_MAX_CONNECTION,      // MaxConnection
 	DEFAULT_LOGGER_NAME,         // LoggerName
 	DEFAULT_ENCODING,            // Encoding
+	&defaultProtocol,
 }
 var settingMutex sync.Mutex
 
@@ -124,7 +125,8 @@ func New(end_point, accessid, accesskey, instance_name string, kwargs ...interfa
 	}
 	urllib.SetDefaultSetting(url_setting)
 
-	protocol.Set(o.AccessId, o.AccessKey, o.InstanceName, o.Encoding, o.LoggerName)
+	o.protocol = newProtocol(nil)
+	o.protocol.Set(o.AccessId, o.AccessKey, o.InstanceName, o.Encoding, o.LoggerName)
 
 	return o, nil
 }
@@ -151,6 +153,9 @@ type OTSClient struct {
 
 	// 字符编码格式，此参数未用,兼容python
 	Encoding string
+
+	// protocol
+	protocol *ots_protocol
 }
 
 func (o *OTSClient) String() string {

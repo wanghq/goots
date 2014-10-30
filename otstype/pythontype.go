@@ -7,6 +7,7 @@ package otstype
 
 import (
 	"errors"
+	"fmt"
 )
 
 // tuple
@@ -62,3 +63,12 @@ func (d *Dict) Get(k interface{}) (v interface{}, err error) {
 }
 
 type DictString map[string]interface{}
+
+func (d DictString) String() string {
+	result := ""
+	for k, v := range d {
+		result = result + fmt.Sprintf("%s:%v\n", k, v)
+	}
+
+	return result
+}
