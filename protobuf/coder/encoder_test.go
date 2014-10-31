@@ -7,8 +7,11 @@
 package coder
 
 import (
-	. "github.com/GiterLab/goots/otstype"
+	"fmt"
 	"testing"
+
+	. "github.com/GiterLab/goots/otstype"
+	. "github.com/GiterLab/goots/protobuf"
 )
 
 func Test_encode_create_table(t *testing.T) {
@@ -63,5 +66,62 @@ func Test_encode_update_table(t *testing.T) {
 	t.Log("UpdateTableRequest:", req)
 	// ----
 	t.Log("test _encode_update_table ok!")
+	// t.Fail()
+}
+
+func Test_EncodeRequest(t *testing.T) {
+	t.Log("testing EncodeRequest...")
+	// ----
+	table_meta := OTSTableMeta{
+		TableName: "myTable",
+		SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
+			"gid": "INTEGER",
+			"uid": "INTEGER",
+		},
+	}
+
+	reserved_throughput := OTSReservedThroughput{
+		OTSCapacityUnit{100, 100},
+	}
+
+	req, err := EncodeRequest("CreateTable", &table_meta, &reserved_throughput)
+	if err != nil {
+		t.Logf("EncodeRequest error: %s", err)
+		t.Fail()
+	}
+
+	if len(req) != 2 {
+		t.Fail()
+	} else {
+		if req[1].Interface() != nil {
+			err, ok := req[1].Interface().(error)
+			if ok {
+				if err != nil {
+					t.Logf("err: %s", err)
+					t.Fail()
+				}
+			}
+		}
+	}
+
+	if req[0].Interface() != nil {
+		v, ok := req[0].Interface().(*CreateTableRequest)
+		if ok {
+			if v != nil {
+				// fmt.Println("TableName", v.GetTableMeta().GetTableName())
+				if v.GetTableMeta().GetTableName() != "myTable" {
+					t.Log("TableName:", v.GetTableMeta().GetTableName())
+					t.Fail()
+				}
+			} else {
+				fmt.Println("CreateTableRequest is nil")
+			}
+		} else {
+			fmt.Println("CreateTableRequest error")
+		}
+	}
+
+	// ----
+	t.Log("test EncodeRequest ok!")
 	// t.Fail()
 }

@@ -12,6 +12,7 @@ import (
 	"encoding/base64"
 	// "encoding/hex"
 	"fmt"
+	"math"
 	"net/url"
 	"sort"
 	"strings"
@@ -19,7 +20,7 @@ import (
 	// "sync"
 	"time"
 
-	// . "github.com/GiterLab/goots/log"
+	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
 	// "github.com/GiterLab/goots/urllib"
 	// "code.google.com/p/goprotobuf/proto"
@@ -39,6 +40,21 @@ func newProtocol(protocol *ots_protocol) *ots_protocol {
 	protocol.api_version = API_VERSION
 
 	return protocol
+}
+
+var api_list = DictString{
+	"CreateTable":   "",
+	"ListTable":     "",
+	"DeleteTable":   "",
+	"DescribeTable": "",
+	"UpdateTable":   "",
+	"GetRow":        "",
+	"PutRow":        "",
+	"UpdateRow":     "",
+	"DeleteRow":     "",
+	"BatchGetRow":   "",
+	"BatchWriteRow": "",
+	"GetRange":      "",
 }
 
 type ots_protocol struct {
@@ -136,14 +152,9 @@ func (o *ots_protocol) _make_request_signature(query string, headers DictString)
 	}
 	sorted_query = urlencode(sorted_query)
 	signature_string := uri + "\n" + "POST" + "\n" + sorted_query + "\n"
-	// fmt.Println("uri:", uri)
-	// fmt.Println("sorted_query:", sorted_query)
-	// fmt.Println("url_obj.Opaque:", url_obj.Opaque)
-	// fmt.Println("signature_string, before:", signature_string)
+
 	headers_string := o._make_headers_string(headers)
-	// fmt.Println("headers_string:", headers_string)
 	signature_string = signature_string + headers_string + "\n"
-	// fmt.Println("signature_string, after:", signature_string)
 	signature = o._call_signature_method(signature_string)
 
 	return signature, nil
@@ -174,6 +185,124 @@ func (o *ots_protocol) _make_headers(body []byte, query string) (headers DictStr
 	return headers, nil
 }
 
+func (o *ots_protocol) _make_response_signature(query string, headers DictString) (signature string, err error) {
+	url_obj, err := url.Parse(query)
+	if err != nil {
+		return "", err
+	}
+
+	uri := url_obj.Path
+	headers_string := o._make_headers_string(headers)
+	signature_string := headers_string + "\n" + uri
+	signature = o._call_signature_method(signature_string)
+
+	return signature, nil
+}
+
+func (o *ots_protocol) _check_headers(headers DictString, body []byte) (ok bool, err error) {
+	// check the response headers and process response body if needed.
+
+	// 1, make sure we have all headers
+	header_names := []string{
+		"x-ots-contentmd5",
+		"x-ots-requestid",
+		"x-ots-date",
+		"x-ots-contenttype",
+	}
+
+	for _, name := range header_names {
+		if _, ok := headers[name]; !ok {
+			return false, (OTSClientError{}.Set("\"%s\" is missing in response header", name))
+		}
+	}
+
+	// 2, check md5
+	md5 := base64Encode(md5Encode(body))
+	if md5 != headers["x-ots-contentmd5"] {
+		return false, (OTSClientError{}.Set("MD5 mismatch in response"))
+	}
+
+	// 3. check date
+	server_time, err := time.Parse(("Mon, 02 Jan 2006 15:04:05 GMT"), headers["x-ots-date"].(string))
+	if err != nil {
+		return false, (OTSClientError{}.Set("Invalid date format in response - %s", err))
+	}
+
+	// 4, check date range
+	server_unix_time := server_time.UTC()
+	now_unix_time := time.Now().UTC()
+
+	d := now_unix_time.Sub(server_unix_time)
+	if math.Abs(float64(d.Seconds())) > float64(15*60*time.Second) {
+		return false, (OTSClientError{}.Set("The difference between date in response and system time is more than 15 minutes"))
+	}
+
+	return true, nil
+}
+
+func (o *ots_protocol) _check_authorization(query string, headers DictString) (ok bool, err error) {
+	auth, ok := headers["authorization"]
+	if !ok {
+		auth, ok = headers["Authorization"]
+		if !ok {
+			return false, (OTSClientError{}.Set("\"Authorization\" is missing in response header"))
+		}
+	}
+
+	// 1, check authorization
+	if !strings.HasPrefix(auth.(string), "OTS ") {
+		return false, (OTSClientError{}.Set("Invalid Authorization in response"))
+	}
+
+	// 2, check accessid
+	auth_string := auth.(string)[4:]
+	auth_slice := strings.Split(auth_string, ":")
+	if len(auth_slice) != 2 {
+		return false, (OTSClientError{}.Set("Invalid Authorization in response"))
+	}
+	access_id := auth_slice[0]
+	signature := auth_slice[1]
+	if access_id != o.user_id {
+		return false, (OTSClientError{}.Set("Invalid accesskeyid in response"))
+	}
+
+	// 3, check signature
+	signature_src, err := o._make_response_signature(query, headers)
+	if err != nil {
+		return false, (OTSClientError{}.Set("Invalid signature in response - %s", err))
+	}
+	if signature != signature_src {
+		return false, (OTSClientError{}.Set("Invalid signature in response"))
+	}
+
+	return true, nil
+}
+
+func (o *ots_protocol) make_request(api_name string, args ...interface{}) (query string, headers DictString, body []byte, err error) {
+	if _, ok := api_list[api_name]; !ok {
+		return "", DictString{}, nil, (OTSClientError{}.Set("API %s is not supported", api_name))
+	}
+
+	return query, headers, body, nil
+}
+
+func (o *ots_protocol) _get_request_id_string(headers DictString) string {
+	request_id, ok := headers["x-ots-requestid"]
+	if ok {
+		return request_id.(string)
+	}
+
+	return ""
+}
+
+// func (o *ots_protocol) parse_response(api_name, status string, headers DictString, body []byte) (ok bool, err error) {
+
+// }
+
+///////////////////////////////////////
+////       COMMON TOOLS            ////
+///////////////////////////////////////
+
 // create md5 string
 func md5Encode(src []byte) []byte {
 	h := md5.New()
@@ -200,6 +329,7 @@ func base64Decode(src []byte) ([]byte, error) {
 	return coder.DecodeString(string(src))
 }
 
+// urlencode
 func urlencode(s string) (result string) {
 	for _, c := range s {
 		if c <= 0x7f { // single byte

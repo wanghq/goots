@@ -41,19 +41,19 @@ func (f Funcmap) Has(name string) bool {
 }
 
 // Call function by name
-func (f Funcmap) Call(name string, params ...interface{}) (result []reflect.Value, err error) {
+func (f Funcmap) Call(name string, args ...interface{}) (result []reflect.Value, err error) {
 	if _, ok := f[name]; !ok {
 		err = fmt.Errorf("%s - fucntion can not found", name)
 		return nil, err
 	}
 
-	if len(params) != f[name].Type().NumIn() {
-		err = fmt.Errorf("%s - input params can not adapt", name)
+	if len(args) != f[name].Type().NumIn() {
+		err = fmt.Errorf("%s - input args can not adapt, need %d, not %d", name, f[name].Type().NumIn(), len(args))
 		return nil, err
 	}
 
-	in := make([]reflect.Value, len(params))
-	for k, v := range params {
+	in := make([]reflect.Value, len(args))
+	for k, v := range args {
 		in[k] = reflect.ValueOf(v)
 	}
 	result = f[name].Call(in)

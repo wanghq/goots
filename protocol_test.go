@@ -45,10 +45,10 @@ func Test_call_signature_method(t *testing.T) {
 
 	protocol := newProtocol(nil)
 	protocol.Set("", key, "", "", "")
-	str := protocol._call_signature_method(stringToSign)
-	// fmt.Println(str)
+	signature := protocol._call_signature_method(stringToSign)
 
-	if str != "4xap392B7EBpN+RmlHgNowjoG1w=" {
+	if signature != "4xap392B7EBpN+RmlHgNowjoG1w=" {
+		t.Logf("signature shoud be %s, not %s", "4xap392B7EBpN+RmlHgNowjoG1w=", signature)
 		t.Fail()
 	}
 }
@@ -68,11 +68,13 @@ func Test_make_request_signature(t *testing.T) {
 	query := "/ListTable"
 	signature, err := protocol._make_request_signature(query, headers)
 	if err != nil {
+		t.Log(err)
 		t.Fail()
 	}
 	// fmt.Println("signature:", signature)
 
 	if signature != "4xap392B7EBpN+RmlHgNowjoG1w=" {
+		t.Logf("signature shoud be %s, not %s", "4xap392B7EBpN+RmlHgNowjoG1w=", signature)
 		t.Fail()
 	}
 }
@@ -88,10 +90,77 @@ func Test_make_headers(t *testing.T) {
 	body := proto.MarshalTextString(proto_list_table)
 	header, err := protocol._make_headers([]byte(body), query)
 	if err != nil {
+		t.Log(err)
 		t.Fail()
 	}
 
 	if header["x-ots-contentmd5"].(string) != "1B2M2Y8AsgTpgAmY7PhCfg==" {
+		t.Logf("x-ots-contentmd5 shoud be %s, not %s", "1B2M2Y8AsgTpgAmY7PhCfg=", header["x-ots-contentmd5"].(string))
+		t.Fail()
+	}
+}
+
+func Test_make_response_signature(t *testing.T) {
+	key := "8AKqXmNBkl85QK70cAOuH4bBd3gS0J"
+	protocol := newProtocol(nil)
+	protocol.Set("", key, "", "", "")
+	query := "/ListTable"
+
+	headers := DictString{
+		"x-ots-date":        "Tue, 12 Aug 2014 10:23:03 GMT",
+		"x-ots-requestid":   "0005006c-0e81-db74-4a34-ce0a5df229a1",
+		"x-ots-contenttype": "protocol buffer",
+		"x-ots-contentmd5":  "1B2M2Y8AsgTpgAmY7PhCfg==",
+	}
+
+	signature, err := protocol._make_response_signature(query, headers)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+
+	if signature != "Y24MHhVti5UhSCW5qsUSDvT9SOk=" {
+		t.Logf("signature shoud be %s, not %s", "Y24MHhVti5UhSCW5qsUSDvT9SOk=", signature)
+		t.Fail()
+	}
+}
+
+func Test_check_authorization(t *testing.T) {
+	uid := "29j2NtzlUr8hjP8b"
+	key := "8AKqXmNBkl85QK70cAOuH4bBd3gS0J"
+	protocol := newProtocol(nil)
+	protocol.Set(uid, key, "", "", "")
+	query := "/ListTable"
+
+	headers := DictString{
+		"x-ots-date":        "Tue, 12 Aug 2014 10:23:03 GMT",
+		"x-ots-requestid":   "0005006c-0e81-db74-4a34-ce0a5df229a1",
+		"x-ots-contenttype": "protocol buffer",
+		"x-ots-contentmd5":  "1B2M2Y8AsgTpgAmY7PhCfg==",
+		"Authorization":     "OTS 29j2NtzlUr8hjP8b:Y24MHhVti5UhSCW5qsUSDvT9SOk=",
+	}
+
+	ok, err := protocol._check_authorization(query, headers)
+	if err != nil {
+		t.Fail()
+	}
+	if !ok {
+		t.Fail()
+	}
+}
+
+func Test_get_request_id_string(t *testing.T) {
+	headers := DictString{
+		"x-ots-date":        "Tue, 12 Aug 2014 10:23:03 GMT",
+		"x-ots-requestid":   "0005006c-0e81-db74-4a34-ce0a5df229a1",
+		"x-ots-contenttype": "protocol buffer",
+		"x-ots-contentmd5":  "1B2M2Y8AsgTpgAmY7PhCfg==",
+		"Authorization":     "OTS 29j2NtzlUr8hjP8b:Y24MHhVti5UhSCW5qsUSDvT9SOk=",
+	}
+
+	protocol := newProtocol(nil)
+	requestid := protocol._get_request_id_string(headers)
+	if requestid != "0005006c-0e81-db74-4a34-ce0a5df229a1" {
 		t.Fail()
 	}
 }

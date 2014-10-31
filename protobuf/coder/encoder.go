@@ -20,11 +20,11 @@ const (
 	INT32_MIN int32 = -2147483648
 )
 
-var ApiEncodeMap = NewFuncmap()
+var api_encode_map = NewFuncmap()
 
-type OTSProtoBufferEncoder map[string]interface{}
+type ots_proto_buffer_encoder map[string]interface{}
 
-var api_encode_list = OTSProtoBufferEncoder{
+var api_encode_list = ots_proto_buffer_encoder{
 	"CreateTable": _encode_create_table,
 	"DeleteTable": _encode_delete_table,
 	"ListTable":   _encode_list_table,
@@ -41,7 +41,7 @@ var api_encode_list = OTSProtoBufferEncoder{
 
 func init() {
 	for k, v := range api_encode_list {
-		ApiEncodeMap.Bind(k, v)
+		api_encode_map.Bind(k, v)
 	}
 }
 
@@ -927,14 +927,7 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 // just for tobyzxj
 // forgot it
 func TestEncoder() {
-	fmt.Println("encoder test")
-	// req, err := ApiEncodeMap.Call("CreateTable", &TableMeta{TableName: NewString("tobzxj")}, &ReservedThroughput{})
-	// v, ok := req[0].Interface().(CreateTableRequest)
-	// if ok {
-	// 	fmt.Println(v.GetTableMeta().GetTableName(), err)
-	// } else {
-	// 	fmt.Println("error")
-	// }
+	fmt.Println("Encoder test...")
 
 	// func _make_repeated_column_names(proto []string, columns_to_get []string) error
 	// var proto []string
@@ -1857,4 +1850,18 @@ func _encode_update_table(table_name string, reserved_throughput *OTSReservedThr
 	}
 
 	return proto, nil
+}
+
+// request encode for ots2
+func EncodeRequest(api_name string, args ...interface{}) (req []reflect.Value, err error) {
+	if _, ok := api_encode_map[api_name]; !ok {
+		return nil, (OTSClientError{}.Set("No PB encode method for API %s", api_name))
+	}
+
+	req, err = api_encode_map.Call(api_name, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
