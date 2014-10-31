@@ -6,13 +6,27 @@
 package coder
 
 import (
-// "fmt"
-// "reflect"
+	// "fmt"
+	"reflect"
 
-// "code.google.com/p/goprotobuf/proto"
-// . "github.com/GiterLab/goots/log"
-// . "github.com/GiterLab/goots/otstype"
-// . "github.com/GiterLab/goots/protobuf"
+	// "code.google.com/p/goprotobuf/proto"
+	. "github.com/GiterLab/goots/log"
+	// . "github.com/GiterLab/goots/otstype"
+	// . "github.com/GiterLab/goots/protobuf"
 )
 
-var ApiDecodeMap = NewFuncmap()
+var api_decode_map = NewFuncmap()
+
+// request encode for ots2
+func DecodeRequest(api_name string, args ...interface{}) (req []reflect.Value, err error) {
+	if _, ok := api_decode_map[api_name]; !ok {
+		return nil, (OTSClientError{}.Set("No PB encode method for API %s", api_name))
+	}
+
+	req, err = api_decode_map.Call(api_name, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}

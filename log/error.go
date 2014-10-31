@@ -14,6 +14,19 @@ type OTSError struct {
 	ServiceError OTSServiceError
 }
 
+func (o OTSError) Init() {
+	// TODO:
+	// open log file
+}
+
+func (o OTSError) Set(format string, a ...interface{}) (e error) {
+	e = fmt.Errorf(format, a...)
+	return e
+
+	// TODO:
+	// log to file
+}
+
 type OTSClientError struct {
 	Message    string
 	HttpStatus string
@@ -23,7 +36,7 @@ func (o OTSClientError) Set(format string, a ...interface{}) (e error) {
 	defer func() {
 		panic(e)
 	}()
-	e = fmt.Errorf(format, a)
+	e = fmt.Errorf(format, a...)
 	return e
 }
 
@@ -54,7 +67,7 @@ func (o OTSServiceError) Set(format string, a ...interface{}) (e error) {
 	defer func() {
 		panic(e)
 	}()
-	e = fmt.Errorf(format, a)
+	e = fmt.Errorf(format, a...)
 	return e
 }
 

@@ -14,21 +14,24 @@ import (
 	"fmt"
 	"math"
 	"net/url"
+	"reflect"
 	"sort"
 	"strings"
-	// "reflect"
 	// "sync"
 	"time"
 
+	"code.google.com/p/goprotobuf/proto"
 	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
-	// "github.com/GiterLab/goots/urllib"
-	// "code.google.com/p/goprotobuf/proto"
+	. "github.com/GiterLab/goots/protobuf"
+	"github.com/GiterLab/goots/protobuf/coder"
 )
 
 var API_VERSION = "2014-08-08"
 var defaultProtocol = ots_protocol{
 	api_version: API_VERSION,
+	encoder:     coder.EncodeRequest,
+	decoder:     coder.DecodeRequest,
 }
 
 func newProtocol(protocol *ots_protocol) *ots_protocol {
@@ -38,6 +41,8 @@ func newProtocol(protocol *ots_protocol) *ots_protocol {
 
 	protocol = new(ots_protocol)
 	protocol.api_version = API_VERSION
+	protocol.encoder = coder.EncodeRequest
+	protocol.decoder = coder.DecodeRequest
 
 	return protocol
 }
@@ -63,9 +68,9 @@ type ots_protocol struct {
 	user_key      string
 	instance_name string
 	encoding      string
-	// encoder func()
-	// decoder func()
-	logger string
+	encoder       func(api_name string, args ...interface{}) (req []reflect.Value, err error)
+	decoder       func(api_name string, args ...interface{}) (req []reflect.Value, err error)
+	logger        string
 }
 
 func (o *ots_protocol) Set(user_id, user_key, instance_name, encoding, logger string) *ots_protocol {
@@ -283,6 +288,79 @@ func (o *ots_protocol) make_request(api_name string, args ...interface{}) (query
 		return "", DictString{}, nil, (OTSClientError{}.Set("API %s is not supported", api_name))
 	}
 
+	proto_obj, err := o.encoder(api_name, args...)
+	if err != nil {
+		return "", DictString{}, nil, err
+	}
+
+	if len(proto_obj) < 2 {
+		return "", DictString{}, nil, (OTSClientError{}.Set("Not enough params"))
+	} else {
+		err_index := len(proto_obj)
+		if proto_obj[err_index-1].Interface() != nil {
+			err, ok := proto_obj[err_index-1].Interface().(error)
+			if ok {
+				return "", DictString{}, nil, err
+			}
+		}
+	}
+
+	// TODO:
+	// MAKR BY TOBYZXJ
+	// "CreateTable"
+	// "ListTable"
+	// "DeleteTable"
+	// "DescribeTable"
+	// "UpdateTable"
+	// "GetRow"
+	// "PutRow"
+	// "UpdateRow"
+	// "DeleteRow"
+	// "BatchGetRow"
+	// "BatchWriteRow"
+	// "GetRange"
+	switch t := proto_obj[0].Interface().(type) {
+	case *CreateTableRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*CreateTableRequest)))
+	case *ListTableRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*ListTableRequest)))
+	case *DeleteTableRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*DeleteTableRequest)))
+	case *DescribeTableRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*DescribeTableRequest)))
+	case *UpdateTableRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*UpdateTableRequest)))
+	case *GetRowRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*GetRowRequest)))
+	case *PutRowRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*PutRowRequest)))
+	case *UpdateRowRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*UpdateRowRequest)))
+	case *DeleteRowRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*DeleteRowRequest)))
+	case *BatchGetRowRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*BatchGetRowRequest)))
+	case *BatchWriteRowRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*BatchWriteRowRequest)))
+	case *GetRangeRequest:
+		body = []byte(proto.MarshalTextString(proto_obj[0].Interface().(*GetRangeRequest)))
+
+	default:
+		return "", DictString{}, nil, fmt.Errorf("Unknown type: %v", t)
+	}
+
+	query = "/" + api_name
+	headers, err = o._make_headers(body, query)
+	if err != nil {
+		return "", DictString{}, nil, err
+	}
+	if OTSDebugEnable {
+		// prevent MessageToString from happening
+		// when no log is going to be actually printed
+		// since it's very time consuming
+		OTSError{}.Set("OTS request, API: %s, Protobuf: %v", api_name, proto_obj[0].Interface())
+	}
+
 	return query, headers, body, nil
 }
 
@@ -295,9 +373,15 @@ func (o *ots_protocol) _get_request_id_string(headers DictString) string {
 	return ""
 }
 
-// func (o *ots_protocol) parse_response(api_name, status string, headers DictString, body []byte) (ok bool, err error) {
+func (o *ots_protocol) parse_response(api_name, status string, headers DictString, body []byte) (ok bool, err error) {
 
-// }
+	return true, nil
+}
+
+func (o *ots_protocol) handle_error(api_name, query, status, reason string, headers DictString, body []byte) OTSError {
+
+	return OTSError{}
+}
 
 ///////////////////////////////////////
 ////       COMMON TOOLS            ////

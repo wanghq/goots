@@ -149,6 +149,35 @@ func Test_check_authorization(t *testing.T) {
 	}
 }
 
+func Test_make_request(t *testing.T) {
+	uid := "29j2NtzlUr8hjP8b"
+	key := "8AKqXmNBkl85QK70cAOuH4bBd3gS0J"
+	protocol := newProtocol(nil)
+	protocol.Set(uid, key, "", "", "")
+	query := "/CreateTable"
+
+	table_meta := OTSTableMeta{
+		TableName: "myTable",
+		SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
+			"gid": "INTEGER",
+			"uid": "INTEGER",
+		},
+	}
+
+	reserved_throughput := OTSReservedThroughput{
+		OTSCapacityUnit{100, 100},
+	}
+
+	query, headers, body, err := protocol.make_request("CreateTable", &table_meta, &reserved_throughput)
+	if err != nil {
+		t.Fail()
+	}
+
+	fmt.Println("query:", query)
+	fmt.Println("headers:", headers)
+	fmt.Println("body:", body)
+}
+
 func Test_get_request_id_string(t *testing.T) {
 	headers := DictString{
 		"x-ots-date":        "Tue, 12 Aug 2014 10:23:03 GMT",
