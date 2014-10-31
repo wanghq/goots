@@ -276,6 +276,34 @@ func (o *OTSClient) Set(kwargs DictString) *OTSClient {
 	return o
 }
 
-func _request_helper(api_name string, args ...interface{}) []interface{} {
-	return nil
+func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp []reflect.Value, err error) {
+	query, reqheaders, reqbody, err := o.protocol.make_request(api_name, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	// http send_receive
+	req := urllib.Post(o.EndPoint + query)
+	req.Body(reqbody)
+	for k, v := range reqheaders {
+		req.Header(k, v)
+	}
+
+	response, err := req.Response()
+	if err != nil {
+		return nil, err
+	}
+	status := response.StatusCode
+	// reason :=
+	resheaders := DictString(response.Header)
+	if response.Body == nil {
+		return nil, nil
+	}
+	defer response.Body.Close()
+	resbody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }
