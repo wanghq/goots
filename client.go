@@ -7,13 +7,17 @@ package goots
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
+	"code.google.com/p/goprotobuf/proto"
 	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
+	. "github.com/GiterLab/goots/protobuf"
 	"github.com/GiterLab/goots/urllib"
 )
 
@@ -277,25 +281,35 @@ func (o *OTSClient) Set(kwargs DictString) *OTSClient {
 }
 
 func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp []reflect.Value, err error) {
+	// 1. make_request
 	query, reqheaders, reqbody, err := o.protocol.make_request(api_name, args...)
 	if err != nil {
 		return nil, err
 	}
 
-	// http send_receive
+	// 2. http send_receive
 	req := urllib.Post(o.EndPoint + query)
-	req.Body(reqbody)
-	for k, v := range reqheaders {
-		req.Header(k, v)
+	if OTSDebugEnable {
+		req.Debug(true)
 	}
-
+	req.Body(reqbody)
+	if reqheaders != nil {
+		for k, v := range reqheaders {
+			req.Header(k, v.(string))
+		}
+	}
 	response, err := req.Response()
 	if err != nil {
 		return nil, err
 	}
-	status := response.StatusCode
-	// reason :=
-	resheaders := DictString(response.Header)
+	status := response.StatusCode // e.g. 200
+	reason := response.Status     // e.g. "200 OK"
+	var resheaders = DictString{}
+	if response.Header != nil {
+		for k, v := range response.Header {
+			resheaders[strings.ToLower(k)] = v
+		}
+	}
 	if response.Body == nil {
 		return nil, nil
 	}
@@ -305,5 +319,81 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 		return nil, err
 	}
 
+	fmt.Println("status:", status)
+	fmt.Println("reason:", reason)
+	fmt.Println("resheaders:", resheaders)
+	fmt.Println("resbody:", resbody)
+
+	// test fo ListTable
+	list_table_resp := &ListTableResponse{}
+	proto.Unmarshal(resbody, list_table_resp)
+	fmt.Println(list_table_resp)
+
+	// 3. handle_error
+
+	// 4. parse_response
+
 	return nil, nil
+}
+
+func (o *OTSClient) CreateTable() {
+
+}
+
+func (o *OTSClient) DeleteTable() {
+
+}
+
+// 说明：获取所有表名的列表。
+//
+// 返回：表名列表。
+//
+// ``table_list``表示获取的表名列表，类型为tuple，如：('MyTable1', 'MyTable2')。
+//
+// 示例：
+//
+//     table_list := ots_client.ListTable()
+//
+func (o *OTSClient) ListTable() {
+	o._request_helper("ListTable")
+}
+
+func (o *OTSClient) UpdateTable() {
+
+}
+
+func (o *OTSClient) DescribeTable() {
+
+}
+
+func (o *OTSClient) GetRow() {
+
+}
+
+func (o *OTSClient) PutRow() {
+
+}
+
+func (o *OTSClient) UpdateRow() {
+
+}
+
+func (o *OTSClient) DeleteRow() {
+
+}
+
+func (o *OTSClient) BatchGetRow() {
+
+}
+
+func (o *OTSClient) BatchWriteRow() {
+
+}
+
+func (o *OTSClient) GetRange() {
+
+}
+
+func (o *OTSClient) XGetRange() {
+
 }

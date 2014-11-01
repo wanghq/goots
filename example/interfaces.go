@@ -7,8 +7,30 @@ package main
 
 import (
 	"fmt"
+
+	ots2 "github.com/GiterLab/goots"
+)
+
+// modify it for yours
+const (
+	ENDPOINT     = "http://127.0.0.1:8800"
+	ACCESSID     = "OTSMultiUser177_accessid"
+	ACCESSKEY    = "OTSMultiUser177_accesskey"
+	INSTANCENAME = "TestInstance177"
 )
 
 func main() {
-	fmt.Println("Test googs start ...")
+	fmt.Println("Test goots start ...")
+
+	ots_client, err := ots2.New(ENDPOINT, ACCESSID, ACCESSKEY, INSTANCENAME)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// delete_table
+
+	// create_table
+
+	// list_table
+	ots_client.ListTable()
 }

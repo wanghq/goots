@@ -105,7 +105,7 @@ func (o *ots_protocol) _make_headers_string(headers DictString) string {
 	// count headers
 	count := 0
 	for k, _ := range headers {
-		if strings.HasPrefix(k, "x-ots-") && k != "x-ots-signature" {
+		if strings.HasPrefix(strings.ToLower(k), "x-ots-") && strings.ToLower(k) != "x-ots-signature" {
 			count++
 		}
 	}
@@ -116,7 +116,7 @@ func (o *ots_protocol) _make_headers_string(headers DictString) string {
 	strslice := make([]string, count)
 	i := 0
 	for k, v := range headers {
-		if strings.HasPrefix(k, "x-ots-") && k != "x-ots-signature" {
+		if strings.HasPrefix(strings.ToLower(k), "x-ots-") && strings.ToLower(k) != "x-ots-signature" {
 			strslice[i] = fmt.Sprintf("%s:%s", strings.ToLower(k), strings.TrimSpace(v.(string)))
 			i++
 		}
@@ -277,7 +277,7 @@ func (o *ots_protocol) _check_authorization(query string, headers DictString) (o
 		return false, (OTSClientError{}.Set("Invalid signature in response - %s", err))
 	}
 	if signature != signature_src {
-		return false, (OTSClientError{}.Set("Invalid signature in response"))
+		return false, (OTSClientError{}.Set("Invalid signature in response - %s but %s", signature, signature_src))
 	}
 
 	return true, nil

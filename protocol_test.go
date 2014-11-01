@@ -149,6 +149,32 @@ func Test_check_authorization(t *testing.T) {
 	}
 }
 
+func Test_check_authorization_tobyzxj(t *testing.T) {
+	uid := "0AkCEeXUWXeviDP6"
+	key := "W8foPaZ53CB61C5H8JnTURsdXekWua"
+	protocol := newProtocol(nil)
+	protocol.Set(uid, key, "", "", "")
+	query := "/ListTable"
+
+	headers := DictString{
+		"Date":              "Sat, 01 Nov 2014 08:49:24 GMT",
+		"Connection":        "keep-alive",
+		"Authorization":     "OTS 0AkCEeXUWXeviDP6:LQ1pIcPfC9NHZWMR9vrydXG4U4A=",
+		"X-Ots-Contentmd5":  "IjpgaUwGKkfuEgyLaDq1mg==",
+		"X-Ots-Contenttype": "protocol buffer",
+		"X-Ots-Date":        "Sat, 01 Nov 2014 08:49:24 GMT",
+		"X-Ots-requestid":   "000506c8-30ac-5974-1388-990a05bf1034",
+	}
+
+	ok, err := protocol._check_authorization(query, headers)
+	if err != nil {
+		t.Fail()
+	}
+	if !ok {
+		t.Fail()
+	}
+}
+
 func Test_make_request(t *testing.T) {
 	uid := "29j2NtzlUr8hjP8b"
 	key := "8AKqXmNBkl85QK70cAOuH4bBd3gS0J"
@@ -173,9 +199,13 @@ func Test_make_request(t *testing.T) {
 		t.Fail()
 	}
 
-	fmt.Println("query:", query)
-	fmt.Println("headers:", headers)
-	fmt.Println("body:", body)
+	t.Log("query:", query)
+	t.Log("headers:", headers)
+	t.Log("body:", body)
+
+	// fmt.Println("query:", query)
+	// fmt.Println("headers:", headers)
+	// fmt.Println("body:", body)
 }
 
 func Test_get_request_id_string(t *testing.T) {
