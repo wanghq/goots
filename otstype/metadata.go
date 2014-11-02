@@ -258,3 +258,8 @@ type OTS_INF_MIN struct {
 // only for GetRange
 type OTS_INF_MAX struct {
 }
+
+// 表示一个OTS实例下的表的列表
+type OTSListTableResponse struct {
+	TableNames []string
+}

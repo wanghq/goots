@@ -157,13 +157,13 @@ func Test_check_authorization_tobyzxj(t *testing.T) {
 	query := "/ListTable"
 
 	headers := DictString{
-		"Date":              "Sat, 01 Nov 2014 08:49:24 GMT",
-		"Connection":        "keep-alive",
-		"Authorization":     "OTS 0AkCEeXUWXeviDP6:LQ1pIcPfC9NHZWMR9vrydXG4U4A=",
-		"X-Ots-Contentmd5":  "IjpgaUwGKkfuEgyLaDq1mg==",
-		"X-Ots-Contenttype": "protocol buffer",
-		"X-Ots-Date":        "Sat, 01 Nov 2014 08:49:24 GMT",
-		"X-Ots-requestid":   "000506c8-30ac-5974-1388-990a05bf1034",
+		"date":              "Sat, 01 Nov 2014 08:49:24 GMT",
+		"connection":        "keep-alive",
+		"authorization":     "OTS 0AkCEeXUWXeviDP6:LQ1pIcPfC9NHZWMR9vrydXG4U4A=",
+		"x-ots-contentmd5":  "IjpgaUwGKkfuEgyLaDq1mg==",
+		"x-ots-contenttype": "protocol buffer",
+		"x-ots-date":        "Sat, 01 Nov 2014 08:49:24 GMT",
+		"x-ots-requestid":   "000506c8-30ac-5974-1388-990a05bf1034",
 	}
 
 	ok, err := protocol._check_authorization(query, headers)

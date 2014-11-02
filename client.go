@@ -14,14 +14,14 @@ import (
 	"sync"
 	"time"
 
-	"code.google.com/p/goprotobuf/proto"
 	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
-	. "github.com/GiterLab/goots/protobuf"
+	// . "github.com/GiterLab/goots/protobuf"
 	"github.com/GiterLab/goots/urllib"
 )
 
-var OTSDebugEnable bool = false // OTS调试默认关闭
+var OTSDebugEnable bool = false  // OTS调试默认关闭
+var OTSLoggerEnable bool = false // OTS运行logger记录
 
 const (
 	DEFAULT_ENCODING       = "utf8"
@@ -58,6 +58,12 @@ func SetDefaultSetting(setting OTSClient) {
 
 // 创建一个新的OTSClient实例
 func New(end_point, accessid, accesskey, instance_name string, kwargs ...interface{}) (o *OTSClient, err error) {
+	// init logger
+	err = LoggerInit()
+	if err != nil {
+		return nil, err
+	}
+
 	o = &defaultOTSSetting
 	o.EndPoint = end_point
 	o.AccessId = accessid
@@ -280,11 +286,13 @@ func (o *OTSClient) Set(kwargs DictString) *OTSClient {
 	return o
 }
 
-func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp []reflect.Value, err error) {
+func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp []reflect.Value, ots_service_error *OTSServiceError) {
+	ots_service_error = new(OTSServiceError)
+
 	// 1. make_request
 	query, reqheaders, reqbody, err := o.protocol.make_request(api_name, args...)
 	if err != nil {
-		return nil, err
+		return nil, ots_service_error.SetErrorMessage("%s", err)
 	}
 
 	// 2. http send_receive
@@ -300,40 +308,46 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 	}
 	response, err := req.Response()
 	if err != nil {
-		return nil, err
+		return nil, ots_service_error.SetErrorMessage("%s", err)
 	}
 	status := response.StatusCode // e.g. 200
 	reason := response.Status     // e.g. "200 OK"
 	var resheaders = DictString{}
 	if response.Header != nil {
 		for k, v := range response.Header {
-			resheaders[strings.ToLower(k)] = v
+			resheaders[strings.ToLower(k)] = v[0] // map[string][]string
 		}
 	}
 	if response.Body == nil {
-		return nil, nil
+		return nil, ots_service_error.SetErrorMessage("Http body is empty")
 	}
 	defer response.Body.Close()
 	resbody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, err
+		return nil, ots_service_error.SetErrorMessage("%s", err)
 	}
 
-	fmt.Println("status:", status)
-	fmt.Println("reason:", reason)
-	fmt.Println("resheaders:", resheaders)
-	fmt.Println("resbody:", resbody)
-
-	// test fo ListTable
-	list_table_resp := &ListTableResponse{}
-	proto.Unmarshal(resbody, list_table_resp)
-	fmt.Println(list_table_resp)
+	// for debug
+	if OTSDebugEnable {
+		fmt.Println("status:", status)
+		fmt.Println("reason:", reason)
+		fmt.Println("resheaders:", resheaders)
+		fmt.Println("resbody:", resbody)
+	}
 
 	// 3. handle_error
+	ots_service_error = o.protocol.handle_error(api_name, query, reason, status, resheaders, resbody)
+	if ots_service_error != nil {
+		return nil, ots_service_error
+	}
 
 	// 4. parse_response
+	resp, ots_service_error = o.protocol.parse_response(api_name, reason, status, resheaders, resbody)
+	if ots_service_error != nil {
+		return nil, ots_service_error
+	}
 
-	return nil, nil
+	return resp, nil
 }
 
 func (o *OTSClient) CreateTable() {
@@ -348,14 +362,23 @@ func (o *OTSClient) DeleteTable() {
 //
 // 返回：表名列表。
 //
-// ``table_list``表示获取的表名列表，类型为tuple，如：('MyTable1', 'MyTable2')。
+// `table_list`表示获取的表名列表，类型为OTSListTableResponse。
 //
 // 示例：
 //
-//     table_list := ots_client.ListTable()
+//     table_list, ots_err := ots_client.ListTable()
 //
-func (o *OTSClient) ListTable() {
-	o._request_helper("ListTable")
+func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError) {
+	err = new(OTSError)
+	r, service_err := o._request_helper("ListTable")
+	if service_err != nil {
+		return nil, err.SetServiceError(service_err)
+	}
+	if r == nil {
+		return nil, err.SetClientMessage("[ListTable] Not expect error")
+	}
+
+	return r[0].Interface().(*OTSListTableResponse), nil
 }
 
 func (o *OTSClient) UpdateTable() {

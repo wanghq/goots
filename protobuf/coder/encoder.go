@@ -25,18 +25,18 @@ var api_encode_map = NewFuncmap()
 type ots_proto_buffer_encoder map[string]interface{}
 
 var api_encode_list = ots_proto_buffer_encoder{
-	"CreateTable": _encode_create_table,
-	"DeleteTable": _encode_delete_table,
-	"ListTable":   _encode_list_table,
-	"UpdateTable": _encode_update_table,
-	// "DescribeTable": _encode_describe_table,
-	// "GetRow":        _encode_get_row,
-	// "PutRow":        _encode_put_row,
-	// "UpdateRow":     _encode_update_row,
-	// "DeleteRow":     _encode_delete_row,
-	// "BatchGetRow":   _encode_batch_get_row,
-	// "BatchWriteRow": _encode_batch_write_row,
-	// "GetRange":      _encode_get_range,
+	"CreateTable":   _encode_create_table,
+	"DeleteTable":   _encode_delete_table,
+	"ListTable":     _encode_list_table,
+	"UpdateTable":   _encode_update_table,
+	"DescribeTable": _encode_describe_table,
+	"GetRow":        _encode_get_row,
+	"PutRow":        _encode_put_row,
+	"UpdateRow":     _encode_update_row,
+	"DeleteRow":     _encode_delete_row,
+	"BatchGetRow":   _encode_batch_get_row,
+	"BatchWriteRow": _encode_batch_write_row,
+	"GetRange":      _encode_get_range,
 }
 
 func init() {
@@ -1807,7 +1807,6 @@ func TestEncoder() {
 	// fmt.Println(proto)
 }
 
-// 根据表信息创建表
 func _encode_create_table(table_meta *OTSTableMeta, reserved_throughput *OTSReservedThroughput) (req *CreateTableRequest, err error) {
 	proto := new(CreateTableRequest)
 	proto.TableMeta = new(TableMeta)
@@ -1824,7 +1823,6 @@ func _encode_create_table(table_meta *OTSTableMeta, reserved_throughput *OTSRese
 	return proto, nil
 }
 
-// 根据表名删除表
 func _encode_delete_table(table_name string) (req *DeleteTableRequest, err error) {
 	proto := new(DeleteTableRequest)
 	proto.TableName = NewString(table_name)
@@ -1832,14 +1830,12 @@ func _encode_delete_table(table_name string) (req *DeleteTableRequest, err error
 	return proto, nil
 }
 
-// 获取所有表名的列表
 func _encode_list_table() (req *ListTableRequest, err error) {
 	proto := new(ListTableRequest)
 
 	return proto, nil
 }
 
-// 更新表属性，目前只支持修改预留读写吞吐量
 func _encode_update_table(table_name string, reserved_throughput *OTSReservedThroughput) (req *UpdateTableRequest, err error) {
 	proto := new(UpdateTableRequest)
 	proto.TableName = NewString(table_name)
@@ -1850,6 +1846,38 @@ func _encode_update_table(table_name string, reserved_throughput *OTSReservedThr
 	}
 
 	return proto, nil
+}
+
+func _encode_describe_table() {
+
+}
+
+func _encode_get_row() {
+
+}
+
+func _encode_put_row() {
+
+}
+
+func _encode_update_row() {
+
+}
+
+func _encode_delete_row() {
+
+}
+
+func _encode_batch_get_row() {
+
+}
+
+func _encode_batch_write_row() {
+
+}
+
+func _encode_get_range() {
+
 }
 
 // request encode for ots2
