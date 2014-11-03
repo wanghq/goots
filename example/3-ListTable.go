@@ -11,7 +11,6 @@ import (
 
 	ots2 "github.com/GiterLab/goots"
 	"github.com/GiterLab/goots/log"
-	. "github.com/GiterLab/goots/otstype"
 )
 
 // modify it to yours
@@ -34,28 +33,6 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	// delete_table
-
-	// create_table
-	table_meta := &OTSTableMeta{
-		TableName: "myTable",
-		SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
-			"gid": "INTEGER",
-			"uid": "INTEGER",
-		},
-	}
-
-	reserved_throughput := &OTSReservedThroughput{
-		OTSCapacityUnit{100, 100},
-	}
-
-	ots_err := ots_client.CreateTable(table_meta, reserved_throughput)
-	if ots_err != nil {
-		fmt.Println(ots_err)
-		os.Exit(1)
-	}
-	fmt.Println("表已创建")
 
 	// list_table
 	list_tables, ots_err := ots_client.ListTable()

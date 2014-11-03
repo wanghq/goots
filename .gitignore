@@ -24,4 +24,4 @@ _testmain.go
 *.prof
 
 # example
-take_a_chestnut/interfaces.go
+take_a_chestnut/

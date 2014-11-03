@@ -321,29 +321,65 @@ func (o *ots_protocol) make_request(api_name string, args ...interface{}) (query
 	// "GetRange"
 	switch t := pb[0].Interface().(type) {
 	case *CreateTableRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*CreateTableRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*CreateTableRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*CreateTableRequest)))
+		}
 	case *ListTableRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*ListTableRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*ListTableRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*ListTableRequest)))
+		}
 	case *DeleteTableRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*DeleteTableRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*DeleteTableRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*DeleteTableRequest)))
+		}
 	case *DescribeTableRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*DescribeTableRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*DescribeTableRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*DescribeTableRequest)))
+		}
 	case *UpdateTableRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*UpdateTableRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*UpdateTableRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*UpdateTableRequest)))
+		}
 	case *GetRowRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*GetRowRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*GetRowRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*GetRowRequest)))
+		}
 	case *PutRowRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*PutRowRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*PutRowRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*PutRowRequest)))
+		}
 	case *UpdateRowRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*UpdateRowRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*UpdateRowRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*UpdateRowRequest)))
+		}
 	case *DeleteRowRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*DeleteRowRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*DeleteRowRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*DeleteRowRequest)))
+		}
 	case *BatchGetRowRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*BatchGetRowRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*BatchGetRowRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*BatchGetRowRequest)))
+		}
 	case *BatchWriteRowRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*BatchWriteRowRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*BatchWriteRowRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*BatchWriteRowRequest)))
+		}
 	case *GetRangeRequest:
-		body = []byte(proto.MarshalTextString(pb[0].Interface().(*GetRangeRequest)))
+		body, err = proto.Marshal(pb[0].Interface().(*GetRangeRequest))
+		if OTSDebugEnable {
+			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*GetRangeRequest)))
+		}
 
 	default:
 		return "", DictString{}, nil, fmt.Errorf("Unknown type: %v", t)
@@ -383,7 +419,7 @@ func (o *ots_protocol) parse_response(api_name, reason string, status int, heade
 		request_id := o._get_request_id_string(headers)
 		error_message := fmt.Sprintf("Response format is invalid, %s, RequestID: %s, HTTP status: %s, Body: %v.", err, request_id, reason, body)
 
-		return nil, ots_service_err.SetErrorMessage(error_message).SetHttpStatus(reason).SetRequestId(request_id).SetErrorCode(status)
+		return nil, ots_service_err.SetErrorMessage(error_message).SetHttpStatus(reason).SetRequestId(request_id).SetErrorCode(fmt.Sprintf("%d", status))
 	}
 
 	// prevent MessageToString from happening
@@ -398,16 +434,16 @@ func (o *ots_protocol) handle_error(api_name, query, reason string, status int, 
 	ots_service_err = new(OTSServiceError)
 	request_id := o._get_request_id_string(headers)
 	if _, ok := api_list[api_name]; !ok {
-		return ots_service_err.SetErrorMessage("API %s is not supported", api_name).SetHttpStatus(reason).SetErrorCode(status).SetRequestId(request_id)
+		return ots_service_err.SetErrorMessage("API %s is not supported", api_name).SetHttpStatus(reason).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
 	}
 
 	// 1. check headers & _check authorization
 	if ok, err := o._check_headers(headers, body); !ok {
-		return ots_service_err.SetErrorMessage("check headers failed - %s", err).SetHttpStatus(reason).SetErrorCode(status).SetRequestId(request_id)
+		return ots_service_err.SetErrorMessage("check headers failed - %s", err).SetHttpStatus(reason).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
 	}
 	if status != 403 {
 		if ok, err := o._check_authorization(query, headers); !ok {
-			return ots_service_err.SetErrorMessage("check authorization failed - %s", err).SetHttpStatus(reason).SetErrorCode(status).SetRequestId(request_id)
+			return ots_service_err.SetErrorMessage("check authorization failed - %s", err).SetHttpStatus(reason).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
 		}
 	}
 
@@ -418,9 +454,15 @@ func (o *ots_protocol) handle_error(api_name, query, reason string, status int, 
 		// prevent MessageToString from happening
 		// when no log is going to be actually printed
 		// since it's very time consuming
-		OTSError{}.Log(OTSLoggerEnable, "OTS request failed, API: %s, HTTPStatus: %s, ErrorCode: %d, ErrorMessage: %v,  RequestID: %s", api_name, reason, status, body, request_id)
+		pb_err := &Error{}
+		proto.Unmarshal(body, pb_err)
+		if pb_err.Code != nil && pb_err.Message != nil {
+			OTSError{}.Log(OTSLoggerEnable, "OTS request failed, API: %s, HTTPStatus: %s, ErrorCode: %s, ErrorMessage: %s,  RequestID: %s", api_name, reason, pb_err.GetCode(), pb_err.GetMessage(), request_id)
+			return ots_service_err.SetErrorMessage("OTS request failed: " + pb_err.GetMessage()).SetHttpStatus(reason).SetErrorCode(pb_err.GetCode()).SetRequestId(request_id)
+		}
 
-		return ots_service_err.SetErrorMessage("OTS request failed").SetHttpStatus(reason).SetErrorCode(status).SetRequestId(request_id)
+		OTSError{}.Log(OTSLoggerEnable, "OTS request failed, API: %s, HTTPStatus: %s, ErrorCode: %d, ErrorMessage: %v,  RequestID: %s", api_name, reason, status, body, request_id)
+		return ots_service_err.SetErrorMessage("OTS request failed: " + strings.TrimSpace(string(body))).SetHttpStatus(reason).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
 	}
 
 	return nil

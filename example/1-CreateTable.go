@@ -35,8 +35,6 @@ func main() {
 		fmt.Println(err)
 	}
 
-	// delete_table
-
 	// create_table
 	table_meta := &OTSTableMeta{
 		TableName: "myTable",
@@ -56,13 +54,4 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println("表已创建")
-
-	// list_table
-	list_tables, ots_err := ots_client.ListTable()
-	if ots_err != nil {
-		fmt.Println(ots_err)
-		os.Exit(1)
-	}
-	fmt.Println("表的列表如下：")
-	fmt.Println("list_tables:", list_tables.TableNames)
 }

@@ -96,8 +96,14 @@ func _parse_batch_write_row() {
 
 }
 
-func _decode_create_table() {
+func _decode_create_table(buf []byte) (err error) {
+	pb := &CreateTableResponse{}
+	err = proto.Unmarshal(buf, pb)
+	if err != nil {
+		return err
+	}
 
+	return nil
 }
 
 func _decode_delete_table() {

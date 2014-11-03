@@ -329,10 +329,24 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 
 	// for debug
 	if OTSDebugEnable {
+		fmt.Println("==== Aliyun OTS Response ====")
 		fmt.Println("status:", status)
 		fmt.Println("reason:", reason)
-		fmt.Println("resheaders:", resheaders)
-		fmt.Println("resbody:", resbody)
+		fmt.Println("headers:", resheaders)
+		if resbody != nil {
+			if len(resbody) == 0 {
+				fmt.Println("body-raw:", "None")
+				fmt.Println("body-string:", "None")
+			} else {
+				fmt.Println("body-raw:", resbody)
+				fmt.Println("body-string:", string(resbody))
+			}
+
+		} else {
+			fmt.Println("body-raw:", "None")
+			fmt.Println("body-string:", "None")
+		}
+		fmt.Println("-----------------------------")
 	}
 
 	// 3. handle_error
@@ -350,8 +364,44 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 	return resp, nil
 }
 
-func (o *OTSClient) CreateTable() {
+// 说明：根据表信息创建表。
+//
+// ``table_meta``是``otstype.OTSTableMeta``类的实例，它包含表名和PrimaryKey的schema，
+// 请参考``OTSTableMeta``类的文档。当创建了一个表之后，通常要等待1分钟时间使partition load
+// 完成，才能进行各种操作。
+// ``reserved_throughput``是``otstype.ReservedThroughput``类的实例，表示预留读写吞吐量。
+//
+// 返回：无。
+//       错误信息。
+//
+// 示例：
+//
+// table_meta := &OTSTableMeta{
+// 	TableName: "myTable",
+// 	SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
+// 		"gid": "INTEGER",
+// 		"uid": "INTEGER",
+// 	},
+// }
+//
+// reserved_throughput := &OTSReservedThroughput{
+// 	OTSCapacityUnit{100, 100},
+// }
+//
+// ots_err := ots_client.CreateTable(table_meta, reserved_throughput)
+//
+func (o *OTSClient) CreateTable(table_meta *OTSTableMeta, reserved_throughput *OTSReservedThroughput) (err *OTSError) {
+	err = new(OTSError)
+	r, service_err := o._request_helper("CreateTable", table_meta, reserved_throughput)
+	if service_err != nil {
+		return err.SetServiceError(service_err)
+	}
 
+	if r[0].Interface() != nil {
+		return err.SetClientMessage("[CreateTable] %s", r[0].Interface().(error))
+	}
+
+	return nil
 }
 
 func (o *OTSClient) DeleteTable() {
@@ -361,8 +411,9 @@ func (o *OTSClient) DeleteTable() {
 // 说明：获取所有表名的列表。
 //
 // 返回：表名列表。
+//       错误信息。
 //
-// `table_list`表示获取的表名列表，类型为OTSListTableResponse。
+// ``table_list``表示获取的表名列表，类型为OTSListTableResponse。
 //
 // 示例：
 //

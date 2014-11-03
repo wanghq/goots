@@ -1,10 +1,22 @@
 ListTable
 =========
-
+	
+	// 说明：获取所有表名的列表。
+	//
+	// 返回：表名列表。
+	//       错误信息。
+	//
+	// ``table_list``表示获取的表名列表，类型为OTSListTableResponse。
+	//
+	// 示例：
+	//
+	//     table_list, ots_err := ots_client.ListTable()
+	//
 	func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError)
 
 Example
 =======
+[ListTable.go](https://github.com/GiterLab/goots/blob/master/example/3-ListTable.go)
 
 	package main
 	

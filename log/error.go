@@ -47,11 +47,41 @@ func (o OTSError) Log(enable bool, format string, a ...interface{}) (e error) {
 }
 
 func (o *OTSError) Error() string {
-	return o.ClientError.Message + " <--> " + o.ServiceError.Message
+	var client_message string
+	var service_message string
+
+	if o.ClientError == nil {
+		client_message = "[C]-None"
+	} else {
+		client_message = "[C]-" + o.ClientError.Message
+	}
+
+	if o.ServiceError == nil {
+		service_message = "[S]-None"
+	} else {
+		service_message = "[S]-" + o.ServiceError.Code + " @ " + o.ServiceError.Message
+	}
+
+	return client_message + " <--> " + service_message
 }
 
 func (o *OTSError) String() string {
-	return o.ClientError.Message + " <--> " + o.ServiceError.Message
+	var client_message string
+	var service_message string
+
+	if o.ClientError == nil {
+		client_message = "[C]-None"
+	} else {
+		client_message = o.ClientError.Message
+	}
+
+	if o.ServiceError == nil {
+		service_message = "[S]-None"
+	} else {
+		service_message = "[S]-" + o.ServiceError.Code + " @ " + o.ServiceError.Message
+	}
+
+	return client_message + " <--> " + service_message
 }
 
 func (o *OTSError) SetClientError(client_err *OTSClientError) *OTSError {
@@ -108,11 +138,11 @@ func (o OTSClientError) Log(enable bool, format string, a ...interface{}) (e err
 }
 
 func (o *OTSClientError) Error() string {
-	return o.Message
+	return "[C]-" + o.Message
 }
 
 func (o *OTSClientError) String() string {
-	return o.Message
+	return "[C]-" + o.Message
 }
 
 func (o *OTSClientError) SetHttpStatus(status string) *OTSClientError {
@@ -165,11 +195,12 @@ func (o OTSServiceError) Log(enable bool, format string, a ...interface{}) (e er
 }
 
 func (o *OTSServiceError) Error() string {
-	return o.Message
+	return fmt.Sprintf("[S]-ErrorCode: %s, ErrorMessage: %s, RequestID: %s",
+		o.Code, o.Message, o.RequestId)
 }
 
 func (o *OTSServiceError) String() string {
-	return fmt.Sprintf("ErrorCode: %s, ErrorMessage: %s, RequestID: %s",
+	return fmt.Sprintf("[S]-ErrorCode: %s, ErrorMessage: %s, RequestID: %s",
 		o.Code, o.Message, o.RequestId)
 }
 
@@ -182,8 +213,8 @@ func (o *OTSServiceError) GetHttpStatus() string {
 	return o.HttpStatus
 }
 
-func (o *OTSServiceError) SetErrorCode(code int) *OTSServiceError {
-	o.Code = fmt.Sprintf("%d", code)
+func (o *OTSServiceError) SetErrorCode(code string) *OTSServiceError {
+	o.Code = code
 
 	return o
 }
