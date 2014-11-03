@@ -106,8 +106,14 @@ func _decode_create_table(buf []byte) (err error) {
 	return nil
 }
 
-func _decode_delete_table() {
+func _decode_delete_table(buf []byte) (err error) {
+	pb := &DeleteTableResponse{}
+	err = proto.Unmarshal(buf, pb)
+	if err != nil {
+		return err
+	}
 
+	return nil
 }
 
 func _decode_list_table(buf []byte) (list_tables *OTSListTableResponse, err error) {

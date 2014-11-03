@@ -11,10 +11,9 @@ import (
 
 	ots2 "github.com/GiterLab/goots"
 	"github.com/GiterLab/goots/log"
-	. "github.com/GiterLab/goots/otstype"
 )
 
-// modify it to yours
+// modify it for yours
 const (
 	ENDPOINT     = "http://127.0.0.1:8800"
 	ACCESSID     = "OTSMultiUser177_accessid"
@@ -39,36 +38,7 @@ func main() {
 	ots_err := ots_client.DeleteTable("myTable")
 	if ots_err != nil {
 		fmt.Println(ots_err)
-		// os.Exit(1)
+		os.Exit(1)
 	}
 	fmt.Println("表已删除")
-
-	// create_table
-	table_meta := &OTSTableMeta{
-		TableName: "myTable",
-		SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
-			"gid": "INTEGER",
-			"uid": "INTEGER",
-		},
-	}
-
-	reserved_throughput := &OTSReservedThroughput{
-		OTSCapacityUnit{100, 100},
-	}
-
-	ots_err = ots_client.CreateTable(table_meta, reserved_throughput)
-	if ots_err != nil {
-		fmt.Println(ots_err)
-		os.Exit(1)
-	}
-	fmt.Println("表已创建")
-
-	// list_table
-	list_tables, ots_err := ots_client.ListTable()
-	if ots_err != nil {
-		fmt.Println(ots_err)
-		os.Exit(1)
-	}
-	fmt.Println("表的列表如下：")
-	fmt.Println("list_tables:", list_tables.TableNames)
 }

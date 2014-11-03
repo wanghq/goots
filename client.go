@@ -404,8 +404,29 @@ func (o *OTSClient) CreateTable(table_meta *OTSTableMeta, reserved_throughput *O
 	return nil
 }
 
-func (o *OTSClient) DeleteTable() {
+// 说明：根据表名删除表。
+//
+// ``table_name``是对应的表名。
+//
+// 返回：无。
+//       错误信息。
+//
+// 示例：
+//
+// ots_client.DeleteTable("myTable")
+//
+func (o *OTSClient) DeleteTable(table_name string) (err *OTSError) {
+	err = new(OTSError)
+	r, service_err := o._request_helper("DeleteTable", table_name)
+	if service_err != nil {
+		return err.SetServiceError(service_err)
+	}
 
+	if r[0].Interface() != nil {
+		return err.SetClientMessage("[DeleteTable] %s", r[0].Interface().(error))
+	}
+
+	return nil
 }
 
 // 说明：获取所有表名的列表。
@@ -417,7 +438,7 @@ func (o *OTSClient) DeleteTable() {
 //
 // 示例：
 //
-//     table_list, ots_err := ots_client.ListTable()
+// table_list, ots_err := ots_client.ListTable()
 //
 func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError) {
 	err = new(OTSError)
