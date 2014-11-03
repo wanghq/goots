@@ -76,29 +76,6 @@ type OTSReservedThroughputDetails struct {
 	NumberOfDecreasesToday int32
 }
 
-// 更新指定表的读服务能力单元或写服务能力单元设置，（新设定将于更新成功一分钟内生效）服务器响应
-//
-// tip:
-//     调整每个表预留读写吞吐量的最小时间间隔为10 分钟，如果本次UpdateTable 操作距上次
-//     不到10 分钟将被拒绝。
-//     每个自然日(UTC 时间00:00:00 到第二天的00:00:00) 内每个表上调预留读写吞吐量次数不
-//     限，但下调预留读写吞吐量次数不能超过4 次。下调写服务能力单元或者读服务能力单元其中
-//     之一即视为下调预留读写吞吐量
-type OTSUpdateTableResponse struct {
-	// 更新后该表的预留读写吞吐量设置信息，除了包含当前的预留读写吞吐量设置值之外，还
-	// 包含了最近一次更新该表的预留读写吞吐量设置的时间和当日已下调预留读写吞吐量的次数
-	ReservedThroughputDetails OTSReservedThroughputDetails
-}
-
-// 查询指定表的结构信息和预留读写吞吐量设置信息服务器响应
-type OTSDescribeTableResponse struct {
-	// 该表的Schema，与建表时给出的Schema 相同
-	TableMeta OTSTableMeta
-	// 该表的预留读写吞吐量设置信息，除了包含当前的预留读写吞吐量设置值之外，还包含了
-	// 最近一次更新该表的预留读写吞吐量设置的时间和当日已下调预留读写吞吐量的次数。
-	ReservedThroughputDetails OTSReservedThroughputDetails
-}
-
 // 表示一列
 type OTSColumn struct {
 	// 该列的列名
@@ -262,4 +239,27 @@ type OTS_INF_MAX struct {
 // 表示一个OTS实例下的表的列表
 type OTSListTableResponse struct {
 	TableNames []string
+}
+
+// 更新指定表的读服务能力单元或写服务能力单元设置，（新设定将于更新成功一分钟内生效）服务器响应
+//
+// tip:
+//     调整每个表预留读写吞吐量的最小时间间隔为10 分钟，如果本次UpdateTable 操作距上次
+//     不到10 分钟将被拒绝。
+//     每个自然日(UTC 时间00:00:00 到第二天的00:00:00) 内每个表上调预留读写吞吐量次数不
+//     限，但下调预留读写吞吐量次数不能超过4 次。下调写服务能力单元或者读服务能力单元其中
+//     之一即视为下调预留读写吞吐量
+type OTSUpdateTableResponse struct {
+	// 更新后该表的预留读写吞吐量设置信息，除了包含当前的预留读写吞吐量设置值之外，还
+	// 包含了最近一次更新该表的预留读写吞吐量设置的时间和当日已下调预留读写吞吐量的次数
+	ReservedThroughputDetails *OTSReservedThroughputDetails
+}
+
+// 查询指定表的结构信息和预留读写吞吐量设置信息服务器响应
+type OTSDescribeTableResponse struct {
+	// 该表的Schema，与建表时给出的Schema 相同
+	TableMeta *OTSTableMeta
+	// 该表的预留读写吞吐量设置信息，除了包含当前的预留读写吞吐量设置值之外，还包含了
+	// 最近一次更新该表的预留读写吞吐量设置的时间和当日已下调预留读写吞吐量的次数。
+	ReservedThroughputDetails *OTSReservedThroughputDetails
 }

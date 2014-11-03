@@ -453,8 +453,22 @@ func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError
 	return r[0].Interface().(*OTSListTableResponse), nil
 }
 
-func (o *OTSClient) UpdateTable() {
+// 说明：更新表属性，目前只支持修改预留读写吞吐量。
+//
+// ``table_name``是对应的表名。
+// ``reserved_throughput``是``otstype.ReservedThroughput``类的实例，表示预留读写吞吐量。
+//
+// 返回：针对该表的预留读写吞吐量的最近上调时间、最近下调时间和当天下调次数。
+//       错误信息。
+//
+// ``update_table_response``表示更新的结果，是otstype.OTSUpdateTableResponse类的实例。
+//
+// 示例：
+//
+//
+func (o *OTSClient) UpdateTable(table_name string, reserved_throughput *OTSReservedThroughput) (update_table_response *OTSUpdateTableResponse, err *OTSError) {
 
+	return update_table_response, nil
 }
 
 func (o *OTSClient) DescribeTable() {
