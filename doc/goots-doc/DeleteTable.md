@@ -28,7 +28,7 @@ Example
 		"github.com/GiterLab/goots/log"
 	)
 	
-	// modify it for yours
+	// modify it to yours
 	const (
 		ENDPOINT     = "http://127.0.0.1:8800"
 		ACCESSID     = "OTSMultiUser177_accessid"
