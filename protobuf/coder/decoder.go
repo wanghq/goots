@@ -8,6 +8,7 @@ package coder
 import (
 	// "fmt"
 	"reflect"
+	"time"
 
 	"code.google.com/p/goprotobuf/proto"
 	. "github.com/GiterLab/goots/log"
@@ -72,12 +73,30 @@ func _parse_row_list() {
 
 }
 
-func _parse_capacity_unit() {
+func _parse_capacity_unit(capacity_unit *CapacityUnit) *OTSCapacityUnit {
+	if capacity_unit == nil {
+		return nil
+	}
 
+	pobj := new(OTSCapacityUnit)
+	pobj.Read = capacity_unit.GetRead()
+	pobj.Write = capacity_unit.GetWrite()
+
+	return pobj
 }
 
-func _parse_reserved_throughput_details() {
+func _parse_reserved_throughput_details(reserved_throughput_details *ReservedThroughputDetails) *OTSReservedThroughputDetails {
+	if reserved_throughput_details == nil {
+		return nil
+	}
 
+	pobj := new(OTSReservedThroughputDetails)
+	pobj.CapacityUnit = _parse_capacity_unit(reserved_throughput_details.GetCapacityUnit())
+	pobj.LastDecreaseTime = time.Unix(reserved_throughput_details.GetLastDecreaseTime(), 0)
+	pobj.LastIncreaseTime = time.Unix(reserved_throughput_details.GetLastIncreaseTime(), 0)
+	pobj.NumberOfDecreasesToday = reserved_throughput_details.GetNumberOfDecreasesToday()
+
+	return pobj
 }
 
 func _parse_get_row_item() {
@@ -130,43 +149,48 @@ func _decode_list_table(buf []byte) (list_tables *OTSListTableResponse, err erro
 	return list_tables, nil
 }
 
-func _decode_update_table() {
+func _decode_update_table(buf []byte) (update_table_response *OTSUpdateTableResponse, err error) {
+	pb := &UpdateTableResponse{}
+	err = proto.Unmarshal(buf, pb)
+	if err != nil {
+		return nil, err
+	}
+
+	update_table_response = new(OTSUpdateTableResponse)
+	update_table_response.ReservedThroughputDetails = _parse_reserved_throughput_details(pb.GetReservedThroughputDetails())
+
+	return update_table_response, nil
+}
+
+func _decode_describe_table(buf []byte) {
 
 }
 
-func _decode_describe_table() {
+func _decode_get_row(buf []byte) {
 
 }
 
-func _decode_get_row() {
+func _decode_put_row(buf []byte) {
 
 }
 
-func _decode_put_row() {
+func _decode_update_row(buf []byte) {
 
 }
 
-func _decode_update_row() {
+func _decode_delete_row(buf []byte) {
 
 }
 
-func _decode_delete_row() {
+func _decode_batch_get_row(buf []byte) {
 
 }
 
-func _decode_batch_get_row() {
+func _decode_batch_write_row(buf []byte) {
 
 }
 
-func _decode_batch_write_row() {
-
-}
-
-func _decode_get_range() {
-
-}
-
-func decode_response() {
+func _decode_get_range(buf []byte) {
 
 }
 

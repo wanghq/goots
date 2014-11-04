@@ -6,6 +6,7 @@
 package goots
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/url"
@@ -364,6 +365,42 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 	return resp, nil
 }
 
+// parse the following two cases
+// 1. (err error)
+// 2. (x *xxx, err error)
+func (o *OTSClient) _check_request_helper_error(resp []reflect.Value) (r interface{}, e error) {
+	switch len(resp) {
+	case 1: // (err error)
+		if resp[0].Interface() != nil {
+			if err, ok := resp[0].Interface().(error); ok {
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				return nil, errors.New("Illegal data parameters, parse err failed")
+			}
+		}
+		return nil, nil
+
+	case 2: // (x *xxx, err error)
+		if resp[1].Interface() != nil {
+			if err, ok := resp[1].Interface().(error); ok {
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				return nil, errors.New("Illegal data parameters, parse err failed")
+			}
+		}
+		return resp[0].Interface(), nil
+
+	default:
+		return nil, errors.New("Illegal data parameters")
+	}
+
+	return nil, errors.New("The program will not perform here")
+}
+
 // 说明：根据表信息创建表。
 //
 // ``table_meta``是``otstype.OTSTableMeta``类的实例，它包含表名和PrimaryKey的schema，
@@ -392,13 +429,14 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 //
 func (o *OTSClient) CreateTable(table_meta *OTSTableMeta, reserved_throughput *OTSReservedThroughput) (err *OTSError) {
 	err = new(OTSError)
-	r, service_err := o._request_helper("CreateTable", table_meta, reserved_throughput)
+	resp, service_err := o._request_helper("CreateTable", table_meta, reserved_throughput)
 	if service_err != nil {
 		return err.SetServiceError(service_err)
 	}
 
-	if r[0].Interface() != nil {
-		return err.SetClientMessage("[CreateTable] %s", r[0].Interface().(error))
+	_, e := o._check_request_helper_error(resp)
+	if e != nil {
+		return err.SetClientMessage("[CreateTable] %s", e)
 	}
 
 	return nil
@@ -417,13 +455,14 @@ func (o *OTSClient) CreateTable(table_meta *OTSTableMeta, reserved_throughput *O
 //
 func (o *OTSClient) DeleteTable(table_name string) (err *OTSError) {
 	err = new(OTSError)
-	r, service_err := o._request_helper("DeleteTable", table_name)
+	resp, service_err := o._request_helper("DeleteTable", table_name)
 	if service_err != nil {
 		return err.SetServiceError(service_err)
 	}
 
-	if r[0].Interface() != nil {
-		return err.SetClientMessage("[DeleteTable] %s", r[0].Interface().(error))
+	_, e := o._check_request_helper_error(resp)
+	if e != nil {
+		return err.SetClientMessage("[DeleteTable] %s", e)
 	}
 
 	return nil
@@ -434,7 +473,7 @@ func (o *OTSClient) DeleteTable(table_name string) (err *OTSError) {
 // 返回：表名列表。
 //       错误信息。
 //
-// ``table_list``表示获取的表名列表，类型为OTSListTableResponse。
+// ``table_list``表示获取的表名列表，类型为``otstype.OTSListTableResponse``。
 //
 // 示例：
 //
@@ -442,15 +481,18 @@ func (o *OTSClient) DeleteTable(table_name string) (err *OTSError) {
 //
 func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError) {
 	err = new(OTSError)
-	r, service_err := o._request_helper("ListTable")
+	resp, service_err := o._request_helper("ListTable")
 	if service_err != nil {
 		return nil, err.SetServiceError(service_err)
 	}
-	if r == nil {
-		return nil, err.SetClientMessage("[ListTable] Not expect error")
+
+	r, e := o._check_request_helper_error(resp)
+
+	if e != nil {
+		return nil, err.SetClientMessage("[ListTable] %s", e)
 	}
 
-	return r[0].Interface().(*OTSListTableResponse), nil
+	return r.(*OTSListTableResponse), nil
 }
 
 // 说明：更新表属性，目前只支持修改预留读写吞吐量。
@@ -461,14 +503,30 @@ func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError
 // 返回：针对该表的预留读写吞吐量的最近上调时间、最近下调时间和当天下调次数。
 //       错误信息。
 //
-// ``update_table_response``表示更新的结果，是otstype.OTSUpdateTableResponse类的实例。
+// ``update_table_response``表示更新的结果，是``otstype.OTSUpdateTableResponse``类的实例。
 //
 // 示例：
+// reserved_throughput := &OTSReservedThroughput{
+//  OTSCapacityUnit{5000, 5000},
+// }
 //
+// // 每次调整操作的间隔应大于10分钟
+// // 如果是刚创建表，需要10分钟之后才能调整表的预留读写吞吐量。
+// update_response, ots_err := ots_client.UpdateTable("myTable", reserved_throughput)
 //
 func (o *OTSClient) UpdateTable(table_name string, reserved_throughput *OTSReservedThroughput) (update_table_response *OTSUpdateTableResponse, err *OTSError) {
+	err = new(OTSError)
+	resp, service_err := o._request_helper("UpdateTable", table_name, reserved_throughput)
+	if service_err != nil {
+		return nil, err.SetServiceError(service_err)
+	}
 
-	return update_table_response, nil
+	r, e := o._check_request_helper_error(resp)
+	if e != nil {
+		return nil, err.SetClientMessage("[UpdateTable] %s ", e)
+	}
+
+	return r.(*OTSUpdateTableResponse), nil
 }
 
 func (o *OTSClient) DescribeTable() {

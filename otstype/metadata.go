@@ -67,7 +67,7 @@ type OTSReservedThroughput struct {
 // 表示一个表的预留读写吞吐量信息
 type OTSReservedThroughputDetails struct {
 	// 该表的预留读写吞吐量的数值
-	CapacityUnit OTSCapacityUnit
+	CapacityUnit *OTSCapacityUnit
 	// 最近一次上调该表的预留读写吞吐量设置的时间，使用UTC 秒数表示
 	LastIncreaseTime time.Time
 	// 最近一次下调该表的预留读写吞吐量设置的时间，使用UTC 秒数表示

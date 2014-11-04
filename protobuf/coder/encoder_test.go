@@ -100,6 +100,9 @@ func Test_EncodeRequest(t *testing.T) {
 					t.Logf("err: %s", err)
 					t.Fail()
 				}
+			} else {
+				t.Log("Illegal data parameters, parse err failed")
+				t.Fail()
 			}
 		}
 	}

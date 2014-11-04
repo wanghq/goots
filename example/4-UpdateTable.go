@@ -8,7 +8,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	ots2 "github.com/GiterLab/goots"
 	"github.com/GiterLab/goots/log"
@@ -36,54 +35,14 @@ func main() {
 		fmt.Println(err)
 	}
 
-	// delete_table
-	ots_err := ots_client.DeleteTable("myTable")
-	if ots_err != nil {
-		fmt.Println(ots_err)
-		// os.Exit(1)
-	}
-	fmt.Println("表已删除")
-
-	// create_table
-	table_meta := &OTSTableMeta{
-		TableName: "myTable",
-		SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
-			"gid": "INTEGER",
-			"uid": "INTEGER",
-		},
-	}
-
-	reserved_throughput := &OTSReservedThroughput{
-		OTSCapacityUnit{100, 100},
-	}
-
-	ots_err = ots_client.CreateTable(table_meta, reserved_throughput)
-	if ots_err != nil {
-		fmt.Println(ots_err)
-		os.Exit(1)
-	}
-	fmt.Println("表已创建")
-
-	// list_table
-	list_tables, ots_err := ots_client.ListTable()
-	if ots_err != nil {
-		fmt.Println(ots_err)
-		os.Exit(1)
-	}
-	fmt.Println("表的列表如下：")
-	fmt.Println("list_tables:", list_tables.TableNames)
-
 	// update_table
-	//
-	// 每次调整操作的间隔应大于10分钟
-	// 如果是刚创建表，需要10分钟之后才能调整表的预留读写吞吐量。
-	update_reserved_throughput := &OTSReservedThroughput{
+	reserved_throughput := &OTSReservedThroughput{
 		OTSCapacityUnit{5000, 5000},
 	}
 
-	fmt.Println("Need to sleep 12 Minute, be patient...")
-	time.Sleep(12 * time.Minute)
-	update_response, ots_err := ots_client.UpdateTable("myTable", update_reserved_throughput)
+	// 每次调整操作的间隔应大于10分钟
+	// 如果是刚创建表，需要10分钟之后才能调整表的预留读写吞吐量。
+	update_response, ots_err := ots_client.UpdateTable("myTable", reserved_throughput)
 	if ots_err != nil {
 		fmt.Println(ots_err)
 		os.Exit(1)
