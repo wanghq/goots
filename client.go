@@ -529,8 +529,31 @@ func (o *OTSClient) UpdateTable(table_name string, reserved_throughput *OTSReser
 	return r.(*OTSUpdateTableResponse), nil
 }
 
-func (o *OTSClient) DescribeTable() {
+// 说明：获取表的描述信息。
+//
+// ``table_name``是对应的表名。
+//
+// 返回：表的描述信息。
+//
+// ``describe_table_response``表示表的描述信息，是``otstype.OTSDescribeTableResponse``类的实例。
+//
+// 示例：
+//
+// describe_response, ots_err := ots_client.DescribeTable("myTable")
+//
+func (o *OTSClient) DescribeTable(table_name string) (describe_table_response *OTSDescribeTableResponse, err *OTSError) {
+	err = new(OTSError)
+	resp, service_err := o._request_helper("DescribeTable", table_name)
+	if service_err != nil {
+		return nil, err.SetServiceError(service_err)
+	}
 
+	r, e := o._check_request_helper_error(resp)
+	if e != nil {
+		return nil, err.SetClientMessage("[DescribeTable] %s", e)
+	}
+
+	return r.(*OTSDescribeTableResponse), nil
 }
 
 func (o *OTSClient) GetRow() {

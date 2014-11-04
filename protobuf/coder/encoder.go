@@ -1848,8 +1848,11 @@ func _encode_update_table(table_name string, reserved_throughput *OTSReservedThr
 	return proto, nil
 }
 
-func _encode_describe_table() {
+func _encode_describe_table(table_name string) (req *DescribeTableRequest, err error) {
+	proto := new(DescribeTableRequest)
+	proto.TableName = NewString(table_name)
 
+	return proto, nil
 }
 
 func _encode_get_row() {

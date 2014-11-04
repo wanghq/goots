@@ -5,11 +5,11 @@ Aliyun OTS(Open Table Service) golang SDK.
 
 ## Support API
 - **Table**
-	- [CreateTable](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/CreateTable.md)
-	- [DeleteTable](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/DeleteTable.md)
-	- [ListTable](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/ListTable.md)
-	- [UpdateTable](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/UpdateTable.md)
-	- DescribeTable
+	- [CreateTable](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/CreateTable.md) ☑
+	- [DeleteTable](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/DeleteTable.md) ☑
+	- [ListTable](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/ListTable.md) ☑
+	- [UpdateTable](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/UpdateTable.md) ☑
+	- [DescribeTable](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/DescribeTable.md) ☑
 - **SingleRow**
 	- GetRow
 	- PutRow

@@ -73,6 +73,23 @@ func _parse_row_list() {
 
 }
 
+func _parse_table_meta(table_meta *TableMeta) *OTSTableMeta {
+	if table_meta == nil {
+		return nil
+	}
+
+	pobj := new(OTSTableMeta)
+	pobj.TableName = table_meta.GetTableName()
+	pobj.SchemaOfPrimaryKey = make(map[string]string, len(table_meta.PrimaryKey))
+	for _, v := range table_meta.PrimaryKey {
+		key := v.GetName()
+		value := ColumnType_name[int32(v.GetType())]
+		pobj.SchemaOfPrimaryKey[key] = value
+	}
+
+	return pobj
+}
+
 func _parse_capacity_unit(capacity_unit *CapacityUnit) *OTSCapacityUnit {
 	if capacity_unit == nil {
 		return nil
@@ -162,8 +179,18 @@ func _decode_update_table(buf []byte) (update_table_response *OTSUpdateTableResp
 	return update_table_response, nil
 }
 
-func _decode_describe_table(buf []byte) {
+func _decode_describe_table(buf []byte) (describe_table_response *OTSDescribeTableResponse, err error) {
+	pb := &DescribeTableResponse{}
+	err = proto.Unmarshal(buf, pb)
+	if err != nil {
+		return nil, err
+	}
 
+	describe_table_response = new(OTSDescribeTableResponse)
+	describe_table_response.TableMeta = _parse_table_meta(pb.GetTableMeta())
+	describe_table_response.ReservedThroughputDetails = _parse_reserved_throughput_details(pb.GetReservedThroughputDetails())
+
+	return describe_table_response, nil
 }
 
 func _decode_get_row(buf []byte) {
