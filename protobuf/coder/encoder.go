@@ -2070,8 +2070,23 @@ func _encode_update_row(table_name string, condition string, primary_key *OTSPri
 	return proto, nil
 }
 
-func _encode_delete_row() {
+func _encode_delete_row(table_name string, condition string, primary_key *OTSPrimaryKey) (req *DeleteRowRequest, err error) {
+	proto := new(DeleteRowRequest)
+	proto.TableName = NewString(table_name)
+	proto.Condition = new(Condition)
+	err = _make_condition(proto.Condition, condition)
+	if err != nil {
+		return nil, err
+	}
 
+	_primary_key := new([]*Column)
+	err = _make_columns_with_dict(_primary_key, DictString(*primary_key))
+	if err != nil {
+		return nil, err
+	}
+	proto.PrimaryKey = *_primary_key
+
+	return proto, nil
 }
 
 func _encode_batch_get_row() {

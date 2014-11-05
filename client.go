@@ -696,8 +696,10 @@ func (o *OTSClient) PutRow(table_name string, condition string, primary_key *OTS
 // 见示例。
 //
 // 返回：本次操作消耗的CapacityUnit。
+//       错误信息。
 //
-// consumed表示消耗的CapacityUnit，是ots2.metadata.CapacityUnit类的实例。
+// ``update_row_response``为``otstype.OTSUpdateRowResponse``类的实例包含了：
+// ``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
 //
 // 示例：
 //
@@ -746,8 +748,51 @@ func (o *OTSClient) UpdateRow(table_name string, condition string, primary_key *
 	return r.(*OTSUpdateRowResponse), nil
 }
 
-func (o *OTSClient) DeleteRow() {
+// 说明：删除一行数据。
+//
+// ``table_name``是对应的表名。
+// ``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
+// 目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
+// ``primary_key``表示主键，类型为``otstype.OTSPrimaryKey``的实例。
+//
+// 返回：本次操作消耗的CapacityUnit。
+//       错误信息。
+//
+// ``delete_row_response``为``otstype.OTSDeleteRowResponse``类的实例包含了：
+// ``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
+//
+// 示例：
+//
+// primary_key := &OTSPrimaryKey{
+// 	"gid": 1,
+// 	"uid": 101,
+// }
+// condition := OTSCondition_IGNORE
+// delete_row_response, ots_err := ots_client.DeleteRow("myTable", condition, primary_key)
+//
+func (o *OTSClient) DeleteRow(table_name string, condition string, primary_key *OTSPrimaryKey) (delete_row_response *OTSDeleteRowResponse, err *OTSError) {
+	err = new(OTSError)
+	if table_name == "" {
+		return nil, err.SetClientMessage("[DeleteRow] table_name should not be empty")
+	}
+	if condition == "" {
+		return nil, err.SetClientMessage("[DeleteRow] condition should not be empty")
+	}
+	if primary_key == nil {
+		return nil, err.SetClientMessage("[DeleteRow] primary_key should not be nil")
+	}
 
+	resp, service_err := o._request_helper("DeleteRow", table_name, condition, primary_key)
+	if service_err != nil {
+		return nil, err.SetServiceError(service_err)
+	}
+
+	r, e := o._check_request_helper_error(resp)
+	if e != nil {
+		return nil, err.SetClientMessage("[DeleteRow] %s", e)
+	}
+
+	return r.(*OTSDeleteRowResponse), nil
 }
 
 func (o *OTSClient) BatchGetRow() {
