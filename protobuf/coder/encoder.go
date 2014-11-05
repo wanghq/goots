@@ -1855,8 +1855,21 @@ func _encode_describe_table(table_name string) (req *DescribeTableRequest, err e
 	return proto, nil
 }
 
-func _encode_get_row() {
+func _encode_get_row(table_name string, primary_key *OTSPrimaryKey, columns_to_get *OTSColumnsToGet) (req *GetRowRequest, err error) {
+	proto := new(GetRowRequest)
+	proto.TableName = NewString(table_name)
+	proto_primary_key := new([]*Column)
+	_make_columns_with_dict(proto_primary_key, DictString(*primary_key))
+	proto.PrimaryKey = *proto_primary_key
+	if columns_to_get != nil {
+		proto_columns_to_get := new([]string)
+		_make_repeated_column_names(proto_columns_to_get, []string(*columns_to_get))
+		proto.ColumnsToGet = *proto_columns_to_get
+	} else {
+		proto.ColumnsToGet = nil
+	}
 
+	return proto, nil
 }
 
 func _encode_put_row() {

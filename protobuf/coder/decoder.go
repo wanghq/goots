@@ -49,28 +49,77 @@ func _parse_string(str string) *string {
 	return &str
 }
 
-func _parse_column_type() {
-
+func _parse_column_type(column_type_enum ColumnType) string {
+	return ColumnType_name[int32(column_type_enum)]
 }
 
-func _parse_value() {
+func _parse_value(value *ColumnValue) interface{} {
+	switch value.GetType() {
+	case ColumnType_INTEGER:
+		return value.GetVInt()
+	case ColumnType_STRING:
+		return value.GetVString()
+	case ColumnType_BOOLEAN:
+		return value.GetVBool()
+	case ColumnType_DOUBLE:
+		return value.GetVDouble()
+	case ColumnType_BINARY:
+		return value.GetVBinary()
+	default:
+		panic(OTSClientError{}.Set("invalid column value type: %d", value.GetType()))
+	}
 
+	return nil
 }
 
-func _parse_schema_list() {
+func _parse_schema_list(primary_key []*ColumnSchema) OTSSchemaOfPrimaryKey {
+	schema_of_primary_key := make(OTSSchemaOfPrimaryKey, len(primary_key))
+	for _, v := range primary_key {
+		key := v.GetName()
+		value := _parse_column_type(v.GetType())
+		schema_of_primary_key[key] = value
+	}
 
+	return schema_of_primary_key
 }
 
-func _parse_column_dict() {
+func _parse_column_dict(colum []*Column) *DictString {
+	if len(colum) == 0 {
+		return nil
+	}
 
+	dict := new(DictString)
+	*dict = make(DictString, len(colum))
+	for _, v := range colum {
+		(*dict)[v.GetName()] = _parse_value(v.GetValue())
+	}
+
+	return dict
 }
 
-func _parse_row() {
+func _parse_row(row *Row) *OTSRow {
+	if row == nil {
+		return nil
+	}
 
+	ots_row := new(OTSRow)
+	ots_row.PrimaryKeyColumns = (*OTSPrimaryKey)(_parse_column_dict(row.GetPrimaryKeyColumns()))
+	ots_row.AttributeColumns = (*OTSAttribute)(_parse_column_dict(row.GetAttributeColumns()))
+
+	return ots_row
 }
 
-func _parse_row_list() {
+func _parse_row_list(rows []*Row) OTSRows {
+	if len(rows) == 0 {
+		return nil
+	}
 
+	ots_rows := make(OTSRows, len(rows))
+	for i, v := range rows {
+		ots_rows[i] = _parse_row(v)
+	}
+
+	return ots_rows
 }
 
 func _parse_table_meta(table_meta *TableMeta) *OTSTableMeta {
@@ -80,12 +129,7 @@ func _parse_table_meta(table_meta *TableMeta) *OTSTableMeta {
 
 	pobj := new(OTSTableMeta)
 	pobj.TableName = table_meta.GetTableName()
-	pobj.SchemaOfPrimaryKey = make(map[string]string, len(table_meta.PrimaryKey))
-	for _, v := range table_meta.PrimaryKey {
-		key := v.GetName()
-		value := ColumnType_name[int32(v.GetType())]
-		pobj.SchemaOfPrimaryKey[key] = value
-	}
+	pobj.SchemaOfPrimaryKey = _parse_schema_list(table_meta.PrimaryKey)
 
 	return pobj
 }
@@ -193,8 +237,18 @@ func _decode_describe_table(buf []byte) (describe_table_response *OTSDescribeTab
 	return describe_table_response, nil
 }
 
-func _decode_get_row(buf []byte) {
+func _decode_get_row(buf []byte) (get_row_response *OTSGetRowResponse, err error) {
+	pb := &GetRowResponse{}
+	err = proto.Unmarshal(buf, pb)
+	if err != nil {
+		return nil, err
+	}
 
+	get_row_response = new(OTSGetRowResponse)
+	get_row_response.Row = _parse_row(pb.GetRow())
+	get_row_response.Consumed = _parse_capacity_unit(pb.GetConsumed().GetCapacityUnit())
+
+	return get_row_response, nil
 }
 
 func _decode_put_row(buf []byte) {

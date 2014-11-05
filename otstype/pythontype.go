@@ -22,19 +22,29 @@ type TupleString struct {
 }
 
 func (t *TupleString) GetKey() string {
+	if t == nil {
+		return ""
+	}
 	return t.K
 }
 
 func (t *TupleString) SetKey(k string) {
-	(*t).K = k
+	if t != nil {
+		(*t).K = k
+	}
 }
 
 func (t *TupleString) GetValue() interface{} {
+	if t == nil {
+		return nil
+	}
 	return t.V
 }
 
 func (t *TupleString) SetValue(v interface{}) {
-	(*t).V = v
+	if t != nil {
+		(*t).V = v
+	}
 }
 
 // for OTS protobuf adapter
@@ -71,4 +81,27 @@ func (d DictString) String() string {
 	}
 
 	return result
+}
+
+// delete key
+func (d DictString) Del(key string) {
+	if d != nil {
+		delete(d, key)
+	}
+}
+
+// get value by key
+func (d DictString) Get(key string) interface{} {
+	if d == nil || key == "" {
+		return nil
+	}
+
+	return d[key]
+}
+
+// set key and value to map
+func (d DictString) Set(key string, value interface{}) {
+	if d != nil {
+		d[key] = value
+	}
 }

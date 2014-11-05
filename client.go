@@ -429,6 +429,13 @@ func (o *OTSClient) _check_request_helper_error(resp []reflect.Value) (r interfa
 //
 func (o *OTSClient) CreateTable(table_meta *OTSTableMeta, reserved_throughput *OTSReservedThroughput) (err *OTSError) {
 	err = new(OTSError)
+	if table_meta == nil {
+		return err.SetClientMessage("[CreateTable] table_meta should not be nil")
+	}
+	if reserved_throughput == nil {
+		return err.SetClientMessage("[CreateTable] reserved_throughput should not be nil")
+	}
+
 	resp, service_err := o._request_helper("CreateTable", table_meta, reserved_throughput)
 	if service_err != nil {
 		return err.SetServiceError(service_err)
@@ -455,6 +462,10 @@ func (o *OTSClient) CreateTable(table_meta *OTSTableMeta, reserved_throughput *O
 //
 func (o *OTSClient) DeleteTable(table_name string) (err *OTSError) {
 	err = new(OTSError)
+	if table_name == "" {
+		return err.SetClientMessage("[DeleteTable] table_name should not be empty")
+	}
+
 	resp, service_err := o._request_helper("DeleteTable", table_name)
 	if service_err != nil {
 		return err.SetServiceError(service_err)
@@ -516,6 +527,13 @@ func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError
 //
 func (o *OTSClient) UpdateTable(table_name string, reserved_throughput *OTSReservedThroughput) (update_table_response *OTSUpdateTableResponse, err *OTSError) {
 	err = new(OTSError)
+	if table_name == "" {
+		return nil, err.SetClientMessage("[UpdateTable] table_name should not be empty")
+	}
+	if reserved_throughput == nil {
+		return nil, err.SetClientMessage("[UpdateTable] reserved_throughput should not be nil")
+	}
+
 	resp, service_err := o._request_helper("UpdateTable", table_name, reserved_throughput)
 	if service_err != nil {
 		return nil, err.SetServiceError(service_err)
@@ -534,6 +552,7 @@ func (o *OTSClient) UpdateTable(table_name string, reserved_throughput *OTSReser
 // ``table_name``是对应的表名。
 //
 // 返回：表的描述信息。
+//       错误信息。
 //
 // ``describe_table_response``表示表的描述信息，是``otstype.OTSDescribeTableResponse``类的实例。
 //
@@ -543,6 +562,10 @@ func (o *OTSClient) UpdateTable(table_name string, reserved_throughput *OTSReser
 //
 func (o *OTSClient) DescribeTable(table_name string) (describe_table_response *OTSDescribeTableResponse, err *OTSError) {
 	err = new(OTSError)
+	if table_name == "" {
+		return nil, err.SetClientMessage("[DescribeTable] table_name should not be empty")
+	}
+
 	resp, service_err := o._request_helper("DescribeTable", table_name)
 	if service_err != nil {
 		return nil, err.SetServiceError(service_err)
@@ -556,8 +579,53 @@ func (o *OTSClient) DescribeTable(table_name string) (describe_table_response *O
 	return r.(*OTSDescribeTableResponse), nil
 }
 
-func (o *OTSClient) GetRow() {
+// 说明：获取一行数据。
+//
+// ``table_name``是对应的表名。
+// ``primary_key``是主键，类型为``otstype.OTSPrimaryKey``。
+// ``columns_to_get``是可选参数，表示要获取的列的名称列表，类型为``otstype.OTSColumnsToGet``；如果填nil，表示获取所有列。
+//
+// 返回：本次操作消耗的CapacityUnit、行数据（包含主键列和属性列）。
+//       错误信息。
+//
+// ``get_row_response``为``otstype.OTSGetRowResponse``类的实例包含了：
+// ``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
+// ``Row``表示一行的数据，是``otstype.OTSRow``的实例,也包含了:
+// ``PrimaryKeyColumns``表示主键列，类型为``otstype.OTSPrimaryKey``，如：{"PK0":value0, "PK1":value1}。
+// ``AttributeColumns``表示属性列，类型为``otstype.OTSAttribute``，如：{"COL0":value0, "COL1":value1}。
+//
+// 示例：
+//
+// primary_key := &OTSPrimaryKey{
+// 	"gid": 1,
+// 	"uid": 101,
+// }
+// columns_to_get := &OTSColumnsToGet{
+// 	"name", "address", "age",
+// }
+// // columns_to_get = nil // read all
+// get_row_response, ots_err := ots_client.GetRow("myTable", primary_key, columns_to_get)
+//
+func (o *OTSClient) GetRow(table_name string, primary_key *OTSPrimaryKey, columns_to_get *OTSColumnsToGet) (get_row_response *OTSGetRowResponse, err *OTSError) {
+	err = new(OTSError)
+	if table_name == "" {
+		return nil, err.SetClientMessage("[GetRow] table_name should not be empty")
+	}
+	if primary_key == nil {
+		return nil, err.SetClientMessage("[GetRow] primary_key should not be nil")
+	}
 
+	resp, service_err := o._request_helper("GetRow", table_name, primary_key, columns_to_get)
+	if service_err != nil {
+		return nil, err.SetServiceError(service_err)
+	}
+
+	r, e := o._check_request_helper_error(resp)
+	if e != nil {
+		return nil, err.SetClientMessage("[GetRow] %s", e)
+	}
+
+	return r.(*OTSGetRowResponse), nil
 }
 
 func (o *OTSClient) PutRow() {

@@ -48,7 +48,19 @@ type OTSTableMeta struct {
 }
 
 // 表主键列描述
-type OTSSchemaOfPrimaryKey map[string]string
+type OTSSchemaOfPrimaryKey DictString
+
+func (o OTSSchemaOfPrimaryKey) Del(key string) {
+	DictString(o).Del(key)
+}
+
+func (o OTSSchemaOfPrimaryKey) Get(key string) interface{} {
+	return DictString(o).Get(key)
+}
+
+func (o OTSSchemaOfPrimaryKey) Set(key string, value interface{}) {
+	DictString(o).Set(key, value)
+}
 
 // 表示一次操作消耗服务能力单元的值或是一个表的预留读写吞吐量的值
 type OTSCapacityUnit struct {
@@ -56,6 +68,16 @@ type OTSCapacityUnit struct {
 	Read int32
 	// 本次操作消耗的写服务能力单元或该表的写服务能力单元
 	Write int32
+}
+
+// 获取本次操作消耗的读服务能力单元或该表的读服务能力单元
+func (o *OTSCapacityUnit) GetRead() int32 {
+	return o.Read
+}
+
+// 获取本次操作消耗的写服务能力单元或该表的写服务能力单元
+func (o *OTSCapacityUnit) GetWrite() int32 {
+	return o.Write
 }
 
 // 表示一个表设置的预留读写吞吐量数值
@@ -104,11 +126,47 @@ type OTSColumnValue struct {
 // 表的主键列值，精简数据模型
 type OTSPrimaryKey DictString
 
+func (o OTSPrimaryKey) Del(key string) {
+	DictString(o).Del(key)
+}
+
+func (o OTSPrimaryKey) Get(key string) interface{} {
+	return DictString(o).Get(key)
+}
+
+func (o OTSPrimaryKey) Set(key string, value interface{}) {
+	DictString(o).Set(key, value)
+}
+
 // 表的属性列值，精简数据模型
 type OTSAttribute DictString
 
+func (o OTSAttribute) Del(key string) {
+	DictString(o).Del(key)
+}
+
+func (o OTSAttribute) Get(key string) interface{} {
+	return DictString(o).Get(key)
+}
+
+func (o OTSAttribute) Set(key string, value interface{}) {
+	DictString(o).Set(key, value)
+}
+
 // 表更新属性列值，精简数据模型
 type OTSUpdateOfAttribute DictString
+
+func (o OTSUpdateOfAttribute) Del(key string) {
+	DictString(o).Del(key)
+}
+
+func (o OTSUpdateOfAttribute) Get(key string) interface{} {
+	return DictString(o).Get(key)
+}
+
+func (o OTSUpdateOfAttribute) Set(key string, value interface{}) {
+	DictString(o).Set(key, value)
+}
 
 // 表的主键列值，复杂数据模型
 type OTSPrimaryKeyColumns []OTSColumn
@@ -127,6 +185,13 @@ type OTSColumnsToPut DictString
 
 // 在数据更新时，指定数据行中哪些属性列需要删除
 type OTSColumnsToDelete []string
+
+// 多行
+type OTSRows []*OTSRow
+
+//////////////////////////////////////////
+/// Request
+//////////////////////////////////////////
 
 // IsOk can be True or False
 // when IsOk is False,
@@ -236,6 +301,10 @@ type OTS_INF_MIN struct {
 type OTS_INF_MAX struct {
 }
 
+//////////////////////////////////////////
+/// Response
+//////////////////////////////////////////
+
 // 表示一个OTS实例下的表的列表
 type OTSListTableResponse struct {
 	TableNames []string
@@ -262,4 +331,52 @@ type OTSDescribeTableResponse struct {
 	// 该表的预留读写吞吐量设置信息，除了包含当前的预留读写吞吐量设置值之外，还包含了
 	// 最近一次更新该表的预留读写吞吐量设置的时间和当日已下调预留读写吞吐量的次数。
 	ReservedThroughputDetails *OTSReservedThroughputDetails
+}
+
+// 一行数据的主键列和属性列
+type OTSRow struct {
+	// 主键列
+	PrimaryKeyColumns *OTSPrimaryKey
+	// 属性列
+	AttributeColumns *OTSAttribute
+}
+
+func (o *OTSRow) GetPrimaryKeyColumns() OTSPrimaryKey {
+	if o.PrimaryKeyColumns == nil {
+		return nil
+	} else {
+		return *o.PrimaryKeyColumns
+	}
+}
+
+func (o *OTSRow) GetAttributeColumns() OTSAttribute {
+	if o.AttributeColumns == nil {
+		return nil
+	} else {
+		return *o.AttributeColumns
+	}
+}
+
+// 获取一行数据
+type OTSGetRowResponse struct {
+	// 消耗的读服务能力单元或该表的读服务能力单元
+	Consumed *OTSCapacityUnit
+	// 行数据，包含了主键列和属性列
+	Row *OTSRow
+}
+
+func (o *OTSGetRowResponse) GetReadConsumed() int32 {
+	if o.Consumed != nil {
+		return o.Consumed.GetRead()
+	}
+
+	return 0
+}
+
+func (o *OTSGetRowResponse) GetAttributeColumns() OTSAttribute {
+	if o.Row != nil {
+		return o.Row.GetAttributeColumns()
+	}
+
+	return nil
 }
