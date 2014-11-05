@@ -83,15 +83,14 @@ func _parse_schema_list(primary_key []*ColumnSchema) OTSSchemaOfPrimaryKey {
 	return schema_of_primary_key
 }
 
-func _parse_column_dict(colum []*Column) *DictString {
+func _parse_column_dict(colum []*Column) DictString {
 	if len(colum) == 0 {
 		return nil
 	}
 
-	dict := new(DictString)
-	*dict = make(DictString, len(colum))
+	dict := make(DictString, len(colum))
 	for _, v := range colum {
-		(*dict)[v.GetName()] = _parse_value(v.GetValue())
+		dict[v.GetName()] = _parse_value(v.GetValue())
 	}
 
 	return dict
@@ -103,8 +102,8 @@ func _parse_row(row *Row) *OTSRow {
 	}
 
 	ots_row := new(OTSRow)
-	ots_row.PrimaryKeyColumns = (*OTSPrimaryKey)(_parse_column_dict(row.GetPrimaryKeyColumns()))
-	ots_row.AttributeColumns = (*OTSAttribute)(_parse_column_dict(row.GetAttributeColumns()))
+	ots_row.PrimaryKeyColumns = (OTSPrimaryKey)(_parse_column_dict(row.GetPrimaryKeyColumns()))
+	ots_row.AttributeColumns = (OTSAttribute)(_parse_column_dict(row.GetAttributeColumns()))
 
 	return ots_row
 }
@@ -251,8 +250,17 @@ func _decode_get_row(buf []byte) (get_row_response *OTSGetRowResponse, err error
 	return get_row_response, nil
 }
 
-func _decode_put_row(buf []byte) {
+func _decode_put_row(buf []byte) (put_row_response *OTSPutRowResponse, err error) {
+	pb := &PutRowResponse{}
+	err = proto.Unmarshal(buf, pb)
+	if err != nil {
+		return nil, err
+	}
 
+	put_row_response = new(OTSPutRowResponse)
+	put_row_response.Consumed = _parse_capacity_unit(pb.GetConsumed().GetCapacityUnit())
+
+	return put_row_response, nil
 }
 
 func _decode_update_row(buf []byte) {

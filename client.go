@@ -628,8 +628,60 @@ func (o *OTSClient) GetRow(table_name string, primary_key *OTSPrimaryKey, column
 	return r.(*OTSGetRowResponse), nil
 }
 
-func (o *OTSClient) PutRow() {
+// 说明：写入一行数据。返回本次操作消耗的CapacityUnit。
+//
+// ``table_name``是对应的表名。
+// ``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
+// 目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
+// ``primary_key``表示主键，类型为``otstype.OTSPrimaryKey``的实例。
+// ``attribute_columns``表示属性列，类型为``otstype.OTSAttribute``的实例。
+//
+// 返回：本次操作消耗的CapacityUnit。
+//       错误信息。
+//
+// ``put_row_response``为``otstype.OTSGetRowResponse``类的实例包含了：
+// ``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
+//
+// 示例：
+//
+// primary_key := &OTSPrimaryKey{
+// 	"gid": 1,
+// 	"uid": 101,
+// }
+// attribute_columns := &OTSAttribute{
+// 	"name":    "张三",
+// 	"mobile":  111111111,
+// 	"address": "中国A地",
+// 	"age":     20,
+// }
+// condition := OTSCondition_EXPECT_NOT_EXIST
+// put_row_response, ots_err := ots_client.PutRow("myTable", condition, primary_key, attribute_columns)
+//
+func (o *OTSClient) PutRow(table_name string, condition string, primary_key *OTSPrimaryKey, attribute_columns *OTSAttribute) (put_row_response *OTSPutRowResponse, err *OTSError) {
+	err = new(OTSError)
+	if table_name == "" {
+		return nil, err.SetClientMessage("[PutRow] table_name should not be empty")
+	}
+	if condition == "" {
+		return nil, err.SetClientMessage("[PutRow] condition should not be empty")
+	}
+	if primary_key == nil {
+		return nil, err.SetClientMessage("[PutRow] primary_key should not be nil")
+	}
+	if attribute_columns == nil {
+		return nil, err.SetClientMessage("[PutRow] attribute_columns should not be nil")
+	}
+	resp, service_err := o._request_helper("PutRow", table_name, condition, primary_key, attribute_columns)
+	if service_err != nil {
+		return nil, err.SetServiceError(service_err)
+	}
 
+	r, e := o._check_request_helper_error(resp)
+	if e != nil {
+		return nil, err.SetClientMessage("[PutRow] %s", e)
+	}
+
+	return r.(*OTSPutRowResponse), nil
 }
 
 func (o *OTSClient) UpdateRow() {

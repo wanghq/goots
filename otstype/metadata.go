@@ -336,16 +336,16 @@ type OTSDescribeTableResponse struct {
 // 一行数据的主键列和属性列
 type OTSRow struct {
 	// 主键列
-	PrimaryKeyColumns *OTSPrimaryKey
+	PrimaryKeyColumns OTSPrimaryKey
 	// 属性列
-	AttributeColumns *OTSAttribute
+	AttributeColumns OTSAttribute
 }
 
 func (o *OTSRow) GetPrimaryKeyColumns() OTSPrimaryKey {
 	if o.PrimaryKeyColumns == nil {
 		return nil
 	} else {
-		return *o.PrimaryKeyColumns
+		return o.PrimaryKeyColumns
 	}
 }
 
@@ -353,7 +353,7 @@ func (o *OTSRow) GetAttributeColumns() OTSAttribute {
 	if o.AttributeColumns == nil {
 		return nil
 	} else {
-		return *o.AttributeColumns
+		return o.AttributeColumns
 	}
 }
 
@@ -379,4 +379,18 @@ func (o *OTSGetRowResponse) GetAttributeColumns() OTSAttribute {
 	}
 
 	return nil
+}
+
+// 插入一行数据
+type OTSPutRowResponse struct {
+	// 消耗的读服务能力单元或该表的读服务能力单元
+	Consumed *OTSCapacityUnit
+}
+
+func (o *OTSPutRowResponse) GetWriteConsumed() int32 {
+	if o.Consumed != nil {
+		return o.Consumed.GetWrite()
+	}
+
+	return 0
 }

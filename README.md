@@ -12,7 +12,7 @@ Aliyun OTS(Open Table Service) golang SDK.
 	- [DescribeTable](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/DescribeTable.md) ☑
 - **SingleRow**
 	- [GetRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/GetRow.md) ☑
-	- PutRow
+	- [PutRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/PutRow.md) ☑
 	- UpdateRow
 	- DeleteRow
 - **BatchRow**

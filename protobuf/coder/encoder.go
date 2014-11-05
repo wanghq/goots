@@ -306,7 +306,10 @@ func _make_schemas_with_list(proto *[]*ColumnSchema, schema_list interface{}) er
 		*proto = make([]*ColumnSchema, len(schema_list.([]ColumnSchema)))
 		for k, schema_tuple := range schema_list.([]ColumnSchema) {
 			item := new(ColumnSchema)
-			_make_column_schema(item, schema_tuple)
+			err := _make_column_schema(item, schema_tuple)
+			if err != nil {
+				return err
+			}
 			(*proto)[k] = item
 		}
 
@@ -317,7 +320,10 @@ func _make_schemas_with_list(proto *[]*ColumnSchema, schema_list interface{}) er
 		*proto = make([]*ColumnSchema, len(schema_list.([]*ColumnSchema)))
 		for k, schema_tuple := range schema_list.([]*ColumnSchema) {
 			item := new(ColumnSchema)
-			_make_column_schema(item, *schema_tuple)
+			err := _make_column_schema(item, *schema_tuple)
+			if err != nil {
+				return err
+			}
 			(*proto)[k] = item
 		}
 
@@ -329,7 +335,10 @@ func _make_schemas_with_list(proto *[]*ColumnSchema, schema_list interface{}) er
 		for k, schema_tuple := range schema_list.([]TupleString) {
 			item := new(ColumnSchema)
 			// _make_column_schema_python(item, schema_tuple)
-			_make_column_schema(item, schema_tuple)
+			err := _make_column_schema(item, schema_tuple)
+			if err != nil {
+				return err
+			}
 			(*proto)[k] = item
 		}
 
@@ -494,14 +503,20 @@ func _make_table_meta(proto *TableMeta, table_meta interface{}) error {
 		proto.TableName = new(string)
 		*proto.TableName = _get_unicode(*table_meta.(TableMeta).TableName)
 		primary_key := new([]*ColumnSchema)
-		_make_schemas_with_list(primary_key, table_meta.(TableMeta).PrimaryKey)
+		err := _make_schemas_with_list(primary_key, table_meta.(TableMeta).PrimaryKey)
+		if err != nil {
+			return err
+		}
 		proto.PrimaryKey = (*primary_key)[:]
 	case TupleString:
 		proto.TableName = new(string)
 		*proto.TableName = _get_unicode(table_meta.(TupleString).GetName())
 		if v, ok := table_meta.(TupleString).V.([]TupleString); ok {
 			primary_key := new([]*ColumnSchema)
-			_make_schemas_with_list(primary_key, v)
+			err := _make_schemas_with_list(primary_key, v)
+			if err != nil {
+				return err
+			}
 			proto.PrimaryKey = (*primary_key)[:]
 		} else {
 			return (OTSClientError{}.Set("table_meta.V should be an instance of []TupleString, not %v", reflect.TypeOf(table_meta.(TupleString).V)))
@@ -518,7 +533,10 @@ func _make_table_meta(proto *TableMeta, table_meta interface{}) error {
 			tuple_string[i].V = v
 			i++
 		}
-		_make_schemas_with_list(primary_key, tuple_string)
+		err := _make_schemas_with_list(primary_key, tuple_string)
+		if err != nil {
+			return err
+		}
 		proto.PrimaryKey = (*primary_key)[:]
 	default:
 		return (OTSClientError{}.Set("table_meta should be an instance of TableMeta, OTSTableMeta or TupleString, not %v", reflect.TypeOf(table_meta)))
@@ -552,12 +570,18 @@ func _make_reserved_throughput(proto *ReservedThroughput, reserved_throughput in
 	case ReservedThroughput:
 		capacity_unit := *reserved_throughput.(ReservedThroughput).CapacityUnit
 		proto.CapacityUnit = new(CapacityUnit)
-		_make_capacity_unit(proto.CapacityUnit, capacity_unit)
+		err := _make_capacity_unit(proto.CapacityUnit, capacity_unit)
+		if err != nil {
+			return err
+		}
 
 	case OTSReservedThroughput:
 		capacity_unit := reserved_throughput.(OTSReservedThroughput).CapacityUnit
 		proto.CapacityUnit = new(CapacityUnit)
-		_make_capacity_unit(proto.CapacityUnit, capacity_unit)
+		err := _make_capacity_unit(proto.CapacityUnit, capacity_unit)
+		if err != nil {
+			return err
+		}
 
 	default:
 		return (OTSClientError{}.Set("reserved_throughput should be an instance of [ReservedThroughput, OTSTableMeta or OTSReservedThroughput], not %v", reflect.TypeOf(reserved_throughput)))
@@ -603,12 +627,18 @@ func _make_update_reserved_throughput(proto *ReservedThroughput, reserved_throug
 	case ReservedThroughput:
 		capacity_unit := *reserved_throughput.(ReservedThroughput).CapacityUnit
 		proto.CapacityUnit = new(CapacityUnit)
-		_make_update_capacity_unit(proto.CapacityUnit, capacity_unit)
+		err := _make_update_capacity_unit(proto.CapacityUnit, capacity_unit)
+		if err != nil {
+			return err
+		}
 
 	case OTSReservedThroughput:
 		capacity_unit := reserved_throughput.(OTSReservedThroughput).CapacityUnit
 		proto.CapacityUnit = new(CapacityUnit)
-		_make_update_capacity_unit(proto.CapacityUnit, capacity_unit)
+		err := _make_update_capacity_unit(proto.CapacityUnit, capacity_unit)
+		if err != nil {
+			return err
+		}
 
 	default:
 		return (OTSClientError{}.Set("reserved_throughput should be an instance of ReservedThroughput, OTSTableMeta or OTSReservedThroughput, not %v", reflect.TypeOf(reserved_throughput)))
@@ -637,7 +667,10 @@ func _make_batch_get_row(proto *BatchGetRowRequest, batch_list interface{}) erro
 			for i1, v1 := range v.Rows {
 				row := new(RowInBatchGetRowRequest)
 				primary_key := new([]*Column)
-				_make_columns_with_dict(primary_key, v1.PrimaryKey)
+				err := _make_columns_with_dict(primary_key, v1.PrimaryKey)
+				if err != nil {
+					return err
+				}
 				row.PrimaryKey = *primary_key
 				table_item.Rows[i1] = row
 			}
@@ -662,7 +695,10 @@ func _make_batch_get_row(proto *BatchGetRowRequest, batch_list interface{}) erro
 			for i1, v1 := range v.Rows {
 				row := new(RowInBatchGetRowRequest)
 				primary_key := new([]*Column)
-				_make_columns_with_dict(primary_key, v1.PrimaryKey)
+				err := _make_columns_with_dict(primary_key, v1.PrimaryKey)
+				if err != nil {
+					return err
+				}
 				row.PrimaryKey = *primary_key
 				table_item.Rows[i1] = row
 			}
@@ -684,7 +720,10 @@ func _make_batch_get_row(proto *BatchGetRowRequest, batch_list interface{}) erro
 			for i1, v1 := range v.Rows {
 				row := new(RowInBatchGetRowRequest)
 				primary_key := new([]*Column)
-				_make_columns_with_dict(primary_key, DictString(v1))
+				err := _make_columns_with_dict(primary_key, DictString(v1))
+				if err != nil {
+					return err
+				}
 				row.PrimaryKey = *primary_key
 				table_item.Rows[i1] = row
 			}
@@ -702,32 +741,59 @@ func _make_put_row_item(proto *PutRowInBatchWriteRowRequest, put_row_item interf
 	switch put_row_item.(type) {
 	case PutRowInBatchWriteRowRequest:
 		proto.Condition = new(Condition)
-		_make_condition(proto.Condition, *put_row_item.(PutRowInBatchWriteRowRequest).Condition)
+		err := _make_condition(proto.Condition, *put_row_item.(PutRowInBatchWriteRowRequest).Condition)
+		if err != nil {
+			return err
+		}
 		primary_key := new([]*Column)
-		_make_columns_with_dict(primary_key, put_row_item.(PutRowInBatchWriteRowRequest).PrimaryKey)
+		err = _make_columns_with_dict(primary_key, put_row_item.(PutRowInBatchWriteRowRequest).PrimaryKey)
+		if err != nil {
+			return err
+		}
 		proto.PrimaryKey = *primary_key
 		attribute_columns := new([]*Column)
-		_make_columns_with_dict(attribute_columns, put_row_item.(PutRowInBatchWriteRowRequest).AttributeColumns)
+		err = _make_columns_with_dict(attribute_columns, put_row_item.(PutRowInBatchWriteRowRequest).AttributeColumns)
+		if err != nil {
+			return err
+		}
 		proto.AttributeColumns = *attribute_columns
 
 	case *PutRowInBatchWriteRowRequest:
 		proto.Condition = new(Condition)
-		_make_condition(proto.Condition, *put_row_item.(*PutRowInBatchWriteRowRequest).Condition)
+		err := _make_condition(proto.Condition, *put_row_item.(*PutRowInBatchWriteRowRequest).Condition)
+		if err != nil {
+			return err
+		}
 		primary_key := new([]*Column)
-		_make_columns_with_dict(primary_key, put_row_item.(*PutRowInBatchWriteRowRequest).PrimaryKey)
+		err = _make_columns_with_dict(primary_key, put_row_item.(*PutRowInBatchWriteRowRequest).PrimaryKey)
+		if err != nil {
+			return err
+		}
 		proto.PrimaryKey = *primary_key
 		attribute_columns := new([]*Column)
-		_make_columns_with_dict(attribute_columns, put_row_item.(*PutRowInBatchWriteRowRequest).AttributeColumns)
+		err = _make_columns_with_dict(attribute_columns, put_row_item.(*PutRowInBatchWriteRowRequest).AttributeColumns)
+		if err != nil {
+			return err
+		}
 		proto.AttributeColumns = *attribute_columns
 
 	case OTSPutRowItem:
 		proto.Condition = new(Condition)
-		_make_condition(proto.Condition, put_row_item.(OTSPutRowItem).Condition)
+		err := _make_condition(proto.Condition, put_row_item.(OTSPutRowItem).Condition)
+		if err != nil {
+			return err
+		}
 		primary_key := new([]*Column)
-		_make_columns_with_dict(primary_key, DictString(put_row_item.(OTSPutRowItem).PrimaryKey))
+		err = _make_columns_with_dict(primary_key, DictString(put_row_item.(OTSPutRowItem).PrimaryKey))
+		if err != nil {
+			return err
+		}
 		proto.PrimaryKey = *primary_key
 		attribute_columns := new([]*Column)
-		_make_columns_with_dict(attribute_columns, DictString(put_row_item.(OTSPutRowItem).AttributeColumns))
+		err = _make_columns_with_dict(attribute_columns, DictString(put_row_item.(OTSPutRowItem).AttributeColumns))
+		if err != nil {
+			return err
+		}
 		proto.AttributeColumns = *attribute_columns
 
 	default:
@@ -741,32 +807,59 @@ func _make_update_row_item(proto *UpdateRowInBatchWriteRowRequest, update_row_it
 	switch update_row_item.(type) {
 	case UpdateRowInBatchWriteRowRequest:
 		proto.Condition = new(Condition)
-		_make_condition(proto.Condition, *update_row_item.(UpdateRowInBatchWriteRowRequest).Condition)
+		err := _make_condition(proto.Condition, *update_row_item.(UpdateRowInBatchWriteRowRequest).Condition)
+		if err != nil {
+			return err
+		}
 		primary_key := new([]*Column)
-		_make_columns_with_dict(primary_key, update_row_item.(UpdateRowInBatchWriteRowRequest).PrimaryKey)
+		err = _make_columns_with_dict(primary_key, update_row_item.(UpdateRowInBatchWriteRowRequest).PrimaryKey)
+		if err != nil {
+			return err
+		}
 		proto.PrimaryKey = *primary_key
 		attribute_columns := new([]*ColumnUpdate)
-		_make_update_of_attribute_columns_with_dict(attribute_columns, update_row_item.(UpdateRowInBatchWriteRowRequest).AttributeColumns)
+		err = _make_update_of_attribute_columns_with_dict(attribute_columns, update_row_item.(UpdateRowInBatchWriteRowRequest).AttributeColumns)
+		if err != nil {
+			return err
+		}
 		proto.AttributeColumns = *attribute_columns
 
 	case *UpdateRowInBatchWriteRowRequest:
 		proto.Condition = new(Condition)
-		_make_condition(proto.Condition, *update_row_item.(*UpdateRowInBatchWriteRowRequest).Condition)
+		err := _make_condition(proto.Condition, *update_row_item.(*UpdateRowInBatchWriteRowRequest).Condition)
+		if err != nil {
+			return err
+		}
 		primary_key := new([]*Column)
-		_make_columns_with_dict(primary_key, update_row_item.(*UpdateRowInBatchWriteRowRequest).PrimaryKey)
+		err = _make_columns_with_dict(primary_key, update_row_item.(*UpdateRowInBatchWriteRowRequest).PrimaryKey)
+		if err != nil {
+			return err
+		}
 		proto.PrimaryKey = *primary_key
 		attribute_columns := new([]*ColumnUpdate)
-		_make_update_of_attribute_columns_with_dict(attribute_columns, update_row_item.(*UpdateRowInBatchWriteRowRequest).AttributeColumns)
+		err = _make_update_of_attribute_columns_with_dict(attribute_columns, update_row_item.(*UpdateRowInBatchWriteRowRequest).AttributeColumns)
+		if err != nil {
+			return err
+		}
 		proto.AttributeColumns = *attribute_columns
 
 	case OTSUpdateRowItem:
 		proto.Condition = new(Condition)
-		_make_condition(proto.Condition, update_row_item.(OTSUpdateRowItem).Condition)
+		err := _make_condition(proto.Condition, update_row_item.(OTSUpdateRowItem).Condition)
+		if err != nil {
+			return err
+		}
 		primary_key := new([]*Column)
-		_make_columns_with_dict(primary_key, DictString(update_row_item.(OTSUpdateRowItem).PrimaryKey))
+		err = _make_columns_with_dict(primary_key, DictString(update_row_item.(OTSUpdateRowItem).PrimaryKey))
+		if err != nil {
+			return err
+		}
 		proto.PrimaryKey = *primary_key
 		attribute_columns := new([]*ColumnUpdate)
-		_make_update_of_attribute_columns_with_dict(attribute_columns, DictString(update_row_item.(OTSUpdateRowItem).UpdateOfAttributeColumns))
+		err = _make_update_of_attribute_columns_with_dict(attribute_columns, DictString(update_row_item.(OTSUpdateRowItem).UpdateOfAttributeColumns))
+		if err != nil {
+			return err
+		}
 		proto.AttributeColumns = *attribute_columns
 
 	default:
@@ -780,23 +873,41 @@ func _make_delete_row_item(proto *DeleteRowInBatchWriteRowRequest, delete_row_it
 	switch delete_row_item.(type) {
 	case DeleteRowInBatchWriteRowRequest:
 		proto.Condition = new(Condition)
-		_make_condition(proto.Condition, *delete_row_item.(DeleteRowInBatchWriteRowRequest).Condition)
+		err := _make_condition(proto.Condition, *delete_row_item.(DeleteRowInBatchWriteRowRequest).Condition)
+		if err != nil {
+			return err
+		}
 		primary_key := new([]*Column)
-		_make_columns_with_dict(primary_key, delete_row_item.(DeleteRowInBatchWriteRowRequest).PrimaryKey)
+		err = _make_columns_with_dict(primary_key, delete_row_item.(DeleteRowInBatchWriteRowRequest).PrimaryKey)
+		if err != nil {
+			return err
+		}
 		proto.PrimaryKey = *primary_key
 
 	case *DeleteRowInBatchWriteRowRequest:
 		proto.Condition = new(Condition)
-		_make_condition(proto.Condition, *delete_row_item.(*DeleteRowInBatchWriteRowRequest).Condition)
+		err := _make_condition(proto.Condition, *delete_row_item.(*DeleteRowInBatchWriteRowRequest).Condition)
+		if err != nil {
+			return err
+		}
 		primary_key := new([]*Column)
-		_make_columns_with_dict(primary_key, delete_row_item.(*DeleteRowInBatchWriteRowRequest).PrimaryKey)
+		err = _make_columns_with_dict(primary_key, delete_row_item.(*DeleteRowInBatchWriteRowRequest).PrimaryKey)
+		if err != nil {
+			return err
+		}
 		proto.PrimaryKey = *primary_key
 
 	case OTSDeleteRowItem:
 		proto.Condition = new(Condition)
-		_make_condition(proto.Condition, delete_row_item.(OTSDeleteRowItem).Condition)
+		err := _make_condition(proto.Condition, delete_row_item.(OTSDeleteRowItem).Condition)
+		if err != nil {
+			return err
+		}
 		primary_key := new([]*Column)
-		_make_columns_with_dict(primary_key, DictString(delete_row_item.(OTSDeleteRowItem).PrimaryKey))
+		err = _make_columns_with_dict(primary_key, DictString(delete_row_item.(OTSDeleteRowItem).PrimaryKey))
+		if err != nil {
+			return err
+		}
 		proto.PrimaryKey = *primary_key
 
 	default:
@@ -822,7 +933,10 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 			table_item.PutRows = make([]*PutRowInBatchWriteRowRequest, len(v.PutRows))
 			for i1, v1 := range v.PutRows {
 				put_rows_item := new(PutRowInBatchWriteRowRequest)
-				_make_put_row_item(put_rows_item, v1)
+				err := _make_put_row_item(put_rows_item, v1)
+				if err != nil {
+					return err
+				}
 				table_item.PutRows[i1] = put_rows_item
 			}
 
@@ -830,7 +944,10 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 			table_item.UpdateRows = make([]*UpdateRowInBatchWriteRowRequest, len(v.UpdateRows))
 			for i1, v1 := range v.UpdateRows {
 				update_rows_item := new(UpdateRowInBatchWriteRowRequest)
-				_make_update_row_item(update_rows_item, v1)
+				err := _make_update_row_item(update_rows_item, v1)
+				if err != nil {
+					return err
+				}
 				table_item.UpdateRows[i1] = update_rows_item
 			}
 
@@ -838,7 +955,10 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 			table_item.DeleteRows = make([]*DeleteRowInBatchWriteRowRequest, len(v.DeleteRows))
 			for i1, v1 := range v.DeleteRows {
 				delete_rows_item := new(DeleteRowInBatchWriteRowRequest)
-				_make_delete_row_item(delete_rows_item, v1)
+				err := _make_delete_row_item(delete_rows_item, v1)
+				if err != nil {
+					return err
+				}
 				table_item.DeleteRows[i1] = delete_rows_item
 			}
 			proto.Tables[i] = table_item
@@ -858,7 +978,10 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 			table_item.PutRows = make([]*PutRowInBatchWriteRowRequest, len(v.PutRows))
 			for i1, v1 := range v.PutRows {
 				put_rows_item := new(PutRowInBatchWriteRowRequest)
-				_make_put_row_item(put_rows_item, v1)
+				err := _make_put_row_item(put_rows_item, v1)
+				if err != nil {
+					return err
+				}
 				table_item.PutRows[i1] = put_rows_item
 			}
 
@@ -866,7 +989,10 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 			table_item.UpdateRows = make([]*UpdateRowInBatchWriteRowRequest, len(v.UpdateRows))
 			for i1, v1 := range v.UpdateRows {
 				update_rows_item := new(UpdateRowInBatchWriteRowRequest)
-				_make_update_row_item(update_rows_item, v1)
+				err := _make_update_row_item(update_rows_item, v1)
+				if err != nil {
+					return err
+				}
 				table_item.UpdateRows[i1] = update_rows_item
 			}
 
@@ -874,7 +1000,10 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 			table_item.DeleteRows = make([]*DeleteRowInBatchWriteRowRequest, len(v.DeleteRows))
 			for i1, v1 := range v.DeleteRows {
 				delete_rows_item := new(DeleteRowInBatchWriteRowRequest)
-				_make_delete_row_item(delete_rows_item, v1)
+				err := _make_delete_row_item(delete_rows_item, v1)
+				if err != nil {
+					return err
+				}
 				table_item.DeleteRows[i1] = delete_rows_item
 			}
 			proto.Tables[i] = table_item
@@ -894,7 +1023,10 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 			table_item.PutRows = make([]*PutRowInBatchWriteRowRequest, len(v.PutRows))
 			for i1, v1 := range v.PutRows {
 				put_rows_item := new(PutRowInBatchWriteRowRequest)
-				_make_put_row_item(put_rows_item, v1)
+				err := _make_put_row_item(put_rows_item, v1)
+				if err != nil {
+					return err
+				}
 				table_item.PutRows[i1] = put_rows_item
 			}
 
@@ -902,7 +1034,10 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 			table_item.UpdateRows = make([]*UpdateRowInBatchWriteRowRequest, len(v.UpdateRows))
 			for i1, v1 := range v.UpdateRows {
 				update_rows_item := new(UpdateRowInBatchWriteRowRequest)
-				_make_update_row_item(update_rows_item, v1)
+				err := _make_update_row_item(update_rows_item, v1)
+				if err != nil {
+					return err
+				}
 				table_item.UpdateRows[i1] = update_rows_item
 			}
 
@@ -910,7 +1045,10 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 			table_item.DeleteRows = make([]*DeleteRowInBatchWriteRowRequest, len(v.DeleteRows))
 			for i1, v1 := range v.DeleteRows {
 				delete_rows_item := new(DeleteRowInBatchWriteRowRequest)
-				_make_delete_row_item(delete_rows_item, v1)
+				err := _make_delete_row_item(delete_rows_item, v1)
+				if err != nil {
+					return err
+				}
 				table_item.DeleteRows[i1] = delete_rows_item
 			}
 			proto.Tables[i] = table_item
@@ -1858,13 +1996,19 @@ func _encode_describe_table(table_name string) (req *DescribeTableRequest, err e
 func _encode_get_row(table_name string, primary_key *OTSPrimaryKey, columns_to_get *OTSColumnsToGet) (req *GetRowRequest, err error) {
 	proto := new(GetRowRequest)
 	proto.TableName = NewString(table_name)
-	proto_primary_key := new([]*Column)
-	_make_columns_with_dict(proto_primary_key, DictString(*primary_key))
-	proto.PrimaryKey = *proto_primary_key
+	_primary_key := new([]*Column)
+	err = _make_columns_with_dict(_primary_key, DictString(*primary_key))
+	if err != nil {
+		return nil, err
+	}
+	proto.PrimaryKey = *_primary_key
 	if columns_to_get != nil {
-		proto_columns_to_get := new([]string)
-		_make_repeated_column_names(proto_columns_to_get, []string(*columns_to_get))
-		proto.ColumnsToGet = *proto_columns_to_get
+		_columns_to_get := new([]string)
+		err = _make_repeated_column_names(_columns_to_get, []string(*columns_to_get))
+		if err != nil {
+			return nil, err
+		}
+		proto.ColumnsToGet = *_columns_to_get
 	} else {
 		proto.ColumnsToGet = nil
 	}
@@ -1872,8 +2016,28 @@ func _encode_get_row(table_name string, primary_key *OTSPrimaryKey, columns_to_g
 	return proto, nil
 }
 
-func _encode_put_row() {
+func _encode_put_row(table_name string, condition string, primary_key *OTSPrimaryKey, attribute_columns *OTSAttribute) (req *PutRowRequest, err error) {
+	proto := new(PutRowRequest)
+	proto.TableName = NewString(table_name)
+	proto.Condition = new(Condition)
+	err = _make_condition(proto.Condition, condition)
+	if err != nil {
+		return nil, err
+	}
+	_primary_key := new([]*Column)
+	err = _make_columns_with_dict(_primary_key, DictString(*primary_key))
+	if err != nil {
+		return nil, err
+	}
+	proto.PrimaryKey = *_primary_key
+	_attribute_columns := new([]*Column)
+	err = _make_columns_with_dict(_attribute_columns, DictString(*attribute_columns))
+	if err != nil {
+		return nil, err
+	}
+	proto.AttributeColumns = *_attribute_columns
 
+	return proto, nil
 }
 
 func _encode_update_row() {
