@@ -154,4 +154,55 @@ func main() {
 	} else {
 		fmt.Println("未查询到数据")
 	}
+
+	// update_row
+	primary_key = &OTSPrimaryKey{
+		"gid": 1,
+		"uid": 101,
+	}
+	update_of_attribute_columns := &OTSUpdateOfAttribute{
+		OTSOperationType_PUT: OTSColumnsToPut{
+			"name":    "张三丰",
+			"address": "中国B地",
+		},
+
+		OTSOperationType_DELETE: OTSColumnsToDelete{
+			"mobile", "age",
+		},
+	}
+	condition = OTSCondition_EXPECT_EXIST
+	update_row_response, ots_err := ots_client.UpdateRow("myTable", condition, primary_key, update_of_attribute_columns)
+	if ots_err != nil {
+		fmt.Println(ots_err)
+		os.Exit(1)
+	}
+	fmt.Println("成功插入数据，消耗的写CapacityUnit为:", update_row_response.GetWriteConsumed())
+
+	// get_row
+	primary_key = &OTSPrimaryKey{
+		"gid": 1,
+		"uid": 101,
+	}
+	columns_to_get = &OTSColumnsToGet{
+		"name", "address", "age",
+	}
+	columns_to_get = nil // read all
+	get_row_response, ots_err = ots_client.GetRow("myTable", primary_key, columns_to_get)
+	if ots_err != nil {
+		fmt.Println(ots_err)
+		os.Exit(1)
+	}
+	fmt.Println("成功读取数据，消耗的读CapacityUnit为:", get_row_response.GetReadConsumed())
+	if get_row_response.Row != nil {
+		if attribute_columns := get_row_response.Row.GetAttributeColumns(); attribute_columns != nil {
+			fmt.Println("name信息:", attribute_columns.Get("name"))
+			fmt.Println("address信息:", attribute_columns.Get("address"))
+			fmt.Println("age信息:", attribute_columns.Get("age"))
+			fmt.Println("mobile信息:", attribute_columns.Get("mobile"))
+		} else {
+			fmt.Println("未查询到数据")
+		}
+	} else {
+		fmt.Println("未查询到数据")
+	}
 }

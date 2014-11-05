@@ -671,6 +671,7 @@ func (o *OTSClient) PutRow(table_name string, condition string, primary_key *OTS
 	if attribute_columns == nil {
 		return nil, err.SetClientMessage("[PutRow] attribute_columns should not be nil")
 	}
+
 	resp, service_err := o._request_helper("PutRow", table_name, condition, primary_key, attribute_columns)
 	if service_err != nil {
 		return nil, err.SetServiceError(service_err)
@@ -684,8 +685,65 @@ func (o *OTSClient) PutRow(table_name string, condition string, primary_key *OTS
 	return r.(*OTSPutRowResponse), nil
 }
 
-func (o *OTSClient) UpdateRow() {
+// 说明：更新一行数据。
+//
+// ``table_name``是对应的表名。
+// ``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
+// 目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
+// ``primary_key``表示主键，类型为``otstype.OTSPrimaryKey``的实例。
+// ``update_of_attribute_columns``表示属性列，类型为``otstype.OTSUpdateOfAttribute``的实例，可以包含put和delete操作。其中put是
+// ``otstype.OTSColumnsToPut`` 表示属性列的写入；delete是``otstype.OTSColumnsToDelete``，表示要删除的属性列的列名，
+// 见示例。
+//
+// 返回：本次操作消耗的CapacityUnit。
+//
+// consumed表示消耗的CapacityUnit，是ots2.metadata.CapacityUnit类的实例。
+//
+// 示例：
+//
+// primary_key := &OTSPrimaryKey{
+// 	"gid": 1,
+// 	"uid": 101,
+// }
+// update_of_attribute_columns := &OTSUpdateOfAttribute{
+// 	OTSOperationType_PUT: OTSColumnsToPut{
+// 		"name":    "张三丰",
+// 		"address": "中国B地",
+// 	},
+//
+// 	OTSOperationType_DELETE: OTSColumnsToDelete{
+// 		"mobile", "age",
+// 	},
+// }
+// condition := OTSCondition_EXPECT_EXIST
+// update_row_response, ots_err := ots_client.UpdateRow("myTable", condition, primary_key, update_of_attribute_columns)
+//
+func (o *OTSClient) UpdateRow(table_name string, condition string, primary_key *OTSPrimaryKey, update_of_attribute_columns *OTSUpdateOfAttribute) (update_row_response *OTSUpdateRowResponse, err *OTSError) {
+	err = new(OTSError)
+	if table_name == "" {
+		return nil, err.SetClientMessage("[UpdateRow] table_name should not be empty")
+	}
+	if condition == "" {
+		return nil, err.SetClientMessage("[UpdateRow] condition should not be empty")
+	}
+	if primary_key == nil {
+		return nil, err.SetClientMessage("[UpdateRow] primary_key should not be nil")
+	}
+	if update_of_attribute_columns == nil {
+		return nil, err.SetClientMessage("[UpdateRow] update_of_attribute_columns should not be nil")
+	}
 
+	resp, service_err := o._request_helper("UpdateRow", table_name, condition, primary_key, update_of_attribute_columns)
+	if service_err != nil {
+		return nil, err.SetServiceError(service_err)
+	}
+
+	r, e := o._check_request_helper_error(resp)
+	if e != nil {
+		return nil, err.SetClientMessage("[UpdateRow] %s", e)
+	}
+
+	return r.(*OTSUpdateRowResponse), nil
 }
 
 func (o *OTSClient) DeleteRow() {

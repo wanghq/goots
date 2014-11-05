@@ -394,3 +394,31 @@ func (o *OTSPutRowResponse) GetWriteConsumed() int32 {
 
 	return 0
 }
+
+// 更新一行数据
+type OTSUpdateRowResponse struct {
+	// 消耗的读服务能力单元或该表的读服务能力单元
+	Consumed *OTSCapacityUnit
+}
+
+func (o *OTSUpdateRowResponse) GetWriteConsumed() int32 {
+	if o.Consumed != nil {
+		return o.Consumed.GetWrite()
+	}
+
+	return 0
+}
+
+// 删除一行数据
+type OTSDeleteRowResponse struct {
+	// 消耗的读服务能力单元或该表的读服务能力单元
+	Consumed *OTSCapacityUnit
+}
+
+func (o *OTSDeleteRowResponse) GetWriteConsumed() int32 {
+	if o.Consumed != nil {
+		return o.Consumed.GetWrite()
+	}
+
+	return 0
+}

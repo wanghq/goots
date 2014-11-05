@@ -13,7 +13,7 @@ Aliyun OTS(Open Table Service) golang SDK.
 - **SingleRow**
 	- [GetRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/GetRow.md) ☑
 	- [PutRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/PutRow.md) ☑
-	- UpdateRow
+	- [UpdateRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/UpdateRow.md) ☑
 	- DeleteRow
 - **BatchRow**
 	- BatchGetRow
@@ -99,9 +99,26 @@ Aliyun OTS(Open Table Service) golang SDK.
 		fmt.Println("list_tables:", list_tables.TableNames)
 
 		// insert a row
-	
-		// get a row
 		primary_key := &OTSPrimaryKey{
+			"gid": 1,
+			"uid": 101,
+		}
+		attribute_columns := &OTSAttribute{
+			"name":    "张三",
+			"mobile":  111111111,
+			"address": "中国A地",
+			"age":     20,
+		}
+		condition := OTSCondition_EXPECT_NOT_EXIST
+		put_row_response, ots_err := ots_client.PutRow("myTable", condition, primary_key, attribute_columns)
+		if ots_err != nil {
+			fmt.Println(ots_err)
+			os.Exit(1)
+		}
+		fmt.Println("成功插入数据，消耗的写CapacityUnit为:", put_row_response.GetWriteConsumed())
+
+		// get a row
+		primary_key = &OTSPrimaryKey{
 			"gid": 1,
 			"uid": 101,
 		}

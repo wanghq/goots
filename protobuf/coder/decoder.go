@@ -263,12 +263,30 @@ func _decode_put_row(buf []byte) (put_row_response *OTSPutRowResponse, err error
 	return put_row_response, nil
 }
 
-func _decode_update_row(buf []byte) {
+func _decode_update_row(buf []byte) (update_row_response *OTSUpdateRowResponse, err error) {
+	pb := &UpdateRowResponse{}
+	err = proto.Unmarshal(buf, pb)
+	if err != nil {
+		return nil, err
+	}
 
+	update_row_response = new(OTSUpdateRowResponse)
+	update_row_response.Consumed = _parse_capacity_unit(pb.GetConsumed().GetCapacityUnit())
+
+	return update_row_response, nil
 }
 
-func _decode_delete_row(buf []byte) {
+func _decode_delete_row(buf []byte) (delete_row_response *OTSDeleteRowResponse, err error) {
+	pb := &DeleteRowResponse{}
+	err = proto.Unmarshal(buf, pb)
+	if err != nil {
+		return nil, err
+	}
 
+	delete_row_response = new(OTSDeleteRowResponse)
+	delete_row_response.Consumed = _parse_capacity_unit(pb.GetConsumed().GetCapacityUnit())
+
+	return delete_row_response, nil
 }
 
 func _decode_batch_get_row(buf []byte) {

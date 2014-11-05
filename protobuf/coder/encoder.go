@@ -1953,6 +1953,7 @@ func _encode_create_table(table_meta *OTSTableMeta, reserved_throughput *OTSRese
 	if err != nil {
 		return nil, err
 	}
+
 	err = _make_reserved_throughput(proto.ReservedThroughput, *reserved_throughput)
 	if err != nil {
 		return nil, err
@@ -2002,6 +2003,7 @@ func _encode_get_row(table_name string, primary_key *OTSPrimaryKey, columns_to_g
 		return nil, err
 	}
 	proto.PrimaryKey = *_primary_key
+
 	if columns_to_get != nil {
 		_columns_to_get := new([]string)
 		err = _make_repeated_column_names(_columns_to_get, []string(*columns_to_get))
@@ -2024,12 +2026,14 @@ func _encode_put_row(table_name string, condition string, primary_key *OTSPrimar
 	if err != nil {
 		return nil, err
 	}
+
 	_primary_key := new([]*Column)
 	err = _make_columns_with_dict(_primary_key, DictString(*primary_key))
 	if err != nil {
 		return nil, err
 	}
 	proto.PrimaryKey = *_primary_key
+
 	_attribute_columns := new([]*Column)
 	err = _make_columns_with_dict(_attribute_columns, DictString(*attribute_columns))
 	if err != nil {
@@ -2040,8 +2044,30 @@ func _encode_put_row(table_name string, condition string, primary_key *OTSPrimar
 	return proto, nil
 }
 
-func _encode_update_row() {
+func _encode_update_row(table_name string, condition string, primary_key *OTSPrimaryKey, update_of_attribute_columns *OTSUpdateOfAttribute) (req *UpdateRowRequest, err error) {
+	proto := new(UpdateRowRequest)
+	proto.TableName = NewString(table_name)
+	proto.Condition = new(Condition)
+	err = _make_condition(proto.Condition, condition)
+	if err != nil {
+		return nil, err
+	}
 
+	_primary_key := new([]*Column)
+	err = _make_columns_with_dict(_primary_key, DictString(*primary_key))
+	if err != nil {
+		return nil, err
+	}
+	proto.PrimaryKey = *_primary_key
+
+	_update_of_attribute_columns := new([]*ColumnUpdate)
+	err = _make_update_of_attribute_columns_with_dict(_update_of_attribute_columns, DictString(*update_of_attribute_columns))
+	if err != nil {
+		return nil, err
+	}
+	proto.AttributeColumns = *_update_of_attribute_columns
+
+	return proto, nil
 }
 
 func _encode_delete_row() {
