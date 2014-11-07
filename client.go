@@ -45,7 +45,7 @@ var defaultOTSSetting = OTSClient{
 }
 var settingMutex sync.Mutex
 
-// Overwrite default settings
+//		Overwrite default settings
 func SetDefaultSetting(setting OTSClient) {
 	settingMutex.Lock()
 	defer settingMutex.Unlock()
@@ -58,7 +58,7 @@ func SetDefaultSetting(setting OTSClient) {
 	}
 }
 
-// 创建一个新的OTSClient实例
+//		创建一个新的OTSClient实例
 func New(end_point, accessid, accesskey, instance_name string, kwargs ...interface{}) (o *OTSClient, err error) {
 	// init logger
 	err = LoggerInit()
@@ -191,18 +191,18 @@ func (o *OTSClient) String() string {
 	return r
 }
 
-// 在OTSClinet创建后（既调用了New函数），需要重新修改OTSClinet的参数时
-// 可以调用此函数进行设置，参数使用字典方式，可以使用的字典如下：
-// Debug --> bool
-// EndPoint --> string
-// AccessId --> string
-// AccessKey --> string
-// InstanceName --> string
-// SocketTimeout --> int
-// MaxConnection --> int
-// LoggerName --> string
-// Encoding --> string
-// 注：具体参数意义请查看OTSClinet定义处的注释
+// 		在OTSClinet创建后（既调用了New函数），需要重新修改OTSClinet的参数时
+// 		可以调用此函数进行设置，参数使用字典方式，可以使用的字典如下：
+// 		Debug --> bool
+// 		EndPoint --> string
+// 		AccessId --> string
+// 		AccessKey --> string
+// 		InstanceName --> string
+// 		SocketTimeout --> int
+// 		MaxConnection --> int
+// 		LoggerName --> string
+// 		Encoding --> string
+// 		注：具体参数意义请查看OTSClinet定义处的注释
 func (o *OTSClient) Set(kwargs DictString) *OTSClient {
 	if len(kwargs) != 0 {
 		for k, v := range kwargs {
@@ -371,10 +371,10 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 	return resp, nil
 }
 
-// parse the following two cases
-// 1. (err error)
-// 2. (x *xxx, err error)
 func (o *OTSClient) _check_request_helper_error(resp []reflect.Value) (r interface{}, e error) {
+	// parse the following two cases
+	// 1. (err error)
+	// 2. (x *xxx, err error)
 	switch len(resp) {
 	case 1: // (err error)
 		if resp[0].Interface() != nil {
@@ -407,31 +407,31 @@ func (o *OTSClient) _check_request_helper_error(resp []reflect.Value) (r interfa
 	return nil, errors.New("The program will not perform here")
 }
 
-// 说明：根据表信息创建表。
+// 		说明：根据表信息创建表。
 //
-// ``table_meta``是``otstype.OTSTableMeta``类的实例，它包含表名和PrimaryKey的schema，
-// 请参考``OTSTableMeta``类的文档。当创建了一个表之后，通常要等待1分钟时间使partition load
-// 完成，才能进行各种操作。
-// ``reserved_throughput``是``otstype.ReservedThroughput``类的实例，表示预留读写吞吐量。
+// 		``table_meta``是``otstype.OTSTableMeta``类的实例，它包含表名和PrimaryKey的schema，
+// 		请参考``OTSTableMeta``类的文档。当创建了一个表之后，通常要等待1分钟时间使partition load
+// 		完成，才能进行各种操作。
+// 		``reserved_throughput``是``otstype.ReservedThroughput``类的实例，表示预留读写吞吐量。
 //
-// 返回：无。
-//       错误信息。
+// 		返回：无。
+// 		      错误信息。
 //
-// 示例：
+// 		示例：
 //
-// table_meta := &OTSTableMeta{
-// 	TableName: "myTable",
-// 	SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
-// 		"gid": "INTEGER",
-// 		"uid": "INTEGER",
-// 	},
-// }
+// 		table_meta := &OTSTableMeta{
+// 			TableName: "myTable",
+// 			SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
+// 				"gid": "INTEGER",
+// 				"uid": "INTEGER",
+// 			},
+// 		}
 //
-// reserved_throughput := &OTSReservedThroughput{
-// 	OTSCapacityUnit{100, 100},
-// }
+// 		reserved_throughput := &OTSReservedThroughput{
+// 			OTSCapacityUnit{100, 100},
+// 		}
 //
-// ots_err := ots_client.CreateTable(table_meta, reserved_throughput)
+// 		ots_err := ots_client.CreateTable(table_meta, reserved_throughput)
 //
 func (o *OTSClient) CreateTable(table_meta *OTSTableMeta, reserved_throughput *OTSReservedThroughput) (err *OTSError) {
 	err = new(OTSError)
@@ -455,16 +455,16 @@ func (o *OTSClient) CreateTable(table_meta *OTSTableMeta, reserved_throughput *O
 	return nil
 }
 
-// 说明：根据表名删除表。
+// 		说明：根据表名删除表。
 //
-// ``table_name``是对应的表名。
+// 		``table_name``是对应的表名。
 //
-// 返回：无。
-//       错误信息。
+// 		返回：无。
+// 		      错误信息。
 //
-// 示例：
+// 		示例：
 //
-// ots_client.DeleteTable("myTable")
+// 		ots_client.DeleteTable("myTable")
 //
 func (o *OTSClient) DeleteTable(table_name string) (err *OTSError) {
 	err = new(OTSError)
@@ -485,16 +485,16 @@ func (o *OTSClient) DeleteTable(table_name string) (err *OTSError) {
 	return nil
 }
 
-// 说明：获取所有表名的列表。
+// 		说明：获取所有表名的列表。
 //
-// 返回：表名列表。
-//       错误信息。
+// 		返回：表名列表。
+// 		      错误信息。
 //
-// ``table_list``表示获取的表名列表，类型为``otstype.OTSListTableResponse``。
+// 		``table_list``表示获取的表名列表，类型为``otstype.OTSListTableResponse``。
 //
-// 示例：
+// 		示例：
 //
-// table_list, ots_err := ots_client.ListTable()
+// 		table_list, ots_err := ots_client.ListTable()
 //
 func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError) {
 	err = new(OTSError)
@@ -512,24 +512,24 @@ func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError
 	return r.(*OTSListTableResponse), nil
 }
 
-// 说明：更新表属性，目前只支持修改预留读写吞吐量。
+// 		说明：更新表属性，目前只支持修改预留读写吞吐量。
 //
-// ``table_name``是对应的表名。
-// ``reserved_throughput``是``otstype.ReservedThroughput``类的实例，表示预留读写吞吐量。
+// 		``table_name``是对应的表名。
+// 		``reserved_throughput``是``otstype.ReservedThroughput``类的实例，表示预留读写吞吐量。
 //
-// 返回：针对该表的预留读写吞吐量的最近上调时间、最近下调时间和当天下调次数。
-//       错误信息。
+// 		返回：针对该表的预留读写吞吐量的最近上调时间、最近下调时间和当天下调次数。
+// 		      错误信息。
 //
-// ``update_table_response``表示更新的结果，是``otstype.OTSUpdateTableResponse``类的实例。
+// 		``update_table_response``表示更新的结果，是``otstype.OTSUpdateTableResponse``类的实例。
 //
-// 示例：
-// reserved_throughput := &OTSReservedThroughput{
-//  OTSCapacityUnit{5000, 5000},
-// }
+// 		示例：
+// 		reserved_throughput := &OTSReservedThroughput{
+// 		 OTSCapacityUnit{5000, 5000},
+// 		}
 //
-// // 每次调整操作的间隔应大于10分钟
-// // 如果是刚创建表，需要10分钟之后才能调整表的预留读写吞吐量。
-// update_response, ots_err := ots_client.UpdateTable("myTable", reserved_throughput)
+// 		// 每次调整操作的间隔应大于10分钟
+// 		// 如果是刚创建表，需要10分钟之后才能调整表的预留读写吞吐量。
+// 		update_response, ots_err := ots_client.UpdateTable("myTable", reserved_throughput)
 //
 func (o *OTSClient) UpdateTable(table_name string, reserved_throughput *OTSReservedThroughput) (update_table_response *OTSUpdateTableResponse, err *OTSError) {
 	err = new(OTSError)
@@ -553,18 +553,18 @@ func (o *OTSClient) UpdateTable(table_name string, reserved_throughput *OTSReser
 	return r.(*OTSUpdateTableResponse), nil
 }
 
-// 说明：获取表的描述信息。
+// 		说明：获取表的描述信息。
 //
-// ``table_name``是对应的表名。
+// 		``table_name``是对应的表名。
 //
-// 返回：表的描述信息。
-//       错误信息。
+// 		返回：表的描述信息。
+// 		      错误信息。
 //
-// ``describe_table_response``表示表的描述信息，是``otstype.OTSDescribeTableResponse``类的实例。
+// 		``describe_table_response``表示表的描述信息，是``otstype.OTSDescribeTableResponse``类的实例。
 //
-// 示例：
+// 		示例：
 //
-// describe_response, ots_err := ots_client.DescribeTable("myTable")
+// 		describe_response, ots_err := ots_client.DescribeTable("myTable")
 //
 func (o *OTSClient) DescribeTable(table_name string) (describe_table_response *OTSDescribeTableResponse, err *OTSError) {
 	err = new(OTSError)
@@ -585,32 +585,32 @@ func (o *OTSClient) DescribeTable(table_name string) (describe_table_response *O
 	return r.(*OTSDescribeTableResponse), nil
 }
 
-// 说明：获取一行数据。
+// 		说明：获取一行数据。
 //
-// ``table_name``是对应的表名。
-// ``primary_key``是主键，类型为``otstype.OTSPrimaryKey``。
-// ``columns_to_get``是可选参数，表示要获取的列的名称列表，类型为``otstype.OTSColumnsToGet``；如果填nil，表示获取所有列。
+// 		``table_name``是对应的表名。
+// 		``primary_key``是主键，类型为``otstype.OTSPrimaryKey``。
+// 		``columns_to_get``是可选参数，表示要获取的列的名称列表，类型为``otstype.OTSColumnsToGet``；如果填nil，表示获取所有列。
 //
-// 返回：本次操作消耗的CapacityUnit、行数据（包含主键列和属性列）。
-//       错误信息。
+// 		返回：本次操作消耗的CapacityUnit、行数据（包含主键列和属性列）。
+// 		      错误信息。
 //
-// ``get_row_response``为``otstype.OTSGetRowResponse``类的实例包含了：
-// ``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
-// ``Row``表示一行的数据，是``otstype.OTSRow``的实例,也包含了:
-// ``PrimaryKeyColumns``表示主键列，类型为``otstype.OTSPrimaryKey``，如：{"PK0":value0, "PK1":value1}。
-// ``AttributeColumns``表示属性列，类型为``otstype.OTSAttribute``，如：{"COL0":value0, "COL1":value1}。
+// 		``get_row_response``为``otstype.OTSGetRowResponse``类的实例包含了：
+// 		``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
+// 		``Row``表示一行的数据，是``otstype.OTSRow``的实例,也包含了:
+// 		``PrimaryKeyColumns``表示主键列，类型为``otstype.OTSPrimaryKey``，如：{"PK0":value0, "PK1":value1}。
+// 		``AttributeColumns``表示属性列，类型为``otstype.OTSAttribute``，如：{"COL0":value0, "COL1":value1}。
 //
-// 示例：
+// 		示例：
 //
-// primary_key := &OTSPrimaryKey{
-// 	"gid": 1,
-// 	"uid": 101,
-// }
-// columns_to_get := &OTSColumnsToGet{
-// 	"name", "address", "age",
-// }
-// // columns_to_get = nil // read all
-// get_row_response, ots_err := ots_client.GetRow("myTable", primary_key, columns_to_get)
+// 		primary_key := &OTSPrimaryKey{
+// 			"gid": 1,
+// 			"uid": 101,
+// 		}
+// 		columns_to_get := &OTSColumnsToGet{
+// 			"name", "address", "age",
+// 		}
+// 		// columns_to_get = nil // read all
+// 		get_row_response, ots_err := ots_client.GetRow("myTable", primary_key, columns_to_get)
 //
 func (o *OTSClient) GetRow(table_name string, primary_key *OTSPrimaryKey, columns_to_get *OTSColumnsToGet) (get_row_response *OTSGetRowResponse, err *OTSError) {
 	err = new(OTSError)
@@ -634,34 +634,34 @@ func (o *OTSClient) GetRow(table_name string, primary_key *OTSPrimaryKey, column
 	return r.(*OTSGetRowResponse), nil
 }
 
-// 说明：写入一行数据。返回本次操作消耗的CapacityUnit。
+// 		说明：写入一行数据。返回本次操作消耗的CapacityUnit。
 //
-// ``table_name``是对应的表名。
-// ``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
-// 目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
-// ``primary_key``表示主键，类型为``otstype.OTSPrimaryKey``的实例。
-// ``attribute_columns``表示属性列，类型为``otstype.OTSAttribute``的实例。
+// 		``table_name``是对应的表名。
+// 		``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
+// 		目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
+// 		``primary_key``表示主键，类型为``otstype.OTSPrimaryKey``的实例。
+// 		``attribute_columns``表示属性列，类型为``otstype.OTSAttribute``的实例。
 //
-// 返回：本次操作消耗的CapacityUnit。
-//       错误信息。
+// 		返回：本次操作消耗的CapacityUnit。
+// 		      错误信息。
 //
-// ``put_row_response``为``otstype.OTSGetRowResponse``类的实例包含了：
-// ``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
+// 		``put_row_response``为``otstype.OTSGetRowResponse``类的实例包含了：
+// 		``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
 //
-// 示例：
+// 		示例：
 //
-// primary_key := &OTSPrimaryKey{
-// 	"gid": 1,
-// 	"uid": 101,
-// }
-// attribute_columns := &OTSAttribute{
-// 	"name":    "张三",
-// 	"mobile":  111111111,
-// 	"address": "中国A地",
-// 	"age":     20,
-// }
-// condition := OTSCondition_EXPECT_NOT_EXIST
-// put_row_response, ots_err := ots_client.PutRow("myTable", condition, primary_key, attribute_columns)
+// 		primary_key := &OTSPrimaryKey{
+// 			"gid": 1,
+// 			"uid": 101,
+// 		}
+// 		attribute_columns := &OTSAttribute{
+// 			"name":    "张三",
+// 			"mobile":  111111111,
+// 			"address": "中国A地",
+// 			"age":     20,
+// 		}
+// 		condition := OTSCondition_EXPECT_NOT_EXIST
+// 		put_row_response, ots_err := ots_client.PutRow("myTable", condition, primary_key, attribute_columns)
 //
 func (o *OTSClient) PutRow(table_name string, condition string, primary_key *OTSPrimaryKey, attribute_columns *OTSAttribute) (put_row_response *OTSPutRowResponse, err *OTSError) {
 	err = new(OTSError)
@@ -691,40 +691,40 @@ func (o *OTSClient) PutRow(table_name string, condition string, primary_key *OTS
 	return r.(*OTSPutRowResponse), nil
 }
 
-// 说明：更新一行数据。
+// 		说明：更新一行数据。
 //
-// ``table_name``是对应的表名。
-// ``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
-// 目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
-// ``primary_key``表示主键，类型为``otstype.OTSPrimaryKey``的实例。
-// ``update_of_attribute_columns``表示属性列，类型为``otstype.OTSUpdateOfAttribute``的实例，可以包含put和delete操作。其中put是
-// ``otstype.OTSColumnsToPut`` 表示属性列的写入；delete是``otstype.OTSColumnsToDelete``，表示要删除的属性列的列名，
-// 见示例。
+// 		``table_name``是对应的表名。
+// 		``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
+// 		目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
+// 		``primary_key``表示主键，类型为``otstype.OTSPrimaryKey``的实例。
+// 		``update_of_attribute_columns``表示属性列，类型为``otstype.OTSUpdateOfAttribute``的实例，可以包含put和delete操作。其中put是
+// 		``otstype.OTSColumnsToPut`` 表示属性列的写入；delete是``otstype.OTSColumnsToDelete``，表示要删除的属性列的列名，
+// 		见示例。
 //
-// 返回：本次操作消耗的CapacityUnit。
-//       错误信息。
+// 		返回：本次操作消耗的CapacityUnit。
+// 		      错误信息。
 //
-// ``update_row_response``为``otstype.OTSUpdateRowResponse``类的实例包含了：
-// ``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
+// 		``update_row_response``为``otstype.OTSUpdateRowResponse``类的实例包含了：
+// 		``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
 //
-// 示例：
+// 		示例：
 //
-// primary_key := &OTSPrimaryKey{
-// 	"gid": 1,
-// 	"uid": 101,
-// }
-// update_of_attribute_columns := &OTSUpdateOfAttribute{
-// 	OTSOperationType_PUT: OTSColumnsToPut{
-// 		"name":    "张三丰",
-// 		"address": "中国B地",
-// 	},
+// 		primary_key := &OTSPrimaryKey{
+// 			"gid": 1,
+// 			"uid": 101,
+// 		}
+// 		update_of_attribute_columns := &OTSUpdateOfAttribute{
+// 			OTSOperationType_PUT: OTSColumnsToPut{
+// 				"name":    "张三丰",
+// 				"address": "中国B地",
+// 			},
 //
-// 	OTSOperationType_DELETE: OTSColumnsToDelete{
-// 		"mobile", "age",
-// 	},
-// }
-// condition := OTSCondition_EXPECT_EXIST
-// update_row_response, ots_err := ots_client.UpdateRow("myTable", condition, primary_key, update_of_attribute_columns)
+// 			OTSOperationType_DELETE: OTSColumnsToDelete{
+// 				"mobile", "age",
+// 			},
+// 		}
+// 		condition := OTSCondition_EXPECT_EXIST
+// 		update_row_response, ots_err := ots_client.UpdateRow("myTable", condition, primary_key, update_of_attribute_columns)
 //
 func (o *OTSClient) UpdateRow(table_name string, condition string, primary_key *OTSPrimaryKey, update_of_attribute_columns *OTSUpdateOfAttribute) (update_row_response *OTSUpdateRowResponse, err *OTSError) {
 	err = new(OTSError)
@@ -754,27 +754,27 @@ func (o *OTSClient) UpdateRow(table_name string, condition string, primary_key *
 	return r.(*OTSUpdateRowResponse), nil
 }
 
-// 说明：删除一行数据。
+// 		说明：删除一行数据。
 //
-// ``table_name``是对应的表名。
-// ``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
-// 目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
-// ``primary_key``表示主键，类型为``otstype.OTSPrimaryKey``的实例。
+// 		``table_name``是对应的表名。
+// 		``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
+// 		目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
+// 		``primary_key``表示主键，类型为``otstype.OTSPrimaryKey``的实例。
 //
-// 返回：本次操作消耗的CapacityUnit。
-//       错误信息。
+// 		返回：本次操作消耗的CapacityUnit。
+// 		      错误信息。
 //
-// ``delete_row_response``为``otstype.OTSDeleteRowResponse``类的实例包含了：
-// ``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
+// 		``delete_row_response``为``otstype.OTSDeleteRowResponse``类的实例包含了：
+// 		``Consumed``表示消耗的CapacityUnit，是``otstype.OTSCapacityUnit``类的实例。
 //
-// 示例：
+// 		示例：
 //
-// primary_key := &OTSPrimaryKey{
-// 	"gid": 1,
-// 	"uid": 101,
-// }
-// condition := OTSCondition_IGNORE
-// delete_row_response, ots_err := ots_client.DeleteRow("myTable", condition, primary_key)
+// 		primary_key := &OTSPrimaryKey{
+// 			"gid": 1,
+// 			"uid": 101,
+// 		}
+// 		condition := OTSCondition_IGNORE
+// 		delete_row_response, ots_err := ots_client.DeleteRow("myTable", condition, primary_key)
 //
 func (o *OTSClient) DeleteRow(table_name string, condition string, primary_key *OTSPrimaryKey) (delete_row_response *OTSDeleteRowResponse, err *OTSError) {
 	err = new(OTSError)
@@ -801,92 +801,92 @@ func (o *OTSClient) DeleteRow(table_name string, condition string, primary_key *
 	return r.(*OTSDeleteRowResponse), nil
 }
 
-// 说明：批量获取多行数据。
+// 		说明：批量获取多行数据。
 //
-// ``batch_list``表示获取多行的条件列表，格式如下：
+// 		``batch_list``表示获取多行的条件列表，格式如下：
 //
-// batch_list := &OTSBatchGetRowRequest{
-// 	{
-// 		// TableName
-// 		TableName: "table_name0",
-// 		// PrimaryKey
-// 		Rows: OTSPrimaryKeyRows{
-// 			{"gid": 1, "uid": 101},
-// 			{"gid": 2, "uid": 202},
-// 			{"gid": 3, "uid": 303},
-// 		},
-// 		// ColumnsToGet
-// 		ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
-// 	},
-// 	{
-// 		// TableName
-// 		TableName: "table_name1",
-// 		// PrimaryKey
-// 		Rows: OTSPrimaryKeyRows{
-// 			{"gid": 1, "uid": 101},
-// 			{"gid": 2, "uid": 202},
-// 			{"gid": 3, "uid": 303},
-// 		},
-// 		// ColumnsToGet
-// 		ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
-// 	},
-// 	...
-// }
+// 		batch_list := &OTSBatchGetRowRequest{
+// 			{
+// 				// TableName
+// 				TableName: "table_name0",
+// 				// PrimaryKey
+// 				Rows: OTSPrimaryKeyRows{
+// 					{"gid": 1, "uid": 101},
+// 					{"gid": 2, "uid": 202},
+// 					{"gid": 3, "uid": 303},
+// 				},
+// 				// ColumnsToGet
+// 				ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
+// 			},
+// 			{
+// 				// TableName
+// 				TableName: "table_name1",
+// 				// PrimaryKey
+// 				Rows: OTSPrimaryKeyRows{
+// 					{"gid": 1, "uid": 101},
+// 					{"gid": 2, "uid": 202},
+// 					{"gid": 3, "uid": 303},
+// 				},
+// 				// ColumnsToGet
+// 				ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
+// 			},
+// 			...
+// 		}
 //
-// 其中，Rows 为主键，类型为``otstype.OTSPrimaryKeyRows``。
+// 		其中，Rows 为主键，类型为``otstype.OTSPrimaryKeyRows``。
 //
-// 返回：对应行的结果列表。
-//       错误信息
+// 		返回：对应行的结果列表。
+// 		      错误信息
 //
-// ``response_rows_list``为``otstype.OTSBatchGetRowResponse``的实例
-// ``response_rows_list.Tables``为返回的结果列表，与请求的顺序一一对应，格式如下：
-// response_rows_list.Tables --> []*OTSTableInBatchGetRowResponseItem{
-// 	{
-// 		TableName: "table_name0",
-// 		Rows : []*OTSRowInBatchGetRowResponseItem{
-// 			row_data_item0, row_data_item1, ...
-// 		},
-// 	},
-// 	{
-// 		TableName: "table_name1",
-// 		Rows : []*OTSRowInBatchGetRowResponseItem{
-// 			row_data_item0, row_data_item1, ...
-// 		},
-// 	},
-// 	...
-// }
+// 		``response_rows_list``为``otstype.OTSBatchGetRowResponse``的实例
+// 		``response_rows_list.Tables``为返回的结果列表，与请求的顺序一一对应，格式如下：
+// 		response_rows_list.Tables --> []*OTSTableInBatchGetRowResponseItem{
+// 			{
+// 				TableName: "table_name0",
+// 				Rows : []*OTSRowInBatchGetRowResponseItem{
+// 					row_data_item0, row_data_item1, ...
+// 				},
+// 			},
+// 			{
+// 				TableName: "table_name1",
+// 				Rows : []*OTSRowInBatchGetRowResponseItem{
+// 					row_data_item0, row_data_item1, ...
+// 				},
+// 			},
+// 			...
+// 		}
 //
-// 其中，row_data_item0, row_data_item1为``otstype.OTSRowInBatchGetRowResponseItem``的实例。
+// 		其中，row_data_item0, row_data_item1为``otstype.OTSRowInBatchGetRowResponseItem``的实例。
 //
-// 示例：
+// 		示例：
 //
-// batch_list_get := &OTSBatchGetRowRequest{
-// 	{
-// 		// TableName
-// 		TableName: "myTable",
-// 		// PrimaryKey
-// 		Rows: OTSPrimaryKeyRows{
-// 			{"gid": 1, "uid": 101},
-// 			{"gid": 2, "uid": 202},
-// 			{"gid": 3, "uid": 303},
-// 		},
-// 		// ColumnsToGet
-// 		ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
-// 	},
-// 	{
-// 		// TableName
-// 		TableName: "notExistTable",
-// 		// PrimaryKey
-// 		Rows: OTSPrimaryKeyRows{
-// 			{"gid": 1, "uid": 101},
-// 			{"gid": 2, "uid": 202},
-// 			{"gid": 3, "uid": 303},
-// 		},
-// 		// ColumnsToGet
-// 		ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
-// 	},
-// }
-// batch_get_response, ots_err := ots_client.BatchGetRow(batch_list_get)
+// 		batch_list_get := &OTSBatchGetRowRequest{
+// 			{
+// 				// TableName
+// 				TableName: "myTable",
+// 				// PrimaryKey
+// 				Rows: OTSPrimaryKeyRows{
+// 					{"gid": 1, "uid": 101},
+// 					{"gid": 2, "uid": 202},
+// 					{"gid": 3, "uid": 303},
+// 				},
+// 				// ColumnsToGet
+// 				ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
+// 			},
+// 			{
+// 				// TableName
+// 				TableName: "notExistTable",
+// 				// PrimaryKey
+// 				Rows: OTSPrimaryKeyRows{
+// 					{"gid": 1, "uid": 101},
+// 					{"gid": 2, "uid": 202},
+// 					{"gid": 3, "uid": 303},
+// 				},
+// 				// ColumnsToGet
+// 				ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
+// 			},
+// 		}
+// 		batch_get_response, ots_err := ots_client.BatchGetRow(batch_list_get)
 //
 func (o *OTSClient) BatchGetRow(batch_list *OTSBatchGetRowRequest) (response_rows_list *OTSBatchGetRowResponse, err *OTSError) {
 	err = new(OTSError)
@@ -907,143 +907,143 @@ func (o *OTSClient) BatchGetRow(batch_list *OTSBatchGetRowRequest) (response_row
 	return r.(*OTSBatchGetRowResponse), nil
 }
 
-// 	说明：批量修改多行数据。
+// 		说明：批量修改多行数据。
 //
-// 	``batch_list``表示获取多行的条件列表，格式如下：
+// 		``batch_list``表示获取多行的条件列表，格式如下：
 //
-// 	batch_list := &OTSBatchWriteRowRequest{
-// 		{
-// 			TableName: "table_name0",
-// 			PutRows: OTSPutRows{
-// 				put_row_item, ...
+// 		batch_list := &OTSBatchWriteRowRequest{
+// 			{
+// 				TableName: "table_name0",
+// 				PutRows: OTSPutRows{
+// 					put_row_item, ...
+// 				},
+// 				UpdateRows: OTSUpdateRows{
+// 					update_row_item, ...
+// 				},
+// 				DeleteRows: OTSDeleteRows{
+// 					delete_row_item, ...
+// 				},
 // 			},
-// 			UpdateRows: OTSUpdateRows{
-// 				update_row_item, ...
+// 			{
+// 				TableName: "table_name1",
+// 				PutRows: OTSPutRows{
+// 					put_row_item, ...
+// 				},
+// 				UpdateRows: OTSUpdateRows{
+// 					update_row_item, ...
+// 				},
+// 				DeleteRows: OTSDeleteRows{
+// 					delete_row_item, ...
+// 				},
 // 			},
-// 			DeleteRows: OTSDeleteRows{
-// 				delete_row_item, ...
-// 			},
-// 		},
-// 		{
-// 			TableName: "table_name1",
-// 			PutRows: OTSPutRows{
-// 				put_row_item, ...
-// 			},
-// 			UpdateRows: OTSUpdateRows{
-// 				update_row_item, ...
-// 			},
-// 			DeleteRows: OTSDeleteRows{
-// 				delete_row_item, ...
-// 			},
-// 		},
-// 		...
-// 	}
+// 			...
+// 		}
 //
-// 	其中，put_row_item, 是``otstype.OTSPutRows``类的实例；
-// 	      update_row_item, 是``otstype.OTSUpdateRows``类的实例；
-// 	      delete_row_item, 是``otstype.OTSDeleteRows``类的实例。
+// 		其中，put_row_item, 是``otstype.OTSPutRows``类的实例；
+// 		      update_row_item, 是``otstype.OTSUpdateRows``类的实例；
+// 		      delete_row_item, 是``otstype.OTSDeleteRows``类的实例。
 //
-// 	返回：对应行的修改结果列表。
-// 	      错误信息。
+// 		返回：对应行的修改结果列表。
+// 		      错误信息。
 //
-// 	``response_items_list``为``otstype.OTSBatchWriteRowResponse``的实例
-// 	``response_items_list.Tables``为返回的结果列表，与请求的顺序一一对应，格式如下：
-// 	response_items_list.Tables --> []*OTSTableInBatchWriteRowResponseItem{
-// 		{
-// 			TableName: "table_name0", // for table_name0
-// 			PutRows: []*OTSRowInBatchWriteRowResponseItem{
-// 				put_row_resp, ...
+// 		``response_items_list``为``otstype.OTSBatchWriteRowResponse``的实例
+// 		``response_items_list.Tables``为返回的结果列表，与请求的顺序一一对应，格式如下：
+// 		response_items_list.Tables --> []*OTSTableInBatchWriteRowResponseItem{
+// 			{
+// 				TableName: "table_name0", // for table_name0
+// 				PutRows: []*OTSRowInBatchWriteRowResponseItem{
+// 					put_row_resp, ...
+// 				},
+// 				UpdateRows: []*OTSRowInBatchWriteRowResponseItem{
+// 					update_row_resp, ...
+// 				},
+// 				DeleteRows: []*OTSRowInBatchWriteRowResponseItem{
+// 					delete_row_resp, ...
+// 				}
 // 			},
-// 			UpdateRows: []*OTSRowInBatchWriteRowResponseItem{
-// 				update_row_resp, ...
+// 			{
+// 				TableName: "table_name1", // for table_name1
+// 				PutRows: []*OTSRowInBatchWriteRowResponseItem{
+// 					put_row_resp, ...
+// 				},
+// 				UpdateRows: []*OTSRowInBatchWriteRowResponseItem{
+// 					update_row_resp, ...
+// 				},
+// 				DeleteRows: []*OTSRowInBatchWriteRowResponseItem{
+// 					delete_row_resp, ...
+// 				}
 // 			},
-// 			DeleteRows: []*OTSRowInBatchWriteRowResponseItem{
-// 				delete_row_resp, ...
-// 			}
-// 		},
-// 		{
-// 			TableName: "table_name1", // for table_name1
-// 			PutRows: []*OTSRowInBatchWriteRowResponseItem{
-// 				put_row_resp, ...
+// 			...
+// 		}
+//
+// 		其中put_row_resp，update_row_resp和delete_row_resp都是``*otstype.OTSRowInBatchWriteRowResponseItem``类的实例。
+//
+// 		示例：
+//
+// 		put_row_item := OTSPutRowItem{
+// 			Condition: OTSCondition_EXPECT_NOT_EXIST, // OTSCondition_IGNORE
+// 			PrimaryKey: OTSPrimaryKey{
+// 				"gid": 2,
+// 				"uid": 202,
 // 			},
-// 			UpdateRows: []*OTSRowInBatchWriteRowResponseItem{
-// 				update_row_resp, ...
-// 			},
-// 			DeleteRows: []*OTSRowInBatchWriteRowResponseItem{
-// 				delete_row_resp, ...
-// 			}
-// 		},
-// 		...
-// 	}
-//
-// 	其中put_row_resp，update_row_resp和delete_row_resp都是``*otstype.OTSRowInBatchWriteRowResponseItem``类的实例。
-//
-// 	示例：
-//
-// 	put_row_item := OTSPutRowItem{
-// 		Condition: OTSCondition_EXPECT_NOT_EXIST, // OTSCondition_IGNORE
-// 		PrimaryKey: OTSPrimaryKey{
-// 			"gid": 2,
-// 			"uid": 202,
-// 		},
-// 		AttributeColumns: OTSAttribute{
-// 			"name":    "李四",
-// 			"address": "中国某地",
-// 			"age":     20,
-// 		},
-// 	}
-// 	// [2] update_row
-// 	update_row_item := OTSUpdateRowItem{
-// 		Condition: OTSCondition_IGNORE,
-// 		PrimaryKey: OTSPrimaryKey{
-// 			"gid": 3,
-// 			"uid": 303,
-// 		},
-// 		UpdateOfAttributeColumns: OTSUpdateOfAttribute{
-// 			OTSOperationType_PUT: OTSColumnsToPut{
-// 				"name":    "李三",
+// 			AttributeColumns: OTSAttribute{
+// 				"name":    "李四",
 // 				"address": "中国某地",
+// 				"age":     20,
 // 			},
-// 			OTSOperationType_DELETE: OTSColumnsToDelete{
-// 				"mobile", "age",
+// 		}
+// 		// [2] update_row
+// 		update_row_item := OTSUpdateRowItem{
+// 			Condition: OTSCondition_IGNORE,
+// 			PrimaryKey: OTSPrimaryKey{
+// 				"gid": 3,
+// 				"uid": 303,
 // 			},
-// 		},
-// 	}
-// 	// [3] delete_row
-// 	delete_row_item := OTSDeleteRowItem{
-// 		Condition: OTSCondition_IGNORE,
-// 		PrimaryKey: OTSPrimaryKey{
-// 			"gid": 4,
-// 			"uid": 404,
-// 		},
-// 	}
-// 	batch_list := &OTSBatchWriteRowRequest{
-// 		{
-// 			TableName: "myTable",
-// 			PutRows: OTSPutRows{
-// 				put_row_item,
+// 			UpdateOfAttributeColumns: OTSUpdateOfAttribute{
+// 				OTSOperationType_PUT: OTSColumnsToPut{
+// 					"name":    "李三",
+// 					"address": "中国某地",
+// 				},
+// 				OTSOperationType_DELETE: OTSColumnsToDelete{
+// 					"mobile", "age",
+// 				},
 // 			},
-// 			UpdateRows: OTSUpdateRows{
-// 				update_row_item,
+// 		}
+// 		// [3] delete_row
+// 		delete_row_item := OTSDeleteRowItem{
+// 			Condition: OTSCondition_IGNORE,
+// 			PrimaryKey: OTSPrimaryKey{
+// 				"gid": 4,
+// 				"uid": 404,
 // 			},
-// 			DeleteRows: OTSDeleteRows{
-// 				delete_row_item,
+// 		}
+// 		batch_list := &OTSBatchWriteRowRequest{
+// 			{
+// 				TableName: "myTable",
+// 				PutRows: OTSPutRows{
+// 					put_row_item,
+// 				},
+// 				UpdateRows: OTSUpdateRows{
+// 					update_row_item,
+// 				},
+// 				DeleteRows: OTSDeleteRows{
+// 					delete_row_item,
+// 				},
 // 			},
-// 		},
-// 		{
-// 			TableName: "notExistTable",
-// 			PutRows: OTSPutRows{
-// 				put_row_item,
+// 			{
+// 				TableName: "notExistTable",
+// 				PutRows: OTSPutRows{
+// 					put_row_item,
+// 				},
+// 				UpdateRows: OTSUpdateRows{
+// 					update_row_item,
+// 				},
+// 				DeleteRows: OTSDeleteRows{
+// 					delete_row_item,
+// 				},
 // 			},
-// 			UpdateRows: OTSUpdateRows{
-// 				update_row_item,
-// 			},
-// 			DeleteRows: OTSDeleteRows{
-// 				delete_row_item,
-// 			},
-// 		},
-// 	}
-// 	batch_write_response, ots_err := ots_client.BatchWriteRow(batch_list)
+// 		}
+// 		batch_write_response, ots_err := ots_client.BatchWriteRow(batch_list)
 //
 func (o *OTSClient) BatchWriteRow(batch_list *OTSBatchWriteRowRequest) (response_item_list *OTSBatchWriteRowResponse, err *OTSError) {
 	err = new(OTSError)
