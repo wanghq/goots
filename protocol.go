@@ -35,6 +35,11 @@ var defaultProtocol = ots_protocol{
 }
 
 func newProtocol(protocol *ots_protocol) *ots_protocol {
+	if OTSDebugEnable {
+		coder.DebugEncoderEnable = true
+		coder.DebugDecoderEnable = true
+	}
+
 	if protocol == nil {
 		return &defaultProtocol
 	}
@@ -322,64 +327,28 @@ func (o *ots_protocol) make_request(api_name string, args ...interface{}) (query
 	switch t := pb[0].Interface().(type) {
 	case *CreateTableRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*CreateTableRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*CreateTableRequest)))
-		}
 	case *ListTableRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*ListTableRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*ListTableRequest)))
-		}
 	case *DeleteTableRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*DeleteTableRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*DeleteTableRequest)))
-		}
 	case *DescribeTableRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*DescribeTableRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*DescribeTableRequest)))
-		}
 	case *UpdateTableRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*UpdateTableRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*UpdateTableRequest)))
-		}
 	case *GetRowRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*GetRowRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*GetRowRequest)))
-		}
 	case *PutRowRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*PutRowRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*PutRowRequest)))
-		}
 	case *UpdateRowRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*UpdateRowRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*UpdateRowRequest)))
-		}
 	case *DeleteRowRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*DeleteRowRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*DeleteRowRequest)))
-		}
 	case *BatchGetRowRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*BatchGetRowRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*BatchGetRowRequest)))
-		}
 	case *BatchWriteRowRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*BatchWriteRowRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*BatchWriteRowRequest)))
-		}
 	case *GetRangeRequest:
 		body, err = proto.Marshal(pb[0].Interface().(*GetRangeRequest))
-		if OTSDebugEnable {
-			fmt.Println(proto.MarshalTextString(pb[0].Interface().(*GetRangeRequest)))
-		}
 
 	default:
 		return "", DictString{}, nil, fmt.Errorf("Unknown type: %v", t)

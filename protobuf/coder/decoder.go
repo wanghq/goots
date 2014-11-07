@@ -6,7 +6,6 @@
 package coder
 
 import (
-	// "fmt"
 	"reflect"
 	"time"
 
@@ -159,20 +158,95 @@ func _parse_reserved_throughput_details(reserved_throughput_details *ReservedThr
 	return pobj
 }
 
-func _parse_get_row_item() {
+func _parse_get_row_item(row_list []*RowInBatchGetRowResponse) []*OTSRowInBatchGetRowResponseItem {
+	if len(row_list) == 0 {
+		return nil
+	}
 
+	pobj := make([]*OTSRowInBatchGetRowResponseItem, len(row_list))
+	for i, v := range row_list {
+		row_item := new(OTSRowInBatchGetRowResponseItem)
+		if v.GetIsOk() {
+			row_item.IsOk = v.GetIsOk()
+			row_item.ErrorCode = "None"
+			row_item.ErrorMessage = "None"
+			row_item.Consumed = _parse_capacity_unit(v.GetConsumed().GetCapacityUnit())
+			row_item.Row = _parse_row(v.GetRow())
+
+		} else {
+			row_item.IsOk = v.GetIsOk()
+			row_item.ErrorCode = v.GetError().GetCode()
+			row_item.ErrorMessage = v.GetError().GetMessage()
+			row_item.Consumed = nil
+			row_item.Row = nil
+		}
+
+		pobj[i] = row_item
+	}
+
+	return pobj
 }
 
-func _parse_batch_get_row() {
+func _parse_batch_get_row(table_list []*TableInBatchGetRowResponse) []*OTSTableInBatchGetRowResponseItem {
+	if len(table_list) == 0 {
+		return nil
+	}
 
+	pobj := make([]*OTSTableInBatchGetRowResponseItem, len(table_list))
+	for i, v := range table_list {
+		table_item := new(OTSTableInBatchGetRowResponseItem)
+		table_item.TableName = v.GetTableName()
+		table_item.Rows = _parse_get_row_item(v.GetRows())
+		pobj[i] = table_item
+	}
+
+	return pobj
 }
 
-func _parse_write_row_item() {
+func _parse_write_row_item(row_list []*RowInBatchWriteRowResponse) []*OTSRowInBatchWriteRowResponseItem {
+	if len(row_list) == 0 {
+		return nil
+	}
 
+	pobj := make([]*OTSRowInBatchWriteRowResponseItem, len(row_list))
+	for i, v := range row_list {
+		row_item := new(OTSRowInBatchWriteRowResponseItem)
+		if v.GetIsOk() {
+			row_item.IsOk = v.GetIsOk()
+			row_item.ErrorCode = "None"
+			row_item.ErrorMessage = "None"
+			row_item.Consumed = _parse_capacity_unit(v.GetConsumed().GetCapacityUnit())
+
+		} else {
+			row_item.IsOk = v.GetIsOk()
+
+			row_item.ErrorCode = v.GetError().GetCode()
+			row_item.ErrorMessage = v.GetError().GetMessage()
+			row_item.Consumed = nil
+		}
+
+		pobj[i] = row_item
+	}
+
+	return pobj
 }
 
-func _parse_batch_write_row() {
+func _parse_batch_write_row(table_list []*TableInBatchWriteRowResponse) []*OTSTableInBatchWriteRowResponseItem {
+	if len(table_list) == 0 {
+		return nil
+	}
 
+	pobj := make([]*OTSTableInBatchWriteRowResponseItem, len(table_list))
+	for i, v := range table_list {
+		table_item := new(OTSTableInBatchWriteRowResponseItem)
+		table_item.TableName = v.GetTableName()
+		table_item.PutRows = _parse_write_row_item(v.GetPutRows())
+		table_item.UpdateRows = _parse_write_row_item(v.GetUpdateRows())
+		table_item.DeleteRows = _parse_write_row_item(v.GetDeleteRows())
+		pobj[i] = table_item
+	}
+
+	return pobj
 }
 
 func _decode_create_table(buf []byte) (err error) {
@@ -181,6 +255,7 @@ func _decode_create_table(buf []byte) (err error) {
 	if err != nil {
 		return err
 	}
+	print_response_message(pb)
 
 	return nil
 }
@@ -191,6 +266,7 @@ func _decode_delete_table(buf []byte) (err error) {
 	if err != nil {
 		return err
 	}
+	print_response_message(pb)
 
 	return nil
 }
@@ -201,6 +277,7 @@ func _decode_list_table(buf []byte) (list_tables *OTSListTableResponse, err erro
 	if err != nil {
 		return nil, err
 	}
+	print_response_message(pb)
 
 	list_tables = new(OTSListTableResponse)
 	list_tables.TableNames = make([]string, len(pb.TableNames))
@@ -215,6 +292,7 @@ func _decode_update_table(buf []byte) (update_table_response *OTSUpdateTableResp
 	if err != nil {
 		return nil, err
 	}
+	print_response_message(pb)
 
 	update_table_response = new(OTSUpdateTableResponse)
 	update_table_response.ReservedThroughputDetails = _parse_reserved_throughput_details(pb.GetReservedThroughputDetails())
@@ -228,6 +306,7 @@ func _decode_describe_table(buf []byte) (describe_table_response *OTSDescribeTab
 	if err != nil {
 		return nil, err
 	}
+	print_response_message(pb)
 
 	describe_table_response = new(OTSDescribeTableResponse)
 	describe_table_response.TableMeta = _parse_table_meta(pb.GetTableMeta())
@@ -242,6 +321,7 @@ func _decode_get_row(buf []byte) (get_row_response *OTSGetRowResponse, err error
 	if err != nil {
 		return nil, err
 	}
+	print_response_message(pb)
 
 	get_row_response = new(OTSGetRowResponse)
 	get_row_response.Row = _parse_row(pb.GetRow())
@@ -256,6 +336,7 @@ func _decode_put_row(buf []byte) (put_row_response *OTSPutRowResponse, err error
 	if err != nil {
 		return nil, err
 	}
+	print_response_message(pb)
 
 	put_row_response = new(OTSPutRowResponse)
 	put_row_response.Consumed = _parse_capacity_unit(pb.GetConsumed().GetCapacityUnit())
@@ -269,6 +350,7 @@ func _decode_update_row(buf []byte) (update_row_response *OTSUpdateRowResponse, 
 	if err != nil {
 		return nil, err
 	}
+	print_response_message(pb)
 
 	update_row_response = new(OTSUpdateRowResponse)
 	update_row_response.Consumed = _parse_capacity_unit(pb.GetConsumed().GetCapacityUnit())
@@ -282,6 +364,7 @@ func _decode_delete_row(buf []byte) (delete_row_response *OTSDeleteRowResponse, 
 	if err != nil {
 		return nil, err
 	}
+	print_response_message(pb)
 
 	delete_row_response = new(OTSDeleteRowResponse)
 	delete_row_response.Consumed = _parse_capacity_unit(pb.GetConsumed().GetCapacityUnit())
@@ -289,12 +372,32 @@ func _decode_delete_row(buf []byte) (delete_row_response *OTSDeleteRowResponse, 
 	return delete_row_response, nil
 }
 
-func _decode_batch_get_row(buf []byte) {
+func _decode_batch_get_row(buf []byte) (response_item_list *OTSBatchGetRowResponse, err error) {
+	pb := &BatchGetRowResponse{}
+	err = proto.Unmarshal(buf, pb)
+	if err != nil {
+		return nil, err
+	}
+	print_response_message(pb)
 
+	response_item_list = new(OTSBatchGetRowResponse)
+	response_item_list.Tables = _parse_batch_get_row(pb.GetTables())
+
+	return response_item_list, nil
 }
 
-func _decode_batch_write_row(buf []byte) {
+func _decode_batch_write_row(buf []byte) (response_item_list *OTSBatchWriteRowResponse, err error) {
+	pb := &BatchWriteRowResponse{}
+	err = proto.Unmarshal(buf, pb)
+	if err != nil {
+		return nil, err
+	}
+	print_response_message(pb)
 
+	response_item_list = new(OTSBatchWriteRowResponse)
+	response_item_list.Tables = _parse_batch_write_row(pb.GetTables())
+
+	return response_item_list, nil
 }
 
 func _decode_get_range(buf []byte) {

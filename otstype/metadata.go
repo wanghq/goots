@@ -6,6 +6,7 @@
 package otstype
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -98,33 +99,46 @@ type OTSReservedThroughputDetails struct {
 	NumberOfDecreasesToday int32
 }
 
-// 表示一列
-type OTSColumn struct {
-	// 该列的列名
-	Name string
-	// 该列的列值
-	Value OTSColumnValue
-}
+// 表示一列，复杂数据模型
+// type OTSColumn struct {
+// 	// 该列的列名
+// 	Name string
+// 	// 该列的列值
+// 	Value OTSColumnValue
+// }
 
-// 表示一列的列值
-type OTSColumnValue struct {
-	// 该列的数据类型
-	Type string
-	// 该列的数据，只在type 为INTEGER 时有效
-	VInt int64
-	// 该列的数据，只在type 为STRING 时有效，必须为UTF-8 编码
-	// golang默认为UTF-8编码
-	VString string
-	// 该列的数据，只在type 为BOOLEAN 时有效
-	VBool bool
-	// 该列的数据，只在type 为DOUBLE 时有效
-	VDouble float64
-	// 该列的数据，只在type 为BINARY 时有效
-	VBinary []byte
-}
+// 表示一列的列值，复杂数据模型
+// type OTSColumnValue struct {
+// 	// 该列的数据类型
+// 	Type string
+// 	// 该列的数据，只在type 为INTEGER 时有效
+// 	VInt int64
+// 	// 该列的数据，只在type 为STRING 时有效，必须为UTF-8 编码
+// 	// golang默认为UTF-8编码
+// 	VString string
+// 	// 该列的数据，只在type 为BOOLEAN 时有效
+// 	VBool bool
+// 	// 该列的数据，只在type 为DOUBLE 时有效
+// 	VDouble float64
+// 	// 该列的数据，只在type 为BINARY 时有效
+// 	VBinary []byte
+// }
 
 // 表的主键列值，精简数据模型
 type OTSPrimaryKey DictString
+
+func (o OTSPrimaryKey) String() string {
+	r := ""
+	if o == nil {
+		return "None"
+	}
+
+	for k, v := range o {
+		r = r + fmt.Sprintf("(%s:%v)", k, v)
+	}
+
+	return r
+}
 
 func (o OTSPrimaryKey) Del(key string) {
 	DictString(o).Del(key)
@@ -141,6 +155,19 @@ func (o OTSPrimaryKey) Set(key string, value interface{}) {
 // 表的属性列值，精简数据模型
 type OTSAttribute DictString
 
+func (o OTSAttribute) String() string {
+	r := ""
+	if o == nil {
+		return "None"
+	}
+
+	for k, v := range o {
+		r = r + fmt.Sprintf("(%s:%v)", k, v)
+	}
+
+	return r
+}
+
 func (o OTSAttribute) Del(key string) {
 	DictString(o).Del(key)
 }
@@ -156,6 +183,19 @@ func (o OTSAttribute) Set(key string, value interface{}) {
 // 表更新属性列值，精简数据模型
 type OTSUpdateOfAttribute DictString
 
+func (o OTSUpdateOfAttribute) String() string {
+	r := ""
+	if o == nil {
+		return "None"
+	}
+
+	for k, v := range o {
+		r = r + fmt.Sprintf("(%s:%v)", k, v)
+	}
+
+	return r
+}
+
 func (o OTSUpdateOfAttribute) Del(key string) {
 	DictString(o).Del(key)
 }
@@ -169,13 +209,13 @@ func (o OTSUpdateOfAttribute) Set(key string, value interface{}) {
 }
 
 // 表的主键列值，复杂数据模型
-type OTSPrimaryKeyColumns []OTSColumn
+// type OTSPrimaryKeyColumns []OTSColumn
 
 // 表的属性列值，复杂数据模型
-type OTSAttributeColumns []OTSColumn
+// type OTSAttributeColumns []OTSColumn
 
 // 表更新属性列值，复杂数据模型
-type OTSUpdateOfAttributeColumns []OTSColumn
+// type OTSUpdateOfAttributeColumns []OTSColumn
 
 // 在数据读取时，指定数据行中哪些属性列需要读取
 type OTSColumnsToGet []string
@@ -186,26 +226,9 @@ type OTSColumnsToPut DictString
 // 在数据更新时，指定数据行中哪些属性列需要删除
 type OTSColumnsToDelete []string
 
-// 多行
-type OTSRows []*OTSRow
-
 //////////////////////////////////////////
 /// Request
 //////////////////////////////////////////
-
-// IsOk can be True or False
-// when IsOk is False,
-//     ErrorCode & ErrorMessage are available
-// when IsOk is True,
-//     Consumed & PrimaryKeyColumns & AttributeColumns are available
-type OTSRowDataItem struct {
-	IsOk              bool
-	ErrorCode         int32
-	ErrorMessage      string
-	Consumed          OTSCapacityUnit
-	PrimaryKeyColumns OTSPrimaryKeyColumns
-	AttributeColumns  OTSAttributeColumns
-}
 
 // 创建行对象
 type OTSPutRowItem struct {
@@ -214,12 +237,6 @@ type OTSPutRowItem struct {
 	AttributeColumns OTSAttribute
 }
 
-// type OTSPutRowItemRaw struct {
-// 	Condition        string
-// 	PrimaryKey       OTSPrimaryKeyColumns
-// 	AttributeColumns OTSAttributeColumns
-// }
-
 // 更新行对象
 type OTSUpdateRowItem struct {
 	Condition                string
@@ -227,18 +244,27 @@ type OTSUpdateRowItem struct {
 	UpdateOfAttributeColumns OTSUpdateOfAttribute
 }
 
-// type OTSUpdateRowItemRaw struct {
-// 	Condition                string
-// 	PrimaryKey               OTSPrimaryKeyColumns
-// 	UpdateOfAttributeColumns OTSUpdateOfAttributeColumns
-// }
-
 // 删除行对象
 type OTSDeleteRowItem struct {
 	Condition  string
 	PrimaryKey OTSPrimaryKey
 }
 
+// 创建行对象，复杂数据模型
+// type OTSPutRowItemRaw struct {
+// 	Condition        string
+// 	PrimaryKey       OTSPrimaryKeyColumns
+// 	AttributeColumns OTSAttributeColumns
+// }
+
+// 更新行对象，复杂数据模型
+// type OTSUpdateRowItemRaw struct {
+// 	Condition                string
+// 	PrimaryKey               OTSPrimaryKeyColumns
+// 	UpdateOfAttributeColumns OTSUpdateOfAttributeColumns
+// }
+
+// 删除行对象，复杂数据模型
 // type OTSDeleteRowItemRaw struct {
 // 	Condition  string
 // 	PrimaryKey OTSPrimaryKeyColumns
@@ -248,7 +274,7 @@ type OTSDeleteRowItem struct {
 type OTSPrimaryKeyRows []OTSPrimaryKey
 
 // 在BatchGetRow 操作中，表示要读取的一个表的请求信息
-type OTSTableInBatchGetRowRequest struct {
+type OTSTableInBatchGetRowRequestItem struct {
 	// 该表的表名
 	TableName string
 	// 该表中需要读取的全部行的信息
@@ -258,7 +284,7 @@ type OTSTableInBatchGetRowRequest struct {
 }
 
 // 在BatchGetRow 操作中，表示要读取的多个表的请求信息
-type OTSBatchGetRowRequest []OTSTableInBatchGetRowRequest
+type OTSBatchGetRowRequest []OTSTableInBatchGetRowRequestItem
 
 // 表的多行操作集合，精简数据模型
 type OTSPutRows []OTSPutRowItem
@@ -266,7 +292,7 @@ type OTSUpdateRows []OTSUpdateRowItem
 type OTSDeleteRows []OTSDeleteRowItem
 
 // 在BatchWriteRow 操作中，表示要写入的一个表的请求信息
-type OTSTableInBatchWriteRowRequest struct {
+type OTSTableInBatchWriteRowRequestItem struct {
 	// 该表的表名
 	TableName string
 	// 该表中需要写入的全部行的信息
@@ -278,15 +304,7 @@ type OTSTableInBatchWriteRowRequest struct {
 }
 
 // 在BatchWriteRow 操作中，表示要写入的多个表的请求信息
-type OTSBatchWriteRowRequest []OTSTableInBatchWriteRowRequest
-
-// 在BatchWriteRow 操作中 服务器反馈对象
-type OTSBatchWriteRowResponseItem struct {
-	IsOk         bool
-	ErrorCode    int32
-	ErrorMessage string
-	Consumed     OTSCapacityUnit
-}
+type OTSBatchWriteRowRequest []OTSTableInBatchWriteRowRequestItem
 
 // OTS 表中的行按主键进行从小到大排序，GetRange 的读取范围是一个左闭右开的区间。操作
 // 会返回主键属于该区间的行数据，区间的起始点是有效的主键或者是由INF_MIN 和INF_MAX
@@ -341,6 +359,13 @@ type OTSRow struct {
 	AttributeColumns OTSAttribute
 }
 
+func (o *OTSRow) String() string {
+	r := "PrimaryKeyColumns: " + o.GetPrimaryKeyColumns().String() + "\n"
+	r = r + "AttributeColumns: " + o.GetAttributeColumns().String() + "\n"
+
+	return r
+}
+
 func (o *OTSRow) GetPrimaryKeyColumns() OTSPrimaryKey {
 	if o.PrimaryKeyColumns == nil {
 		return nil
@@ -356,6 +381,9 @@ func (o *OTSRow) GetAttributeColumns() OTSAttribute {
 		return o.AttributeColumns
 	}
 }
+
+// 多行数据
+type OTSRows []*OTSRow
 
 // 获取一行数据
 type OTSGetRowResponse struct {
@@ -421,4 +449,96 @@ func (o *OTSDeleteRowResponse) GetWriteConsumed() int32 {
 	}
 
 	return 0
+}
+
+// 在BatchGetRow 操作的返回消息中，表示一行数据。
+type OTSRowInBatchGetRowResponseItem struct {
+	// 该行操作是否成功。若为true，则该行读取成功，error 无效；若为false，则该行读取失败，row 无效
+	IsOk bool
+	// 该行操作的错误号
+	ErrorCode string
+	// 该行操作的错误信息
+	ErrorMessage string
+	// 该行操作消耗的服务能力单元
+	Consumed *OTSCapacityUnit
+	// 行数据，包含了主键列和属性列
+	Row *OTSRow
+}
+
+// 在 BatchGetRow 操作的返回消息中，表示一个表的数据。
+type OTSTableInBatchGetRowResponseItem struct {
+	// 该表的表名
+	TableName string
+	// 该表中读取到的全部行数据
+	Rows []*OTSRowInBatchGetRowResponseItem
+}
+
+// 对应了每个 table 下读取到的数据。
+// 响应消息中 OTSTableInBatchGetRowResponseItem 对象的顺序与 OTSBatchGetRowRequest 中的
+// OTSTableInBatchGetRowRequestItem 对象的顺序相同；每个 OTSTableInBatchGetRowResponseItem 下面的
+// OTSRowInBatchGetRowResponseItem 对象的顺序与 OTSTableInBatchGetRowRequestItem 下面的 Rows 相同。
+// 如果某行不存在或者某行在指定的 ColumnsToGet 下没有数据，仍然会在 OTSTableInBatchGetRowResponseItem
+// 中有一条对应的 OTSRowInBatchGetRowResponseItem，但其 Row 下面的 PrimaryKeyColumns 和
+// AttributeColumns 将为空。
+//
+// 若某行读取失败，该行所对应的 OTSRowInBatchGetRowResponseItem 中 IsOk 将为 false，此时 Row
+// 将为空。
+//
+// 注意: BatchGetRow 操作可能会在行级别部分失败，此时返回的 HTTP 状态码仍为200。应用
+// 程序必须对 OTSRowInBatchGetRowResponseItem 中的error 进行检查确认每一行的执行结果，并进行相
+// 应的处理。
+//
+// 服务能力单元消耗:
+// 如果本次操作整体失败，不消耗任何服务能力单元。
+// 如果请求超时，结果未定义，服务能力单元有可能被消耗，也可能未被消耗。
+// 其他情况将每个 OTSRowInBatchGetRowResponseItem 视为一个 OTSGetRow 操作独立计算读服务能力单
+// 元。
+type OTSBatchGetRowResponse struct {
+	Tables []*OTSTableInBatchGetRowResponseItem
+}
+
+// 在 BatchWriteRow 操作的返回消息中，表示一行写入操作的结果。
+type OTSRowInBatchWriteRowResponseItem struct {
+	// 该行操作是否成功。若为true，则该行写入成功，error 无效；若为false，则该行写入失败。
+	IsOk bool
+	// 该行操作的错误号
+	ErrorCode string
+	// 该行操作的错误信息
+	ErrorMessage string
+	// 该行操作消耗的服务能力单元
+	Consumed *OTSCapacityUnit
+}
+
+// 在 BatchWriteRow 操作中，表示对一个表进行写入的结果。
+type OTSTableInBatchWriteRowResponseItem struct {
+	// 该表的表名
+	TableName string
+	// 该表中PutRow 操作的结果
+	PutRows []*OTSRowInBatchWriteRowResponseItem
+	// 该表中UpdateRow 操作的结果
+	UpdateRows []*OTSRowInBatchWriteRowResponseItem
+	// 该表中DeleteRow 操作的结果
+	DeleteRows []*OTSRowInBatchWriteRowResponseItem
+}
+
+// 对应了每个 table 下各操作的响应信息，包括是否成功执行，错误码和消耗的服务能力单元。
+// 响应消息中 OTSTableInBatchWriteRowResponseItem 对象的顺序与 OTSBatchWriteRowRequest 中的
+// OTSTableInBatchWriteRowRequestItem 对象的顺序相同；每个 OTSTableInBatchWriteRowRequestItem
+// 中 PutRows、UpdateRows、DeleteRows 包含的OTSRowInBatchWriteRowResponseItem 对象的顺序分别与
+// OTSTableInBatchWriteRowRequestItem 中 PutRows、UpdateRows、DeleteRows 包含的 OTSPutRowItem，
+// OTSUpdateRowItem 和 OTSDeleteRowItem 对象的顺序相同。
+//
+// 若某行读取失败，该行所对应的 OTSRowInBatchWriteRowResponseItem 中 IsOk 将为false。
+//
+// 注意:BatchWriteRow 操作可能会在行级别部分失败，此时返回的HTTP 状态码仍为200。应
+// 用程序必须对 OTSRowInBatchWriteRowResponseItem 中的 error 进行检查，确认每一行的执行结果并进
+// 行相应的处理。
+//
+// 服务能力单元消耗:
+// 如果本次操作整体失败，不消耗任何服务能力单元。
+// 如果请求超时，结果未定义，服务能力单元有可能被消耗，也可能未被消耗。
+// 其他情况将每个 OTSPutRowItem、OTSUpdateRowItem、OTSDeleteRowItem
+// 依次视作相对应的写操作独立计算读服务能力单元。
+type OTSBatchWriteRowResponse struct {
+	Tables []*OTSTableInBatchWriteRowResponseItem
 }

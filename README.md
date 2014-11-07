@@ -16,7 +16,7 @@ Aliyun OTS(Open Table Service) golang SDK.
 	- [UpdateRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/UpdateRow.md) ☑
 	- [DeleteRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/DeleteRow.md) ☑
 - **BatchRow**
-	- BatchGetRow
+	- [BatchGetRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/BatchGetRow.md) ☑
 	- BatchWriteRow
 	- GetRange
 	- XGetRange

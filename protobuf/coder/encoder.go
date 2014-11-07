@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"reflect"
 
-	// "code.google.com/p/goprotobuf/proto"
 	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
 	. "github.com/GiterLab/goots/protobuf"
@@ -71,22 +70,22 @@ func _get_int32(value interface{}) int32 {
 	panic(OTSClientError{}.Set("expect int or long for the value, not %v", reflect.TypeOf(value)))
 }
 
-func _make_repeated_column_names(proto *[]string, columns_to_get []string) error {
+func _make_repeated_column_names(pb *[]string, columns_to_get []string) error {
 	if columns_to_get == nil {
 		// if no column name is given, get all primary_key_columns and attribute_columns.
 		return nil
 	}
 
 	for _, column_name := range columns_to_get {
-		*proto = append(*proto, _get_unicode(column_name))
+		*pb = append(*pb, _get_unicode(column_name))
 	}
 
-	// *proto = columns_to_get[:] // not used
+	// *pb = columns_to_get[:] // not used
 
 	return nil
 }
 
-func _make_column_value(proto *ColumnValue, value interface{}) error {
+func _make_column_value(pb *ColumnValue, value interface{}) error {
 	// you have to put 'int' under 'bool' in the switch case
 	// because a bool is also a int !!!
 
@@ -94,91 +93,91 @@ func _make_column_value(proto *ColumnValue, value interface{}) error {
 	case string:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_STRING
-		proto.Type = pcolumn_type
-		proto.VString = NewString(_get_unicode(value.(string)))
+		pb.Type = pcolumn_type
+		pb.VString = NewString(_get_unicode(value.(string)))
 
 	case bool:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_BOOLEAN
-		proto.Type = pcolumn_type
-		proto.VBool = NewBool(value.(bool))
+		pb.Type = pcolumn_type
+		pb.VBool = NewBool(value.(bool))
 
 	case int:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_INTEGER
-		proto.Type = pcolumn_type
-		proto.VInt = NewInt64(int64(value.(int)))
+		pb.Type = pcolumn_type
+		pb.VInt = NewInt64(int64(value.(int)))
 
 	case uint:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_INTEGER
-		proto.Type = pcolumn_type
-		proto.VInt = NewInt64(int64(value.(uint)))
+		pb.Type = pcolumn_type
+		pb.VInt = NewInt64(int64(value.(uint)))
 
 	case int8:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_INTEGER
-		proto.Type = pcolumn_type
-		proto.VInt = NewInt64(int64(value.(int8)))
+		pb.Type = pcolumn_type
+		pb.VInt = NewInt64(int64(value.(int8)))
 
 	case uint8:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_INTEGER
-		proto.Type = pcolumn_type
-		proto.VInt = NewInt64(int64(value.(uint8)))
+		pb.Type = pcolumn_type
+		pb.VInt = NewInt64(int64(value.(uint8)))
 
 	case int32:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_INTEGER
-		proto.Type = pcolumn_type
-		proto.VInt = NewInt64(int64(value.(int32)))
+		pb.Type = pcolumn_type
+		pb.VInt = NewInt64(int64(value.(int32)))
 
 	case uint32:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_INTEGER
-		proto.Type = pcolumn_type
-		proto.VInt = NewInt64(int64(value.(uint32)))
+		pb.Type = pcolumn_type
+		pb.VInt = NewInt64(int64(value.(uint32)))
 
 	case int64:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_INTEGER
-		proto.Type = pcolumn_type
-		proto.VInt = NewInt64(value.(int64))
+		pb.Type = pcolumn_type
+		pb.VInt = NewInt64(value.(int64))
 
 	case uint64:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_INTEGER
-		proto.Type = pcolumn_type
-		proto.VInt = NewInt64(int64(value.(uint64)))
+		pb.Type = pcolumn_type
+		pb.VInt = NewInt64(int64(value.(uint64)))
 
 	case float32:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_DOUBLE
-		proto.Type = pcolumn_type
-		proto.VDouble = NewFloat64(float64(value.(float32)))
+		pb.Type = pcolumn_type
+		pb.VDouble = NewFloat64(float64(value.(float32)))
 
 	case float64:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_DOUBLE
-		proto.Type = pcolumn_type
-		proto.VDouble = NewFloat64(value.(float64))
+		pb.Type = pcolumn_type
+		pb.VDouble = NewFloat64(value.(float64))
 
 	case []byte:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_BINARY
-		proto.Type = pcolumn_type
-		proto.VBinary = value.([]byte)
+		pb.Type = pcolumn_type
+		pb.VBinary = value.([]byte)
 
 	case ColumnType:
 		v := value.(ColumnType)
 		if v == ColumnType_INF_MIN {
 			pcolumn_type := new(ColumnType)
 			*pcolumn_type = ColumnType_INF_MIN
-			proto.Type = pcolumn_type
+			pb.Type = pcolumn_type
 		} else if v == ColumnType_INF_MAX {
 			pcolumn_type := new(ColumnType)
 			*pcolumn_type = ColumnType_INF_MAX
-			proto.Type = pcolumn_type
+			pb.Type = pcolumn_type
 		} else {
 			return (OTSClientError{}.Set("don't expect the value of ColumnType"))
 		}
@@ -199,14 +198,14 @@ func _get_column_type(type_str string) ColumnType {
 	}
 }
 
-func _make_condition(proto *Condition, condition interface{}) error {
+func _make_condition(pb *Condition, condition interface{}) error {
 	switch condition.(type) {
 	case Condition:
 		exp := *condition.(Condition).RowExistence
 		if v, ok := RowExistenceExpectation_name[int32(exp)]; ok {
 			item := new(RowExistenceExpectation)
 			*item = RowExistenceExpectation(RowExistenceExpectation_value[v])
-			proto.RowExistence = item
+			pb.RowExistence = item
 		} else {
 			return (OTSClientError{}.Set("condition value should be one of [IGNORE(0), EXPECT_EXIST(1), EXPECT_NOT_EXIST(2)], not %v", exp))
 		}
@@ -215,7 +214,7 @@ func _make_condition(proto *Condition, condition interface{}) error {
 		if v, ok := RowExistenceExpectation_name[int32(exp)]; ok {
 			item := new(RowExistenceExpectation)
 			*item = RowExistenceExpectation(RowExistenceExpectation_value[v])
-			proto.RowExistence = item
+			pb.RowExistence = item
 		} else {
 			return (OTSClientError{}.Set("condition value should be one of [IGNORE(0), EXPECT_EXIST(1), EXPECT_NOT_EXIST(2)], not %v", exp))
 		}
@@ -224,7 +223,7 @@ func _make_condition(proto *Condition, condition interface{}) error {
 		if v, ok := RowExistenceExpectation_value[exp]; ok {
 			item := new(RowExistenceExpectation)
 			*item = RowExistenceExpectation(v)
-			proto.RowExistence = item
+			pb.RowExistence = item
 		} else {
 			return (OTSClientError{}.Set("condition value should be one of [IGNORE(0), EXPECT_EXIST(1), EXPECT_NOT_EXIST(2)], not %v", exp))
 		}
@@ -257,21 +256,21 @@ func _get_direction(direction_str string) Direction {
 	}
 }
 
-func _make_column_schema(proto *ColumnSchema, schema_tuple interface{}) error {
+func _make_column_schema(pb *ColumnSchema, schema_tuple interface{}) error {
 	switch schema_tuple.(type) {
 	case ColumnSchema:
 		schema_name, schema_type := *schema_tuple.(ColumnSchema).Name, *schema_tuple.(ColumnSchema).Type
-		proto.Name = new(string)
-		proto.Type = new(ColumnType)
-		*proto.Name = _get_unicode(schema_name)
-		*proto.Type = schema_type
+		pb.Name = new(string)
+		pb.Type = new(ColumnType)
+		*pb.Name = _get_unicode(schema_name)
+		*pb.Type = schema_type
 	case TupleString:
 		schema_name, schema_type := schema_tuple.(TupleString).GetName(), schema_tuple.(TupleString).GetType()
-		proto.Name = new(string)
-		proto.Type = new(ColumnType)
-		*proto.Name = _get_unicode(schema_name)
+		pb.Name = new(string)
+		pb.Type = new(ColumnType)
+		*pb.Name = _get_unicode(schema_name)
 		if v, ok := schema_type.(string); ok {
-			*proto.Type = _get_column_type(v)
+			*pb.Type = _get_column_type(v)
 		} else {
 			return (OTSClientError{}.Set("schema_tuple should be (string, string), not (string, %v)", reflect.TypeOf(schema_type)))
 		}
@@ -283,13 +282,13 @@ func _make_column_schema(proto *ColumnSchema, schema_tuple interface{}) error {
 }
 
 // Deprecated
-func _make_column_schema_python(proto *ColumnSchema, schema_tuple TupleString) error {
+func _make_column_schema_python(pb *ColumnSchema, schema_tuple TupleString) error {
 	schema_name, schema_type := schema_tuple.GetName(), schema_tuple.GetType()
-	proto.Name = new(string)
-	proto.Type = new(ColumnType)
-	*proto.Name = _get_unicode(schema_name)
+	pb.Name = new(string)
+	pb.Type = new(ColumnType)
+	*pb.Name = _get_unicode(schema_name)
 	if v, ok := schema_type.(string); ok {
-		*proto.Type = _get_column_type(v)
+		*pb.Type = _get_column_type(v)
 	} else {
 		return (OTSClientError{}.Set("schema_tuple should be (string, string), not (string, %v)", reflect.TypeOf(schema_type)))
 	}
@@ -297,41 +296,41 @@ func _make_column_schema_python(proto *ColumnSchema, schema_tuple TupleString) e
 	return nil
 }
 
-func _make_schemas_with_list(proto *[]*ColumnSchema, schema_list interface{}) error {
+func _make_schemas_with_list(pb *[]*ColumnSchema, schema_list interface{}) error {
 	switch schema_list.(type) {
 	case []ColumnSchema:
 		if len(schema_list.([]ColumnSchema)) == 0 {
 			return OTSClientError{}.Set("schema_list should not be empty")
 		}
-		*proto = make([]*ColumnSchema, len(schema_list.([]ColumnSchema)))
+		*pb = make([]*ColumnSchema, len(schema_list.([]ColumnSchema)))
 		for k, schema_tuple := range schema_list.([]ColumnSchema) {
 			item := new(ColumnSchema)
 			err := _make_column_schema(item, schema_tuple)
 			if err != nil {
 				return err
 			}
-			(*proto)[k] = item
+			(*pb)[k] = item
 		}
 
 	case []*ColumnSchema:
 		if len(schema_list.([]*ColumnSchema)) == 0 {
 			return OTSClientError{}.Set("schema_list should not be empty")
 		}
-		*proto = make([]*ColumnSchema, len(schema_list.([]*ColumnSchema)))
+		*pb = make([]*ColumnSchema, len(schema_list.([]*ColumnSchema)))
 		for k, schema_tuple := range schema_list.([]*ColumnSchema) {
 			item := new(ColumnSchema)
 			err := _make_column_schema(item, *schema_tuple)
 			if err != nil {
 				return err
 			}
-			(*proto)[k] = item
+			(*pb)[k] = item
 		}
 
 	case []TupleString:
 		if len(schema_list.([]TupleString)) == 0 {
 			return OTSClientError{}.Set("schema_list should not be empty")
 		}
-		*proto = make([]*ColumnSchema, len(schema_list.([]TupleString)))
+		*pb = make([]*ColumnSchema, len(schema_list.([]TupleString)))
 		for k, schema_tuple := range schema_list.([]TupleString) {
 			item := new(ColumnSchema)
 			// _make_column_schema_python(item, schema_tuple)
@@ -339,7 +338,7 @@ func _make_schemas_with_list(proto *[]*ColumnSchema, schema_list interface{}) er
 			if err != nil {
 				return err
 			}
-			(*proto)[k] = item
+			(*pb)[k] = item
 		}
 
 	default:
@@ -348,46 +347,46 @@ func _make_schemas_with_list(proto *[]*ColumnSchema, schema_list interface{}) er
 	return nil
 }
 
-func _make_columns_with_dict(proto *[]*Column, column_dict interface{}) error {
+func _make_columns_with_dict(pb *[]*Column, column_dict interface{}) error {
 	switch column_dict.(type) {
 	case []Column:
 		if len(column_dict.([]Column)) == 0 {
 			return OTSClientError{}.Set("column_dict should not be empty")
 		}
-		*proto = make([]*Column, len(column_dict.([]Column)))
+		*pb = make([]*Column, len(column_dict.([]Column)))
 		for k, column := range column_dict.([]Column) {
 			item := new(Column)
 			item.Name = new(string)
 			*item.Name = _get_unicode(column.GetName())
 			item.Value = column.GetValue()
-			(*proto)[k] = item
+			(*pb)[k] = item
 		}
 
 	case []*Column:
 		if len(column_dict.([]*Column)) == 0 {
 			return OTSClientError{}.Set("column_dict should not be empty")
 		}
-		*proto = make([]*Column, len(column_dict.([]*Column)))
+		*pb = make([]*Column, len(column_dict.([]*Column)))
 		for k, column := range column_dict.([]*Column) {
 			item := new(Column)
 			item.Name = new(string)
 			*item.Name = _get_unicode((*column).GetName())
 			item.Value = (*column).GetValue()
-			(*proto)[k] = item
+			(*pb)[k] = item
 		}
 
 	case DictString:
 		if len(column_dict.(DictString)) == 0 {
 			return OTSClientError{}.Set("column_dict should not be empty")
 		}
-		*proto = make([]*Column, len(column_dict.(DictString)))
+		*pb = make([]*Column, len(column_dict.(DictString)))
 		i := 0
 		for name, column := range column_dict.(DictString) {
 			item := new(Column)
 			item.Name = NewString(name)
 			item.Value = new(ColumnValue)
 			_make_column_value(item.Value, column)
-			(*proto)[i] = item
+			(*pb)[i] = item
 			i++
 		}
 
@@ -397,13 +396,13 @@ func _make_columns_with_dict(proto *[]*Column, column_dict interface{}) error {
 	return nil
 }
 
-func _make_update_of_attribute_columns_with_dict(proto *[]*ColumnUpdate, column_dict interface{}) error {
+func _make_update_of_attribute_columns_with_dict(pb *[]*ColumnUpdate, column_dict interface{}) error {
 	switch column_dict.(type) {
 	case []ColumnUpdate:
 		if len(column_dict.([]ColumnUpdate)) == 0 {
 			return OTSClientError{}.Set("column_dict should not be empty")
 		}
-		*proto = make([]*ColumnUpdate, len(column_dict.([]ColumnUpdate)))
+		*pb = make([]*ColumnUpdate, len(column_dict.([]ColumnUpdate)))
 		for k, column_update := range column_dict.([]ColumnUpdate) {
 			item := new(ColumnUpdate)
 			item.Type = new(OperationType)
@@ -412,13 +411,13 @@ func _make_update_of_attribute_columns_with_dict(proto *[]*ColumnUpdate, column_
 			*item.Name = _get_unicode(column_update.GetName())
 			item.Value = new(ColumnValue)
 			item.Value = column_update.GetValue()
-			(*proto)[k] = item
+			(*pb)[k] = item
 		}
 	case []*ColumnUpdate:
 		if len(column_dict.([]*ColumnUpdate)) == 0 {
 			return OTSClientError{}.Set("column_dict should not be empty")
 		}
-		*proto = make([]*ColumnUpdate, len(column_dict.([]*ColumnUpdate)))
+		*pb = make([]*ColumnUpdate, len(column_dict.([]*ColumnUpdate)))
 		for k, column_update := range column_dict.([]*ColumnUpdate) {
 			item := new(ColumnUpdate)
 			item.Type = new(OperationType)
@@ -427,11 +426,11 @@ func _make_update_of_attribute_columns_with_dict(proto *[]*ColumnUpdate, column_
 			*item.Name = _get_unicode((*column_update).GetName())
 			item.Value = new(ColumnValue)
 			item.Value = (*column_update).GetValue()
-			(*proto)[k] = item
+			(*pb)[k] = item
 		}
 	case DictString:
 		// DictString --> map[string] DictString --> map[string] map[string]interface
-		*proto = make([]*ColumnUpdate, 0, 10) // modify 10 to big value to fit your app
+		*pb = make([]*ColumnUpdate, 0, 10) // modify 10 to big value to fit your app
 		for key, value := range column_dict.(DictString) {
 			if key == "PUT" {
 				// value.(DictString) or value.(OTSColumnsToPut)
@@ -445,7 +444,7 @@ func _make_update_of_attribute_columns_with_dict(proto *[]*ColumnUpdate, column_
 						*item.Name = _get_unicode(k)
 						item.Value = new(ColumnValue)
 						_make_column_value(item.Value, v)
-						*proto = append(*proto, item)
+						*pb = append(*pb, item)
 					}
 				case OTSColumnsToPut:
 					for k, v := range value.(OTSColumnsToPut) {
@@ -456,7 +455,7 @@ func _make_update_of_attribute_columns_with_dict(proto *[]*ColumnUpdate, column_
 						*item.Name = _get_unicode(k)
 						item.Value = new(ColumnValue)
 						_make_column_value(item.Value, v)
-						*proto = append(*proto, item)
+						*pb = append(*pb, item)
 					}
 				default:
 					return (OTSClientError{}.Set("expect DictString  or OTSColumnsToPut for put operation in 'update_of_attribute_columns', not %v", reflect.TypeOf(value)))
@@ -471,7 +470,7 @@ func _make_update_of_attribute_columns_with_dict(proto *[]*ColumnUpdate, column_
 						*item.Type = OperationType_DELETE
 						item.Name = new(string)
 						*item.Name = _get_unicode(v)
-						*proto = append(*proto, item)
+						*pb = append(*pb, item)
 					}
 				case OTSColumnsToDelete:
 					for _, v := range value.(OTSColumnsToDelete) {
@@ -480,7 +479,7 @@ func _make_update_of_attribute_columns_with_dict(proto *[]*ColumnUpdate, column_
 						*item.Type = OperationType_DELETE
 						item.Name = new(string)
 						*item.Name = _get_unicode(v)
-						*proto = append(*proto, item)
+						*pb = append(*pb, item)
 					}
 				default:
 					return (OTSClientError{}.Set("expect list([]string or OTSColumnsToDelete) for delete operation in 'update_of_attribute_columns', not %v", reflect.TypeOf(value)))
@@ -497,32 +496,32 @@ func _make_update_of_attribute_columns_with_dict(proto *[]*ColumnUpdate, column_
 	return nil
 }
 
-func _make_table_meta(proto *TableMeta, table_meta interface{}) error {
+func _make_table_meta(pb *TableMeta, table_meta interface{}) error {
 	switch table_meta.(type) {
 	case TableMeta:
-		proto.TableName = new(string)
-		*proto.TableName = _get_unicode(*table_meta.(TableMeta).TableName)
+		pb.TableName = new(string)
+		*pb.TableName = _get_unicode(*table_meta.(TableMeta).TableName)
 		primary_key := new([]*ColumnSchema)
 		err := _make_schemas_with_list(primary_key, table_meta.(TableMeta).PrimaryKey)
 		if err != nil {
 			return err
 		}
-		proto.PrimaryKey = (*primary_key)[:]
+		pb.PrimaryKey = (*primary_key)[:]
 	case TupleString:
-		proto.TableName = new(string)
-		*proto.TableName = _get_unicode(table_meta.(TupleString).GetName())
+		pb.TableName = new(string)
+		*pb.TableName = _get_unicode(table_meta.(TupleString).GetName())
 		if v, ok := table_meta.(TupleString).V.([]TupleString); ok {
 			primary_key := new([]*ColumnSchema)
 			err := _make_schemas_with_list(primary_key, v)
 			if err != nil {
 				return err
 			}
-			proto.PrimaryKey = (*primary_key)[:]
+			pb.PrimaryKey = (*primary_key)[:]
 		} else {
 			return (OTSClientError{}.Set("table_meta.V should be an instance of []TupleString, not %v", reflect.TypeOf(table_meta.(TupleString).V)))
 		}
 	case OTSTableMeta:
-		proto.TableName = NewString(table_meta.(OTSTableMeta).TableName)
+		pb.TableName = NewString(table_meta.(OTSTableMeta).TableName)
 		primary_key := new([]*ColumnSchema)
 
 		// change map[string]string to []TupleString
@@ -537,7 +536,7 @@ func _make_table_meta(proto *TableMeta, table_meta interface{}) error {
 		if err != nil {
 			return err
 		}
-		proto.PrimaryKey = (*primary_key)[:]
+		pb.PrimaryKey = (*primary_key)[:]
 	default:
 		return (OTSClientError{}.Set("table_meta should be an instance of TableMeta, OTSTableMeta or TupleString, not %v", reflect.TypeOf(table_meta)))
 	}
@@ -545,40 +544,40 @@ func _make_table_meta(proto *TableMeta, table_meta interface{}) error {
 	return nil
 }
 
-func _make_capacity_unit(proto *CapacityUnit, capacity_unit interface{}) error {
+func _make_capacity_unit(pb *CapacityUnit, capacity_unit interface{}) error {
 	switch capacity_unit.(type) {
 	case CapacityUnit:
 		if capacity_unit.(CapacityUnit).Read == nil || capacity_unit.(CapacityUnit).Write == nil {
 			return (OTSClientError{}.Set("both of read and write of CapacityUnit are required"))
 		}
-		proto.Read = NewInt32(_get_int32(*capacity_unit.(CapacityUnit).Read))
-		proto.Write = NewInt32(_get_int32(*capacity_unit.(CapacityUnit).Write))
+		pb.Read = NewInt32(_get_int32(*capacity_unit.(CapacityUnit).Read))
+		pb.Write = NewInt32(_get_int32(*capacity_unit.(CapacityUnit).Write))
 
 	case OTSCapacityUnit:
 		if capacity_unit.(OTSCapacityUnit).Read == 0 || capacity_unit.(OTSCapacityUnit).Write == 0 {
 			return (OTSClientError{}.Set("both of read and write of CapacityUnit are required"))
 		}
-		proto.Read = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Read))
-		proto.Write = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Write))
+		pb.Read = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Read))
+		pb.Write = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Write))
 	}
 
 	return nil
 }
 
-func _make_reserved_throughput(proto *ReservedThroughput, reserved_throughput interface{}) error {
+func _make_reserved_throughput(pb *ReservedThroughput, reserved_throughput interface{}) error {
 	switch reserved_throughput.(type) {
 	case ReservedThroughput:
 		capacity_unit := *reserved_throughput.(ReservedThroughput).CapacityUnit
-		proto.CapacityUnit = new(CapacityUnit)
-		err := _make_capacity_unit(proto.CapacityUnit, capacity_unit)
+		pb.CapacityUnit = new(CapacityUnit)
+		err := _make_capacity_unit(pb.CapacityUnit, capacity_unit)
 		if err != nil {
 			return err
 		}
 
 	case OTSReservedThroughput:
 		capacity_unit := reserved_throughput.(OTSReservedThroughput).CapacityUnit
-		proto.CapacityUnit = new(CapacityUnit)
-		err := _make_capacity_unit(proto.CapacityUnit, capacity_unit)
+		pb.CapacityUnit = new(CapacityUnit)
+		err := _make_capacity_unit(pb.CapacityUnit, capacity_unit)
 		if err != nil {
 			return err
 		}
@@ -590,7 +589,7 @@ func _make_reserved_throughput(proto *ReservedThroughput, reserved_throughput in
 	return nil
 }
 
-func _make_update_capacity_unit(proto *CapacityUnit, capacity_unit interface{}) error {
+func _make_update_capacity_unit(pb *CapacityUnit, capacity_unit interface{}) error {
 	switch capacity_unit.(type) {
 	case CapacityUnit:
 		if capacity_unit.(CapacityUnit).Read == nil && capacity_unit.(CapacityUnit).Write == nil {
@@ -598,11 +597,11 @@ func _make_update_capacity_unit(proto *CapacityUnit, capacity_unit interface{}) 
 		}
 
 		if capacity_unit.(CapacityUnit).Read != nil {
-			proto.Read = NewInt32(_get_int32(*capacity_unit.(CapacityUnit).Read))
+			pb.Read = NewInt32(_get_int32(*capacity_unit.(CapacityUnit).Read))
 		}
 
 		if capacity_unit.(CapacityUnit).Write != nil {
-			proto.Write = NewInt32(_get_int32(*capacity_unit.(CapacityUnit).Write))
+			pb.Write = NewInt32(_get_int32(*capacity_unit.(CapacityUnit).Write))
 		}
 
 	case OTSCapacityUnit:
@@ -611,31 +610,31 @@ func _make_update_capacity_unit(proto *CapacityUnit, capacity_unit interface{}) 
 		}
 
 		if capacity_unit.(OTSCapacityUnit).Read != 0 {
-			proto.Read = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Read))
+			pb.Read = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Read))
 		}
 
 		if capacity_unit.(OTSCapacityUnit).Write != 0 {
-			proto.Write = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Write))
+			pb.Write = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Write))
 		}
 	}
 
 	return nil
 }
 
-func _make_update_reserved_throughput(proto *ReservedThroughput, reserved_throughput interface{}) error {
+func _make_update_reserved_throughput(pb *ReservedThroughput, reserved_throughput interface{}) error {
 	switch reserved_throughput.(type) {
 	case ReservedThroughput:
 		capacity_unit := *reserved_throughput.(ReservedThroughput).CapacityUnit
-		proto.CapacityUnit = new(CapacityUnit)
-		err := _make_update_capacity_unit(proto.CapacityUnit, capacity_unit)
+		pb.CapacityUnit = new(CapacityUnit)
+		err := _make_update_capacity_unit(pb.CapacityUnit, capacity_unit)
 		if err != nil {
 			return err
 		}
 
 	case OTSReservedThroughput:
 		capacity_unit := reserved_throughput.(OTSReservedThroughput).CapacityUnit
-		proto.CapacityUnit = new(CapacityUnit)
-		err := _make_update_capacity_unit(proto.CapacityUnit, capacity_unit)
+		pb.CapacityUnit = new(CapacityUnit)
+		err := _make_update_capacity_unit(pb.CapacityUnit, capacity_unit)
 		if err != nil {
 			return err
 		}
@@ -647,11 +646,11 @@ func _make_update_reserved_throughput(proto *ReservedThroughput, reserved_throug
 	return nil
 }
 
-func _make_batch_get_row(proto *BatchGetRowRequest, batch_list interface{}) error {
+func _make_batch_get_row(pb *BatchGetRowRequest, batch_list interface{}) error {
 	switch batch_list.(type) {
 	case []TableInBatchGetRowRequest:
 		list_len := len(batch_list.([]TableInBatchGetRowRequest))
-		proto.Tables = make([]*TableInBatchGetRowRequest, list_len)
+		pb.Tables = make([]*TableInBatchGetRowRequest, list_len)
 		for i, v := range batch_list.([]TableInBatchGetRowRequest) {
 			table_item := new(TableInBatchGetRowRequest)
 			// table_name
@@ -674,12 +673,12 @@ func _make_batch_get_row(proto *BatchGetRowRequest, batch_list interface{}) erro
 				row.PrimaryKey = *primary_key
 				table_item.Rows[i1] = row
 			}
-			proto.Tables[i] = table_item
+			pb.Tables[i] = table_item
 		}
 
 	case []*TableInBatchGetRowRequest:
 		list_len := len(batch_list.([]*TableInBatchGetRowRequest))
-		proto.Tables = make([]*TableInBatchGetRowRequest, list_len)
+		pb.Tables = make([]*TableInBatchGetRowRequest, list_len)
 		for i, v := range batch_list.([]*TableInBatchGetRowRequest) {
 			table_item := new(TableInBatchGetRowRequest)
 			// table_name
@@ -702,11 +701,11 @@ func _make_batch_get_row(proto *BatchGetRowRequest, batch_list interface{}) erro
 				row.PrimaryKey = *primary_key
 				table_item.Rows[i1] = row
 			}
-			proto.Tables[i] = table_item
+			pb.Tables[i] = table_item
 		}
 	case OTSBatchGetRowRequest:
 		list_len := len(batch_list.(OTSBatchGetRowRequest))
-		proto.Tables = make([]*TableInBatchGetRowRequest, list_len)
+		pb.Tables = make([]*TableInBatchGetRowRequest, list_len)
 		for i, v := range batch_list.(OTSBatchGetRowRequest) {
 			table_item := new(TableInBatchGetRowRequest)
 			// table_name
@@ -727,7 +726,7 @@ func _make_batch_get_row(proto *BatchGetRowRequest, batch_list interface{}) erro
 				row.PrimaryKey = *primary_key
 				table_item.Rows[i1] = row
 			}
-			proto.Tables[i] = table_item
+			pb.Tables[i] = table_item
 		}
 
 	default:
@@ -737,11 +736,11 @@ func _make_batch_get_row(proto *BatchGetRowRequest, batch_list interface{}) erro
 	return nil
 }
 
-func _make_put_row_item(proto *PutRowInBatchWriteRowRequest, put_row_item interface{}) error {
+func _make_put_row_item(pb *PutRowInBatchWriteRowRequest, put_row_item interface{}) error {
 	switch put_row_item.(type) {
 	case PutRowInBatchWriteRowRequest:
-		proto.Condition = new(Condition)
-		err := _make_condition(proto.Condition, *put_row_item.(PutRowInBatchWriteRowRequest).Condition)
+		pb.Condition = new(Condition)
+		err := _make_condition(pb.Condition, *put_row_item.(PutRowInBatchWriteRowRequest).Condition)
 		if err != nil {
 			return err
 		}
@@ -750,17 +749,17 @@ func _make_put_row_item(proto *PutRowInBatchWriteRowRequest, put_row_item interf
 		if err != nil {
 			return err
 		}
-		proto.PrimaryKey = *primary_key
+		pb.PrimaryKey = *primary_key
 		attribute_columns := new([]*Column)
 		err = _make_columns_with_dict(attribute_columns, put_row_item.(PutRowInBatchWriteRowRequest).AttributeColumns)
 		if err != nil {
 			return err
 		}
-		proto.AttributeColumns = *attribute_columns
+		pb.AttributeColumns = *attribute_columns
 
 	case *PutRowInBatchWriteRowRequest:
-		proto.Condition = new(Condition)
-		err := _make_condition(proto.Condition, *put_row_item.(*PutRowInBatchWriteRowRequest).Condition)
+		pb.Condition = new(Condition)
+		err := _make_condition(pb.Condition, *put_row_item.(*PutRowInBatchWriteRowRequest).Condition)
 		if err != nil {
 			return err
 		}
@@ -769,17 +768,17 @@ func _make_put_row_item(proto *PutRowInBatchWriteRowRequest, put_row_item interf
 		if err != nil {
 			return err
 		}
-		proto.PrimaryKey = *primary_key
+		pb.PrimaryKey = *primary_key
 		attribute_columns := new([]*Column)
 		err = _make_columns_with_dict(attribute_columns, put_row_item.(*PutRowInBatchWriteRowRequest).AttributeColumns)
 		if err != nil {
 			return err
 		}
-		proto.AttributeColumns = *attribute_columns
+		pb.AttributeColumns = *attribute_columns
 
 	case OTSPutRowItem:
-		proto.Condition = new(Condition)
-		err := _make_condition(proto.Condition, put_row_item.(OTSPutRowItem).Condition)
+		pb.Condition = new(Condition)
+		err := _make_condition(pb.Condition, put_row_item.(OTSPutRowItem).Condition)
 		if err != nil {
 			return err
 		}
@@ -788,13 +787,13 @@ func _make_put_row_item(proto *PutRowInBatchWriteRowRequest, put_row_item interf
 		if err != nil {
 			return err
 		}
-		proto.PrimaryKey = *primary_key
+		pb.PrimaryKey = *primary_key
 		attribute_columns := new([]*Column)
 		err = _make_columns_with_dict(attribute_columns, DictString(put_row_item.(OTSPutRowItem).AttributeColumns))
 		if err != nil {
 			return err
 		}
-		proto.AttributeColumns = *attribute_columns
+		pb.AttributeColumns = *attribute_columns
 
 	default:
 		return (OTSClientError{}.Set("put_row_item should be an instance of [PutRowInBatchWriteRowRequest, *PutRowInBatchWriteRowRequest or OTSPutRowItem], not %v", reflect.TypeOf(put_row_item)))
@@ -803,11 +802,11 @@ func _make_put_row_item(proto *PutRowInBatchWriteRowRequest, put_row_item interf
 	return nil
 }
 
-func _make_update_row_item(proto *UpdateRowInBatchWriteRowRequest, update_row_item interface{}) error {
+func _make_update_row_item(pb *UpdateRowInBatchWriteRowRequest, update_row_item interface{}) error {
 	switch update_row_item.(type) {
 	case UpdateRowInBatchWriteRowRequest:
-		proto.Condition = new(Condition)
-		err := _make_condition(proto.Condition, *update_row_item.(UpdateRowInBatchWriteRowRequest).Condition)
+		pb.Condition = new(Condition)
+		err := _make_condition(pb.Condition, *update_row_item.(UpdateRowInBatchWriteRowRequest).Condition)
 		if err != nil {
 			return err
 		}
@@ -816,17 +815,17 @@ func _make_update_row_item(proto *UpdateRowInBatchWriteRowRequest, update_row_it
 		if err != nil {
 			return err
 		}
-		proto.PrimaryKey = *primary_key
+		pb.PrimaryKey = *primary_key
 		attribute_columns := new([]*ColumnUpdate)
 		err = _make_update_of_attribute_columns_with_dict(attribute_columns, update_row_item.(UpdateRowInBatchWriteRowRequest).AttributeColumns)
 		if err != nil {
 			return err
 		}
-		proto.AttributeColumns = *attribute_columns
+		pb.AttributeColumns = *attribute_columns
 
 	case *UpdateRowInBatchWriteRowRequest:
-		proto.Condition = new(Condition)
-		err := _make_condition(proto.Condition, *update_row_item.(*UpdateRowInBatchWriteRowRequest).Condition)
+		pb.Condition = new(Condition)
+		err := _make_condition(pb.Condition, *update_row_item.(*UpdateRowInBatchWriteRowRequest).Condition)
 		if err != nil {
 			return err
 		}
@@ -835,17 +834,17 @@ func _make_update_row_item(proto *UpdateRowInBatchWriteRowRequest, update_row_it
 		if err != nil {
 			return err
 		}
-		proto.PrimaryKey = *primary_key
+		pb.PrimaryKey = *primary_key
 		attribute_columns := new([]*ColumnUpdate)
 		err = _make_update_of_attribute_columns_with_dict(attribute_columns, update_row_item.(*UpdateRowInBatchWriteRowRequest).AttributeColumns)
 		if err != nil {
 			return err
 		}
-		proto.AttributeColumns = *attribute_columns
+		pb.AttributeColumns = *attribute_columns
 
 	case OTSUpdateRowItem:
-		proto.Condition = new(Condition)
-		err := _make_condition(proto.Condition, update_row_item.(OTSUpdateRowItem).Condition)
+		pb.Condition = new(Condition)
+		err := _make_condition(pb.Condition, update_row_item.(OTSUpdateRowItem).Condition)
 		if err != nil {
 			return err
 		}
@@ -854,13 +853,13 @@ func _make_update_row_item(proto *UpdateRowInBatchWriteRowRequest, update_row_it
 		if err != nil {
 			return err
 		}
-		proto.PrimaryKey = *primary_key
+		pb.PrimaryKey = *primary_key
 		attribute_columns := new([]*ColumnUpdate)
 		err = _make_update_of_attribute_columns_with_dict(attribute_columns, DictString(update_row_item.(OTSUpdateRowItem).UpdateOfAttributeColumns))
 		if err != nil {
 			return err
 		}
-		proto.AttributeColumns = *attribute_columns
+		pb.AttributeColumns = *attribute_columns
 
 	default:
 		return (OTSClientError{}.Set("update_row_item should be an instance of [UpdateRowInBatchWriteRowRequest, *UpdateRowInBatchWriteRowRequest or OTSUpdateRowItem], not %v", reflect.TypeOf(update_row_item)))
@@ -869,11 +868,11 @@ func _make_update_row_item(proto *UpdateRowInBatchWriteRowRequest, update_row_it
 	return nil
 }
 
-func _make_delete_row_item(proto *DeleteRowInBatchWriteRowRequest, delete_row_item interface{}) error {
+func _make_delete_row_item(pb *DeleteRowInBatchWriteRowRequest, delete_row_item interface{}) error {
 	switch delete_row_item.(type) {
 	case DeleteRowInBatchWriteRowRequest:
-		proto.Condition = new(Condition)
-		err := _make_condition(proto.Condition, *delete_row_item.(DeleteRowInBatchWriteRowRequest).Condition)
+		pb.Condition = new(Condition)
+		err := _make_condition(pb.Condition, *delete_row_item.(DeleteRowInBatchWriteRowRequest).Condition)
 		if err != nil {
 			return err
 		}
@@ -882,11 +881,11 @@ func _make_delete_row_item(proto *DeleteRowInBatchWriteRowRequest, delete_row_it
 		if err != nil {
 			return err
 		}
-		proto.PrimaryKey = *primary_key
+		pb.PrimaryKey = *primary_key
 
 	case *DeleteRowInBatchWriteRowRequest:
-		proto.Condition = new(Condition)
-		err := _make_condition(proto.Condition, *delete_row_item.(*DeleteRowInBatchWriteRowRequest).Condition)
+		pb.Condition = new(Condition)
+		err := _make_condition(pb.Condition, *delete_row_item.(*DeleteRowInBatchWriteRowRequest).Condition)
 		if err != nil {
 			return err
 		}
@@ -895,11 +894,11 @@ func _make_delete_row_item(proto *DeleteRowInBatchWriteRowRequest, delete_row_it
 		if err != nil {
 			return err
 		}
-		proto.PrimaryKey = *primary_key
+		pb.PrimaryKey = *primary_key
 
 	case OTSDeleteRowItem:
-		proto.Condition = new(Condition)
-		err := _make_condition(proto.Condition, delete_row_item.(OTSDeleteRowItem).Condition)
+		pb.Condition = new(Condition)
+		err := _make_condition(pb.Condition, delete_row_item.(OTSDeleteRowItem).Condition)
 		if err != nil {
 			return err
 		}
@@ -908,7 +907,7 @@ func _make_delete_row_item(proto *DeleteRowInBatchWriteRowRequest, delete_row_it
 		if err != nil {
 			return err
 		}
-		proto.PrimaryKey = *primary_key
+		pb.PrimaryKey = *primary_key
 
 	default:
 		return (OTSClientError{}.Set("delete_row_item should be an instance of [DeleteRowInBatchWriteRowRequest, *DeleteRowInBatchWriteRowRequest or OTSDeleteRowItem], not %v", reflect.TypeOf(delete_row_item)))
@@ -917,11 +916,11 @@ func _make_delete_row_item(proto *DeleteRowInBatchWriteRowRequest, delete_row_it
 	return nil
 }
 
-func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) error {
+func _make_batch_write_row(pb *BatchWriteRowRequest, batch_list interface{}) error {
 	switch batch_list.(type) {
 	case []TableInBatchWriteRowRequest:
 		list_len := len(batch_list.([]TableInBatchWriteRowRequest))
-		proto.Tables = make([]*TableInBatchWriteRowRequest, list_len)
+		pb.Tables = make([]*TableInBatchWriteRowRequest, list_len)
 		for i, v := range batch_list.([]TableInBatchWriteRowRequest) {
 			table_item := new(TableInBatchWriteRowRequest)
 			// table_name
@@ -961,12 +960,12 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 				}
 				table_item.DeleteRows[i1] = delete_rows_item
 			}
-			proto.Tables[i] = table_item
+			pb.Tables[i] = table_item
 		}
 
 	case []*TableInBatchWriteRowRequest:
 		list_len := len(batch_list.([]*TableInBatchWriteRowRequest))
-		proto.Tables = make([]*TableInBatchWriteRowRequest, list_len)
+		pb.Tables = make([]*TableInBatchWriteRowRequest, list_len)
 		for i, v := range batch_list.([]*TableInBatchWriteRowRequest) {
 			table_item := new(TableInBatchWriteRowRequest)
 			// table_name
@@ -1006,12 +1005,12 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 				}
 				table_item.DeleteRows[i1] = delete_rows_item
 			}
-			proto.Tables[i] = table_item
+			pb.Tables[i] = table_item
 		}
 
 	case OTSBatchWriteRowRequest:
 		list_len := len(batch_list.(OTSBatchWriteRowRequest))
-		proto.Tables = make([]*TableInBatchWriteRowRequest, list_len)
+		pb.Tables = make([]*TableInBatchWriteRowRequest, list_len)
 		for i, v := range batch_list.(OTSBatchWriteRowRequest) {
 			table_item := new(TableInBatchWriteRowRequest)
 			// table_name
@@ -1051,7 +1050,7 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 				}
 				table_item.DeleteRows[i1] = delete_rows_item
 			}
-			proto.Tables[i] = table_item
+			pb.Tables[i] = table_item
 		}
 
 	default:
@@ -1067,73 +1066,73 @@ func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) 
 func TestEncoder() {
 	fmt.Println("Encoder test...")
 
-	// func _make_repeated_column_names(proto []string, columns_to_get []string) error
-	// var proto []string
-	// _make_repeated_column_names(&proto, []string{})
-	// fmt.Println(proto)
-	// _make_repeated_column_names(&proto, []string{"toby", "allen"})
-	// fmt.Println(proto)
-	// _make_repeated_column_names(&proto, []string{"toby1", "allen2"})
-	// fmt.Println(proto)
+	// func _make_repeated_column_names(pb []string, columns_to_get []string) error
+	// var pb []string
+	// _make_repeated_column_names(&pb, []string{})
+	// fmt.Println(pb)
+	// _make_repeated_column_names(&pb, []string{"toby", "allen"})
+	// fmt.Println(pb)
+	// _make_repeated_column_names(&pb, []string{"toby1", "allen2"})
+	// fmt.Println(pb)
 
-	// func _make_column_value(proto *ColumnValue, value interface{})
-	// proto := ColumnValue{}
-	// _make_column_value(&proto, "tobyzxj")
-	// fmt.Println(proto, proto.GetVString())
-	// _make_column_value(&proto, 123)
-	// fmt.Println(proto, proto.GetVInt())
+	// func _make_column_value(pb *ColumnValue, value interface{})
+	// pb := ColumnValue{}
+	// _make_column_value(&pb, "tobyzxj")
+	// fmt.Println(pb, pb.GetVString())
+	// _make_column_value(&pb, 123)
+	// fmt.Println(pb, pb.GetVInt())
 
 	// func _get_column_type(type_str string) ColumnType
-	// proto := _get_column_type("INF_MIN")
-	// fmt.Println(proto)
-	// proto = _get_column_type("tobyzxj")
-	// fmt.Println(proto)
+	// pb := _get_column_type("INF_MIN")
+	// fmt.Println(pb)
+	// pb = _get_column_type("tobyzxj")
+	// fmt.Println(pb)
 
-	// func _make_condition(proto *Condition, condition interface{}) error
+	// func _make_condition(pb *Condition, condition interface{}) error
 	// [1]
-	// proto := Condition{}
-	// fmt.Println(proto)
+	// pb := Condition{}
+	// fmt.Println(pb)
 	// prowExistence := new(RowExistenceExpectation)
 	// *prowExistence = RowExistenceExpectation_IGNORE
-	// _make_condition(&proto, Condition{RowExistence: prowExistence})
-	// fmt.Println(proto)
+	// _make_condition(&pb, Condition{RowExistence: prowExistence})
+	// fmt.Println(pb)
 	//
 	// [2]
-	// proto := Condition{}
-	// fmt.Println(proto)
+	// pb := Condition{}
+	// fmt.Println(pb)
 	// prowExistence := new(RowExistenceExpectation)
 	// *prowExistence = RowExistenceExpectation_IGNORE
-	// _make_condition(&proto, &Condition{RowExistence: prowExistence})
-	// fmt.Println(proto)
+	// _make_condition(&pb, &Condition{RowExistence: prowExistence})
+	// fmt.Println(pb)
 	//
 	// [3]
-	// proto := Condition{}
-	// fmt.Println(proto)
-	// _make_condition(&proto, "IGNORE")
-	// fmt.Println(proto)
+	// pb := Condition{}
+	// fmt.Println(pb)
+	// _make_condition(&pb, "IGNORE")
+	// fmt.Println(pb)
 	//
 	// [4]
-	// proto := Condition{}
-	// fmt.Println(proto)
-	// _make_condition(&proto, "NO_IGNORE")
-	// fmt.Println(proto)
+	// pb := Condition{}
+	// fmt.Println(pb)
+	// _make_condition(&pb, "NO_IGNORE")
+	// fmt.Println(pb)
 
-	// func _make_column_schema(proto *ColumnSchema, schema_tuple ColumnSchema) error
-	// proto := new(ColumnSchema)
-	// fmt.Println(proto)
+	// func _make_column_schema(pb *ColumnSchema, schema_tuple ColumnSchema) error
+	// pb := new(ColumnSchema)
+	// fmt.Println(pb)
 	// column_type := new(ColumnType)
 	// *column_type = ColumnType_INF_MIN
 	// schema_tuple := ColumnSchema{
 	// 	Name: NewString("toby"),
 	// 	Type: column_type,
 	// }
-	// _make_column_schema(proto, schema_tuple)
-	// fmt.Println(proto)
+	// _make_column_schema(pb, schema_tuple)
+	// fmt.Println(pb)
 
-	// func _make_schemas_with_list(proto *[]*ColumnSchema, schema_list interface{}) error
+	// func _make_schemas_with_list(pb *[]*ColumnSchema, schema_list interface{}) error
 	// [1]
-	// var proto = new([]*ColumnSchema)
-	// fmt.Println(proto)
+	// var pb = new([]*ColumnSchema)
+	// fmt.Println(pb)
 	// column_type := new(ColumnType)
 	// *column_type = ColumnType_INF_MIN
 	// schema_list := []ColumnSchema{
@@ -1141,16 +1140,16 @@ func TestEncoder() {
 	// 	{Name: NewString("toby2"), Type: column_type},
 	// 	{Name: NewString("toby3"), Type: column_type},
 	// }
-	// err := _make_schemas_with_list(proto, schema_list)
+	// err := _make_schemas_with_list(pb, schema_list)
 	// if err != nil {
 	// 	fmt.Println("Error", err)
 	// }
-	// fmt.Println(proto)
+	// fmt.Println(pb)
 	//
-	// func _make_schemas_with_list(proto *[]*ColumnSchema, schema_list interface{}) error
+	// func _make_schemas_with_list(pb *[]*ColumnSchema, schema_list interface{}) error
 	// [2]
-	// var proto = new([]*ColumnSchema)
-	// fmt.Println(proto)
+	// var pb = new([]*ColumnSchema)
+	// fmt.Println(pb)
 	// column_type := new(ColumnType)
 	// *column_type = ColumnType_INF_MIN
 	// schema_list := []TupleString{
@@ -1158,28 +1157,28 @@ func TestEncoder() {
 	// 	{"toby2", "INTEGER"},
 	// 	{"toby3", "STRING"},
 	// }
-	// err := _make_schemas_with_list(proto, schema_list)
+	// err := _make_schemas_with_list(pb, schema_list)
 	// if err != nil {
 	// 	fmt.Println("Error", err)
 	// }
-	// fmt.Println(proto)
+	// fmt.Println(pb)
 
-	// func _make_columns_with_dict(proto *[]*Column, column_dict interface{}) error
+	// func _make_columns_with_dict(pb *[]*Column, column_dict interface{}) error
 	// [1]
-	// proto := new([]*Column)
-	// fmt.Println(proto)
+	// pb := new([]*Column)
+	// fmt.Println(pb)
 	// column_value := new(ColumnValue)
 	// _make_column_value(column_value, 123)
 	// column_dict := []Column{
 	// 	{Name: NewString("tobyzxj1"), Value: column_value},
 	// 	{Name: NewString("tobyzxj2"), Value: column_value},
 	// }
-	// _make_columns_with_dict(proto, column_dict)
-	// fmt.Println(proto)
+	// _make_columns_with_dict(pb, column_dict)
+	// fmt.Println(pb)
 	//
 	// [2]
-	// proto := new([]*Column)
-	// fmt.Println(proto)
+	// pb := new([]*Column)
+	// fmt.Println(pb)
 	// column_value := new(ColumnValue)
 	// _make_column_value(column_value, 123)
 	// column_dict := []*Column{
@@ -1192,23 +1191,23 @@ func TestEncoder() {
 	// 		Value: column_value,
 	// 	},
 	// }
-	// _make_columns_with_dict(proto, column_dict)
-	// fmt.Println(proto)
+	// _make_columns_with_dict(pb, column_dict)
+	// fmt.Println(pb)
 	//
 	// [3]
-	// proto := new([]*Column)
-	// fmt.Println(proto)
+	// pb := new([]*Column)
+	// fmt.Println(pb)
 	// column_dict := DictString{
 	// 	"tobyzxj1": 123,
 	// 	"tobyzxj2": "i'm here",
 	// }
-	// _make_columns_with_dict(proto, column_dict)
-	// fmt.Println(proto)
+	// _make_columns_with_dict(pb, column_dict)
+	// fmt.Println(pb)
 
-	// func _make_update_of_attribute_columns_with_dict(proto *[]*ColumnUpdate, column_dict interface{}) error
+	// func _make_update_of_attribute_columns_with_dict(pb *[]*ColumnUpdate, column_dict interface{}) error
 	// [1]
-	// proto := new([]*ColumnUpdate)
-	// fmt.Println(proto)
+	// pb := new([]*ColumnUpdate)
+	// fmt.Println(pb)
 	// column_update_type1 := new(OperationType)
 	// *column_update_type1 = OperationType_PUT
 	// column_update_type2 := new(OperationType)
@@ -1219,12 +1218,12 @@ func TestEncoder() {
 	// 	{Type: column_update_type1, Name: NewString("tobyzxj1"), Value: column_update_value},
 	// 	{Type: column_update_type2, Name: NewString("tobyzxj2")},
 	// }
-	// _make_update_of_attribute_columns_with_dict(proto, column_dict)
-	// fmt.Println(proto)
+	// _make_update_of_attribute_columns_with_dict(pb, column_dict)
+	// fmt.Println(pb)
 	//
 	// [2]
-	// proto := new([]*ColumnUpdate)
-	// fmt.Println(proto)
+	// pb := new([]*ColumnUpdate)
+	// fmt.Println(pb)
 	// column_update_type1 := new(OperationType)
 	// *column_update_type1 = OperationType_PUT
 	// column_update_type2 := new(OperationType)
@@ -1242,12 +1241,12 @@ func TestEncoder() {
 	// 		Name: NewString("tobyzxj2"),
 	// 	},
 	// }
-	// _make_update_of_attribute_columns_with_dict(proto, column_dict)
-	// fmt.Println(proto)
+	// _make_update_of_attribute_columns_with_dict(pb, column_dict)
+	// fmt.Println(pb)
 	//
 	// [3]
-	// proto := new([]*ColumnUpdate)
-	// fmt.Println(proto)
+	// pb := new([]*ColumnUpdate)
+	// fmt.Println(pb)
 	// column_dict := DictString{
 	// 	"PUT": DictString{
 	// 		"put_name1": "value1",
@@ -1257,13 +1256,13 @@ func TestEncoder() {
 	// 		"del_name1", "del_name2",
 	// 	},
 	// }
-	// _make_update_of_attribute_columns_with_dict(proto, column_dict)
-	// fmt.Println(proto)
+	// _make_update_of_attribute_columns_with_dict(pb, column_dict)
+	// fmt.Println(pb)
 
-	// func _make_table_meta(proto *TableMeta, table_meta interface{}) error
+	// func _make_table_meta(pb *TableMeta, table_meta interface{}) error
 	// [1]
-	// proto := new(TableMeta)
-	// fmt.Println(proto)
+	// pb := new(TableMeta)
+	// fmt.Println(pb)
 	// column_interge_type := new(ColumnType)
 	// *column_interge_type = ColumnType_INTEGER
 	// column_string_type := new(ColumnType)
@@ -1281,24 +1280,24 @@ func TestEncoder() {
 	// 		},
 	// 	},
 	// }
-	// _make_table_meta(proto, table_meta)
-	// fmt.Println(proto)
+	// _make_table_meta(pb, table_meta)
+	// fmt.Println(pb)
 	//
 	// [2]
-	// proto := new(TableMeta)
-	// fmt.Println(proto)
+	// pb := new(TableMeta)
+	// fmt.Println(pb)
 	// table_meta := TupleString{
 	// 	"tablename", []TupleString{
 	// 		{"PK1", "INTEGER"},
 	// 		{"PK2", "STRING"},
 	// 	},
 	// }
-	// _make_table_meta(proto, table_meta)
-	// fmt.Println(proto)
+	// _make_table_meta(pb, table_meta)
+	// fmt.Println(pb)
 	//
 	// [3]
-	// proto := new(TableMeta)
-	// fmt.Println(proto)
+	// pb := new(TableMeta)
+	// fmt.Println(pb)
 	// table_meta := OTSTableMeta{
 	// 	"tablename",
 	// 	OTSSchemaOfPrimaryKey{
@@ -1306,45 +1305,45 @@ func TestEncoder() {
 	// 		"PK2": "STRING",
 	// 	},
 	// }
-	// _make_table_meta(proto, table_meta)
-	// fmt.Println(proto)
+	// _make_table_meta(pb, table_meta)
+	// fmt.Println(pb)
 
-	// func _make_capacity_unit(proto *CapacityUnit, capacity_unit interface{}) error
-	// proto := new(CapacityUnit)
-	// fmt.Println(proto)
+	// func _make_capacity_unit(pb *CapacityUnit, capacity_unit interface{}) error
+	// pb := new(CapacityUnit)
+	// fmt.Println(pb)
 	// capacity_unit := OTSCapacityUnit{100, 100}
-	// _make_capacity_unit(proto, capacity_unit)
-	// fmt.Println(proto)
+	// _make_capacity_unit(pb, capacity_unit)
+	// fmt.Println(pb)
 
-	// func _make_reserved_throughput(proto *ReservedThroughput, reserved_throughput interface{}) error
-	// proto := new(ReservedThroughput)
-	// fmt.Println(proto)
+	// func _make_reserved_throughput(pb *ReservedThroughput, reserved_throughput interface{}) error
+	// pb := new(ReservedThroughput)
+	// fmt.Println(pb)
 	// reserved_throughput := OTSReservedThroughput{
 	// 	OTSCapacityUnit{100, 100},
 	// }
-	// _make_reserved_throughput(proto, reserved_throughput)
-	// fmt.Println(proto)
+	// _make_reserved_throughput(pb, reserved_throughput)
+	// fmt.Println(pb)
 
-	// func _make_update_capacity_unit(proto *CapacityUnit, capacity_unit interface{}) error
-	// proto := new(CapacityUnit)
-	// fmt.Println(proto)
+	// func _make_update_capacity_unit(pb *CapacityUnit, capacity_unit interface{}) error
+	// pb := new(CapacityUnit)
+	// fmt.Println(pb)
 	// capacity_unit := OTSCapacityUnit{Read: 100}
-	// _make_update_capacity_unit(proto, capacity_unit)
-	// fmt.Println(proto)
+	// _make_update_capacity_unit(pb, capacity_unit)
+	// fmt.Println(pb)
 
-	// func _make_update_reserved_throughput(proto *ReservedThroughput, reserved_throughput interface{}) error
-	// proto := new(ReservedThroughput)
-	// fmt.Println(proto)
+	// func _make_update_reserved_throughput(pb *ReservedThroughput, reserved_throughput interface{}) error
+	// pb := new(ReservedThroughput)
+	// fmt.Println(pb)
 	// reserved_throughput := OTSReservedThroughput{
 	// 	OTSCapacityUnit{Read: 100, Write: 100},
 	// }
-	// _make_update_reserved_throughput(proto, reserved_throughput)
-	// fmt.Println(proto)
+	// _make_update_reserved_throughput(pb, reserved_throughput)
+	// fmt.Println(pb)
 
-	// func _make_batch_get_row(proto *BatchGetRowRequest, batch_list interface{}) error
+	// func _make_batch_get_row(pb *BatchGetRowRequest, batch_list interface{}) error
 	// [1]
-	// proto := new(BatchGetRowRequest)
-	// fmt.Println(proto)
+	// pb := new(BatchGetRowRequest)
+	// fmt.Println(pb)
 	// column := new([]*Column)
 	// column_value := new(ColumnValue)
 	// _make_column_value(column_value, 123)
@@ -1382,12 +1381,12 @@ func TestEncoder() {
 	// 	},
 	// }
 	// // fmt.Println("batch_list:", batch_list)
-	// _make_batch_get_row(proto, batch_list)
-	// fmt.Println(proto)
+	// _make_batch_get_row(pb, batch_list)
+	// fmt.Println(pb)
 	//
 	// [2]
-	// proto := new(BatchGetRowRequest)
-	// fmt.Println(proto)
+	// pb := new(BatchGetRowRequest)
+	// fmt.Println(pb)
 	// column := new([]*Column)
 	// column_value := new(ColumnValue)
 	// _make_column_value(column_value, 123)
@@ -1425,12 +1424,12 @@ func TestEncoder() {
 	// 	},
 	// }
 	// // fmt.Println("batch_list:", batch_list)
-	// _make_batch_get_row(proto, batch_list)
-	// fmt.Println(proto)
+	// _make_batch_get_row(pb, batch_list)
+	// fmt.Println(pb)
 	//
 	// [3]
-	// proto := new(BatchGetRowRequest)
-	// fmt.Println(proto)
+	// pb := new(BatchGetRowRequest)
+	// fmt.Println(pb)
 
 	// batch_list := OTSBatchGetRowRequest{
 	// 	{
@@ -1461,13 +1460,13 @@ func TestEncoder() {
 	//
 	// batch_list = OTSBatchGetRowRequest{} // test none
 	// fmt.Println("batch_list:", batch_list)
-	// _make_batch_get_row(proto, batch_list)
-	// fmt.Println(proto)
+	// _make_batch_get_row(pb, batch_list)
+	// fmt.Println(pb)
 
-	// func _make_put_row_item(proto *PutRowInBatchWriteRowRequest, put_row_item interface{}) error
+	// func _make_put_row_item(pb *PutRowInBatchWriteRowRequest, put_row_item interface{}) error
 	// [1]
-	// proto := new(PutRowInBatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(PutRowInBatchWriteRowRequest)
+	// fmt.Println(pb)
 	// condition := new(Condition)
 	// prowExistence := new(RowExistenceExpectation)
 	// *prowExistence = RowExistenceExpectation_IGNORE
@@ -1491,12 +1490,12 @@ func TestEncoder() {
 	// 	PrimaryKey:       *pk_column,
 	// 	AttributeColumns: *attr_column,
 	// }
-	// _make_put_row_item(proto, put_row_item)
-	// fmt.Println(proto)
+	// _make_put_row_item(pb, put_row_item)
+	// fmt.Println(pb)
 	//
 	// [2]
-	// proto := new(PutRowInBatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(PutRowInBatchWriteRowRequest)
+	// fmt.Println(pb)
 	// condition := new(Condition)
 	// prowExistence := new(RowExistenceExpectation)
 	// *prowExistence = RowExistenceExpectation_IGNORE
@@ -1520,12 +1519,12 @@ func TestEncoder() {
 	// 	PrimaryKey:       *pk_column,
 	// 	AttributeColumns: *attr_column,
 	// }
-	// _make_put_row_item(proto, put_row_item)
-	// fmt.Println(proto)
+	// _make_put_row_item(pb, put_row_item)
+	// fmt.Println(pb)
 	//
 	// [3]
-	// proto := new(PutRowInBatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(PutRowInBatchWriteRowRequest)
+	// fmt.Println(pb)
 	// put_row_item := OTSPutRowItem{
 	// 	Condition: OTSCondition_EXPECT_EXIST,
 	// 	PrimaryKey: OTSPrimaryKey{
@@ -1538,14 +1537,14 @@ func TestEncoder() {
 	// 		"age":     20,
 	// 	},
 	// }
-	// _make_put_row_item(proto, put_row_item)
-	// fmt.Println(proto)
+	// _make_put_row_item(pb, put_row_item)
+	// fmt.Println(pb)
 
-	// func _make_update_row_item(proto *UpdateRowInBatchWriteRowRequest, update_row_item interface{}) error
+	// func _make_update_row_item(pb *UpdateRowInBatchWriteRowRequest, update_row_item interface{}) error
 	//
 	// [1]
-	// proto := new(UpdateRowInBatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(UpdateRowInBatchWriteRowRequest)
+	// fmt.Println(pb)
 	// condition := new(Condition)
 	// prowExistence := new(RowExistenceExpectation)
 	// *prowExistence = RowExistenceExpectation_IGNORE
@@ -1573,13 +1572,13 @@ func TestEncoder() {
 	// 	PrimaryKey:       *pk_column,
 	// 	AttributeColumns: *attr_column,
 	// }
-	// _make_update_row_item(proto, update_row_item)
-	// fmt.Println(proto)
+	// _make_update_row_item(pb, update_row_item)
+	// fmt.Println(pb)
 	//
 	// [2]
 	//
-	// proto := new(UpdateRowInBatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(UpdateRowInBatchWriteRowRequest)
+	// fmt.Println(pb)
 	// condition := new(Condition)
 	// prowExistence := new(RowExistenceExpectation)
 	// *prowExistence = RowExistenceExpectation_IGNORE
@@ -1607,12 +1606,12 @@ func TestEncoder() {
 	// 	PrimaryKey:       *pk_column,
 	// 	AttributeColumns: *attr_column,
 	// }
-	// _make_update_row_item(proto, update_row_item)
-	// fmt.Println(proto)
+	// _make_update_row_item(pb, update_row_item)
+	// fmt.Println(pb)
 	//
 	// [3]
-	// proto := new(UpdateRowInBatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(UpdateRowInBatchWriteRowRequest)
+	// fmt.Println(pb)
 	// update_row_item := OTSUpdateRowItem{
 	// 	Condition: OTSCondition_EXPECT_EXIST,
 	// 	PrimaryKey: OTSPrimaryKey{
@@ -1629,13 +1628,13 @@ func TestEncoder() {
 	// 		},
 	// 	},
 	// }
-	// _make_update_row_item(proto, update_row_item)
-	// fmt.Println(proto)
+	// _make_update_row_item(pb, update_row_item)
+	// fmt.Println(pb)
 	//
 	//
 	// [4]
-	// proto := new(UpdateRowInBatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(UpdateRowInBatchWriteRowRequest)
+	// fmt.Println(pb)
 	// update_row_item := OTSUpdateRowItem{
 	// 	Condition: OTSCondition_EXPECT_EXIST,
 	// 	PrimaryKey: OTSPrimaryKey{
@@ -1652,14 +1651,14 @@ func TestEncoder() {
 	// 		},
 	// 	},
 	// }
-	// _make_update_row_item(proto, update_row_item)
-	// fmt.Println(proto)
+	// _make_update_row_item(pb, update_row_item)
+	// fmt.Println(pb)
 
-	// func _make_delete_row_item(proto *DeleteRowInBatchWriteRowRequest, delete_row_item interface{}) error
+	// func _make_delete_row_item(pb *DeleteRowInBatchWriteRowRequest, delete_row_item interface{}) error
 	//
 	// [1]
-	// proto := new(DeleteRowInBatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(DeleteRowInBatchWriteRowRequest)
+	// fmt.Println(pb)
 	// condition := new(Condition)
 	// prowExistence := new(RowExistenceExpectation)
 	// *prowExistence = RowExistenceExpectation_IGNORE
@@ -1675,12 +1674,12 @@ func TestEncoder() {
 	// 	Condition:  condition,
 	// 	PrimaryKey: *pk_column,
 	// }
-	// _make_delete_row_item(proto, delete_row_item)
-	// fmt.Println(proto)
+	// _make_delete_row_item(pb, delete_row_item)
+	// fmt.Println(pb)
 	//
 	// [2]
-	// proto := new(DeleteRowInBatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(DeleteRowInBatchWriteRowRequest)
+	// fmt.Println(pb)
 	// condition := new(Condition)
 	// prowExistence := new(RowExistenceExpectation)
 	// *prowExistence = RowExistenceExpectation_IGNORE
@@ -1696,12 +1695,12 @@ func TestEncoder() {
 	// 	Condition:  condition,
 	// 	PrimaryKey: *pk_column,
 	// }
-	// _make_delete_row_item(proto, delete_row_item)
-	// fmt.Println(proto)
+	// _make_delete_row_item(pb, delete_row_item)
+	// fmt.Println(pb)
 	//
 	// [3]
-	// proto := new(DeleteRowInBatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(DeleteRowInBatchWriteRowRequest)
+	// fmt.Println(pb)
 	// delete_row_item := OTSDeleteRowItem{
 	// 	Condition: OTSCondition_IGNORE,
 	// 	PrimaryKey: OTSPrimaryKey{
@@ -1709,14 +1708,14 @@ func TestEncoder() {
 	// 		"uid": 202,
 	// 	},
 	// }
-	// _make_delete_row_item(proto, delete_row_item)
-	// fmt.Println(proto)
+	// _make_delete_row_item(pb, delete_row_item)
+	// fmt.Println(pb)
 
-	// func _make_batch_write_row(proto *BatchWriteRowRequest, batch_list interface{}) error
+	// func _make_batch_write_row(pb *BatchWriteRowRequest, batch_list interface{}) error
 	//
 	// [1]
-	// proto := new(BatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(BatchWriteRowRequest)
+	// fmt.Println(pb)
 	// // put row
 	// put_row := new(PutRowInBatchWriteRowRequest)
 	// put_row_item := OTSPutRowItem{
@@ -1790,12 +1789,12 @@ func TestEncoder() {
 	// 		},
 	// 	},
 	// }
-	// _make_batch_write_row(proto, batch_list)
-	// fmt.Println(proto)
+	// _make_batch_write_row(pb, batch_list)
+	// fmt.Println(pb)
 	//
 	// [2]
-	// proto := new(BatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(BatchWriteRowRequest)
+	// fmt.Println(pb)
 	// // put row
 	// put_row := new(PutRowInBatchWriteRowRequest)
 	// put_row_item := OTSPutRowItem{
@@ -1869,12 +1868,12 @@ func TestEncoder() {
 	// 		},
 	// 	},
 	// }
-	// _make_batch_write_row(proto, batch_list)
-	// fmt.Println(proto)
+	// _make_batch_write_row(pb, batch_list)
+	// fmt.Println(pb)
 	//
 	// [3]
-	// proto := new(BatchWriteRowRequest)
-	// fmt.Println(proto)
+	// pb := new(BatchWriteRowRequest)
+	// fmt.Println(pb)
 	// // put row
 	// put_row_item := OTSPutRowItem{
 	// 	Condition: OTSCondition_EXPECT_NOT_EXIST,
@@ -1905,7 +1904,7 @@ func TestEncoder() {
 	// 		},
 	// 	},
 	// }
-
+	//
 	// // delete_row
 	// delete_row_item := OTSDeleteRowItem{
 	// 	Condition: OTSCondition_IGNORE,
@@ -1914,7 +1913,7 @@ func TestEncoder() {
 	// 		"uid": 404,
 	// 	},
 	// }
-
+	//
 	// batch_list := OTSBatchWriteRowRequest{
 	// 	{
 	// 		TableName: "myTable",
@@ -1941,68 +1940,78 @@ func TestEncoder() {
 	// 		},
 	// 	},
 	// }
-	// _make_batch_write_row(proto, batch_list)
-	// fmt.Println(proto)
+	// _make_batch_write_row(pb, batch_list)
+	// fmt.Println(pb)
 }
 
 func _encode_create_table(table_meta *OTSTableMeta, reserved_throughput *OTSReservedThroughput) (req *CreateTableRequest, err error) {
-	proto := new(CreateTableRequest)
-	proto.TableMeta = new(TableMeta)
-	proto.ReservedThroughput = new(ReservedThroughput)
-	err = _make_table_meta(proto.TableMeta, *table_meta)
+	pb := new(CreateTableRequest)
+	pb.TableMeta = new(TableMeta)
+	pb.ReservedThroughput = new(ReservedThroughput)
+	err = _make_table_meta(pb.TableMeta, *table_meta)
 	if err != nil {
 		return nil, err
 	}
 
-	err = _make_reserved_throughput(proto.ReservedThroughput, *reserved_throughput)
+	err = _make_reserved_throughput(pb.ReservedThroughput, *reserved_throughput)
 	if err != nil {
 		return nil, err
 	}
 
-	return proto, nil
+	print_request_message(pb)
+
+	return pb, nil
 }
 
 func _encode_delete_table(table_name string) (req *DeleteTableRequest, err error) {
-	proto := new(DeleteTableRequest)
-	proto.TableName = NewString(table_name)
+	pb := new(DeleteTableRequest)
+	pb.TableName = NewString(table_name)
 
-	return proto, nil
+	print_request_message(pb)
+
+	return pb, nil
 }
 
 func _encode_list_table() (req *ListTableRequest, err error) {
-	proto := new(ListTableRequest)
+	pb := new(ListTableRequest)
 
-	return proto, nil
+	print_request_message(pb)
+
+	return pb, nil
 }
 
 func _encode_update_table(table_name string, reserved_throughput *OTSReservedThroughput) (req *UpdateTableRequest, err error) {
-	proto := new(UpdateTableRequest)
-	proto.TableName = NewString(table_name)
-	proto.ReservedThroughput = new(ReservedThroughput)
-	err = _make_update_reserved_throughput(proto.ReservedThroughput, *reserved_throughput)
+	pb := new(UpdateTableRequest)
+	pb.TableName = NewString(table_name)
+	pb.ReservedThroughput = new(ReservedThroughput)
+	err = _make_update_reserved_throughput(pb.ReservedThroughput, *reserved_throughput)
 	if err != nil {
 		return nil, err
 	}
 
-	return proto, nil
+	print_request_message(pb)
+
+	return pb, nil
 }
 
 func _encode_describe_table(table_name string) (req *DescribeTableRequest, err error) {
-	proto := new(DescribeTableRequest)
-	proto.TableName = NewString(table_name)
+	pb := new(DescribeTableRequest)
+	pb.TableName = NewString(table_name)
 
-	return proto, nil
+	print_request_message(pb)
+
+	return pb, nil
 }
 
 func _encode_get_row(table_name string, primary_key *OTSPrimaryKey, columns_to_get *OTSColumnsToGet) (req *GetRowRequest, err error) {
-	proto := new(GetRowRequest)
-	proto.TableName = NewString(table_name)
+	pb := new(GetRowRequest)
+	pb.TableName = NewString(table_name)
 	_primary_key := new([]*Column)
 	err = _make_columns_with_dict(_primary_key, DictString(*primary_key))
 	if err != nil {
 		return nil, err
 	}
-	proto.PrimaryKey = *_primary_key
+	pb.PrimaryKey = *_primary_key
 
 	if columns_to_get != nil {
 		_columns_to_get := new([]string)
@@ -2010,19 +2019,21 @@ func _encode_get_row(table_name string, primary_key *OTSPrimaryKey, columns_to_g
 		if err != nil {
 			return nil, err
 		}
-		proto.ColumnsToGet = *_columns_to_get
+		pb.ColumnsToGet = *_columns_to_get
 	} else {
-		proto.ColumnsToGet = nil
+		pb.ColumnsToGet = nil
 	}
 
-	return proto, nil
+	print_request_message(pb)
+
+	return pb, nil
 }
 
 func _encode_put_row(table_name string, condition string, primary_key *OTSPrimaryKey, attribute_columns *OTSAttribute) (req *PutRowRequest, err error) {
-	proto := new(PutRowRequest)
-	proto.TableName = NewString(table_name)
-	proto.Condition = new(Condition)
-	err = _make_condition(proto.Condition, condition)
+	pb := new(PutRowRequest)
+	pb.TableName = NewString(table_name)
+	pb.Condition = new(Condition)
+	err = _make_condition(pb.Condition, condition)
 	if err != nil {
 		return nil, err
 	}
@@ -2032,23 +2043,25 @@ func _encode_put_row(table_name string, condition string, primary_key *OTSPrimar
 	if err != nil {
 		return nil, err
 	}
-	proto.PrimaryKey = *_primary_key
+	pb.PrimaryKey = *_primary_key
 
 	_attribute_columns := new([]*Column)
 	err = _make_columns_with_dict(_attribute_columns, DictString(*attribute_columns))
 	if err != nil {
 		return nil, err
 	}
-	proto.AttributeColumns = *_attribute_columns
+	pb.AttributeColumns = *_attribute_columns
 
-	return proto, nil
+	print_request_message(pb)
+
+	return pb, nil
 }
 
 func _encode_update_row(table_name string, condition string, primary_key *OTSPrimaryKey, update_of_attribute_columns *OTSUpdateOfAttribute) (req *UpdateRowRequest, err error) {
-	proto := new(UpdateRowRequest)
-	proto.TableName = NewString(table_name)
-	proto.Condition = new(Condition)
-	err = _make_condition(proto.Condition, condition)
+	pb := new(UpdateRowRequest)
+	pb.TableName = NewString(table_name)
+	pb.Condition = new(Condition)
+	err = _make_condition(pb.Condition, condition)
 	if err != nil {
 		return nil, err
 	}
@@ -2058,23 +2071,25 @@ func _encode_update_row(table_name string, condition string, primary_key *OTSPri
 	if err != nil {
 		return nil, err
 	}
-	proto.PrimaryKey = *_primary_key
+	pb.PrimaryKey = *_primary_key
 
 	_update_of_attribute_columns := new([]*ColumnUpdate)
 	err = _make_update_of_attribute_columns_with_dict(_update_of_attribute_columns, DictString(*update_of_attribute_columns))
 	if err != nil {
 		return nil, err
 	}
-	proto.AttributeColumns = *_update_of_attribute_columns
+	pb.AttributeColumns = *_update_of_attribute_columns
 
-	return proto, nil
+	print_request_message(pb)
+
+	return pb, nil
 }
 
 func _encode_delete_row(table_name string, condition string, primary_key *OTSPrimaryKey) (req *DeleteRowRequest, err error) {
-	proto := new(DeleteRowRequest)
-	proto.TableName = NewString(table_name)
-	proto.Condition = new(Condition)
-	err = _make_condition(proto.Condition, condition)
+	pb := new(DeleteRowRequest)
+	pb.TableName = NewString(table_name)
+	pb.Condition = new(Condition)
+	err = _make_condition(pb.Condition, condition)
 	if err != nil {
 		return nil, err
 	}
@@ -2084,17 +2099,35 @@ func _encode_delete_row(table_name string, condition string, primary_key *OTSPri
 	if err != nil {
 		return nil, err
 	}
-	proto.PrimaryKey = *_primary_key
+	pb.PrimaryKey = *_primary_key
 
-	return proto, nil
+	print_request_message(pb)
+
+	return pb, nil
 }
 
-func _encode_batch_get_row() {
+func _encode_batch_get_row(batch_list *OTSBatchGetRowRequest) (req *BatchGetRowRequest, err error) {
+	pb := new(BatchGetRowRequest)
+	err = _make_batch_get_row(pb, *batch_list)
+	if err != nil {
+		return nil, err
+	}
 
+	print_request_message(pb)
+
+	return pb, nil
 }
 
-func _encode_batch_write_row() {
+func _encode_batch_write_row(batch_list *OTSBatchWriteRowRequest) (req *BatchWriteRowRequest, err error) {
+	pb := new(BatchWriteRowRequest)
+	err = _make_batch_write_row(pb, *batch_list)
+	if err != nil {
+		return nil, err
+	}
 
+	print_request_message(pb)
+
+	return pb, nil
 }
 
 func _encode_get_range() {

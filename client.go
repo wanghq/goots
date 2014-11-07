@@ -21,8 +21,9 @@ import (
 	"github.com/GiterLab/goots/urllib"
 )
 
-var OTSDebugEnable bool = false  // OTS调试默认关闭
-var OTSLoggerEnable bool = false // OTS运行logger记录
+var OTSDebugEnable bool = false     // OTS调试默认关闭
+var OTSLoggerEnable bool = false    // OTS运行logger记录
+var OTSHttpDebugEnable bool = false // OTS HTTP调试记录
 
 const (
 	DEFAULT_ENCODING       = "utf8"
@@ -131,8 +132,10 @@ func New(end_point, accessid, accesskey, instance_name string, kwargs ...interfa
 		url_setting.ConnectTimeout = time.Duration(o.SocketTimeout) * time.Second
 		url_setting.ReadWriteTimeout = time.Duration(o.SocketTimeout) * time.Second
 	}
-	if OTSDebugEnable {
+	if OTSHttpDebugEnable {
 		url_setting.ShowDebug = true
+	} else {
+		url_setting.ShowDebug = false
 	}
 	urllib.SetDefaultSetting(url_setting)
 
@@ -172,15 +175,16 @@ type OTSClient struct {
 func (o *OTSClient) String() string {
 	r := ""
 	r = r + fmt.Sprintln("#### OTSClinet Config ####")
-	r = r + fmt.Sprintln("API_VERSION  :", API_VERSION)
-	r = r + fmt.Sprintln("DebugEnable  :", OTSDebugEnable)
-	r = r + fmt.Sprintln("EndPoint     :", o.EndPoint)
-	r = r + fmt.Sprintln("AccessId     :", o.AccessId)
-	r = r + fmt.Sprintln("AccessKey    :", o.AccessKey)
-	r = r + fmt.Sprintln("InstanceName :", o.InstanceName)
-	r = r + fmt.Sprintln("SocketTimeout:", o.SocketTimeout)
-	r = r + fmt.Sprintln("MaxConnection:", o.MaxConnection)
-	r = r + fmt.Sprintln("LoggerName   :", o.LoggerName)
+	r = r + fmt.Sprintln("API_VERSION    :", API_VERSION)
+	r = r + fmt.Sprintln("DebugEnable    :", OTSDebugEnable)
+	r = r + fmt.Sprintln("EndPoint       :", o.EndPoint)
+	r = r + fmt.Sprintln("AccessId       :", o.AccessId)
+	r = r + fmt.Sprintln("AccessKey      :", o.AccessKey)
+	r = r + fmt.Sprintln("InstanceName   :", o.InstanceName)
+	r = r + fmt.Sprintln("SocketTimeout  :", o.SocketTimeout)
+	r = r + fmt.Sprintln("MaxConnection  :", o.MaxConnection)
+	r = r + fmt.Sprintln("OTSLoggerEnable:", OTSLoggerEnable)
+	r = r + fmt.Sprintln("LoggerName     :", o.LoggerName)
 	// r = r + fmt.Sprintln("Encoding:", o.Encoding)
 	r = r + fmt.Sprintln("##########################")
 
@@ -298,8 +302,10 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 
 	// 2. http send_receive
 	req := urllib.Post(o.EndPoint + query)
-	if OTSDebugEnable {
+	if OTSHttpDebugEnable {
 		req.Debug(true)
+	} else {
+		req.Debug(false)
 	}
 	req.Body(reqbody)
 	if reqheaders != nil {
@@ -334,20 +340,20 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 		fmt.Println("status:", status)
 		fmt.Println("reason:", reason)
 		fmt.Println("headers:", resheaders)
-		if resbody != nil {
-			if len(resbody) == 0 {
-				fmt.Println("body-raw:", "None")
-				fmt.Println("body-string:", "None")
-			} else {
-				fmt.Println("body-raw:", resbody)
-				fmt.Println("body-string:", string(resbody))
-			}
-
-		} else {
-			fmt.Println("body-raw:", "None")
-			fmt.Println("body-string:", "None")
-		}
-		fmt.Println("-----------------------------")
+		// if resbody != nil {
+		// 	if len(resbody) == 0 {
+		// 		fmt.Println("body-raw:", "None")
+		// 		fmt.Println("body-string:", "None")
+		// 	} else {
+		// 		fmt.Println("body-raw:", resbody)
+		// 		fmt.Println("body-string:", string(resbody))
+		// 	}
+		//
+		// } else {
+		// 	fmt.Println("body-raw:", "None")
+		// 	fmt.Println("body-string:", "None")
+		// }
+		// fmt.Println("-----------------------------")
 	}
 
 	// 3. handle_error
@@ -795,12 +801,268 @@ func (o *OTSClient) DeleteRow(table_name string, condition string, primary_key *
 	return r.(*OTSDeleteRowResponse), nil
 }
 
-func (o *OTSClient) BatchGetRow() {
+// 说明：批量获取多行数据。
+//
+// ``batch_list``表示获取多行的条件列表，格式如下：
+//
+// batch_list := &OTSBatchGetRowRequest{
+// 	{
+// 		// TableName
+// 		TableName: "table_name0",
+// 		// PrimaryKey
+// 		Rows: OTSPrimaryKeyRows{
+// 			{"gid": 1, "uid": 101},
+// 			{"gid": 2, "uid": 202},
+// 			{"gid": 3, "uid": 303},
+// 		},
+// 		// ColumnsToGet
+// 		ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
+// 	},
+// 	{
+// 		// TableName
+// 		TableName: "table_name1",
+// 		// PrimaryKey
+// 		Rows: OTSPrimaryKeyRows{
+// 			{"gid": 1, "uid": 101},
+// 			{"gid": 2, "uid": 202},
+// 			{"gid": 3, "uid": 303},
+// 		},
+// 		// ColumnsToGet
+// 		ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
+// 	},
+// 	...
+// }
+//
+// 其中，Rows 为主键，类型为``otstype.OTSPrimaryKeyRows``。
+//
+// 返回：对应行的结果列表。
+//       错误信息
+//
+// ``response_rows_list``为``otstype.OTSBatchGetRowResponse``的实例
+// ``response_rows_list.Tables``为返回的结果列表，与请求的顺序一一对应，格式如下：
+// response_rows_list.Tables --> []*OTSTableInBatchGetRowResponseItem{
+// 	{
+// 		TableName: "table_name0",
+// 		Rows : []*OTSRowInBatchGetRowResponseItem{
+// 			row_data_item0, row_data_item1, ...
+// 		},
+// 	},
+// 	{
+// 		TableName: "table_name1",
+// 		Rows : []*OTSRowInBatchGetRowResponseItem{
+// 			row_data_item0, row_data_item1, ...
+// 		},
+// 	},
+// 	...
+// }
+//
+// 其中，row_data_item0, row_data_item1为``otstype.OTSRowInBatchGetRowResponseItem``的实例。
+//
+// 示例：
+//
+// batch_list_get := &OTSBatchGetRowRequest{
+// 	{
+// 		// TableName
+// 		TableName: "myTable",
+// 		// PrimaryKey
+// 		Rows: OTSPrimaryKeyRows{
+// 			{"gid": 1, "uid": 101},
+// 			{"gid": 2, "uid": 202},
+// 			{"gid": 3, "uid": 303},
+// 		},
+// 		// ColumnsToGet
+// 		ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
+// 	},
+// 	{
+// 		// TableName
+// 		TableName: "notExistTable",
+// 		// PrimaryKey
+// 		Rows: OTSPrimaryKeyRows{
+// 			{"gid": 1, "uid": 101},
+// 			{"gid": 2, "uid": 202},
+// 			{"gid": 3, "uid": 303},
+// 		},
+// 		// ColumnsToGet
+// 		ColumnsToGet: OTSColumnsToGet{"name", "address", "mobile", "age"},
+// 	},
+// }
+// batch_get_response, ots_err := ots_client.BatchGetRow(batch_list_get)
+//
+func (o *OTSClient) BatchGetRow(batch_list *OTSBatchGetRowRequest) (response_rows_list *OTSBatchGetRowResponse, err *OTSError) {
+	err = new(OTSError)
+	if batch_list == nil {
+		return nil, err.SetClientMessage("[BatchGetRow] primary_key should not be nil")
+	}
 
+	resp, service_err := o._request_helper("BatchGetRow", batch_list)
+	if service_err != nil {
+		return nil, err.SetServiceError(service_err)
+	}
+
+	r, e := o._check_request_helper_error(resp)
+	if e != nil {
+		return nil, err.SetClientMessage("[BatchGetRow] %s", e)
+	}
+
+	return r.(*OTSBatchGetRowResponse), nil
 }
 
-func (o *OTSClient) BatchWriteRow() {
+// 说明：批量修改多行数据。
+//
+// ``batch_list``表示获取多行的条件列表，格式如下：
+//
+// batch_list := &OTSBatchWriteRowRequest{
+// 	{
+// 		TableName: "table_name0",
+// 		PutRows: OTSPutRows{
+// 			put_row_item, ...
+// 		},
+// 		UpdateRows: OTSUpdateRows{
+// 			update_row_item, ...
+// 		},
+// 		DeleteRows: OTSDeleteRows{
+// 			delete_row_item, ...
+// 		},
+// 	},
+// 	{
+// 		TableName: "table_name1",
+// 		PutRows: OTSPutRows{
+// 			put_row_item, ...
+// 		},
+// 		UpdateRows: OTSUpdateRows{
+// 			update_row_item, ...
+// 		},
+// 		DeleteRows: OTSDeleteRows{
+// 			delete_row_item, ...
+// 		},
+// 	},
+// 	...
+// }
+//
+// 其中，put_row_item, 是``otstype.OTSPutRows``类的实例；
+//       update_row_item, 是``otstype.OTSUpdateRows``类的实例；
+//       delete_row_item, 是``otstype.OTSDeleteRows``类的实例。
+//
+// 返回：对应行的修改结果列表。
+//       错误信息。
+//
+//
+// ``response_items_list``为``otstype.OTSBatchWriteRowResponse``的实例
+// ``response_items_list.Tables``为返回的结果列表，与请求的顺序一一对应，格式如下：
+// response_items_list.Tables --> []*OTSTableInBatchWriteRowResponseItem{
+// 	{
+// 		TableName: "table_name0", // for table_name0
+// 		PutRows: []*OTSRowInBatchWriteRowResponseItem{
+// 			put_row_resp, ...
+// 		},
+// 		UpdateRows: []*OTSRowInBatchWriteRowResponseItem{
+// 			update_row_resp, ...
+// 		},
+// 		DeleteRows: []*OTSRowInBatchWriteRowResponseItem{
+// 			delete_row_resp, ...
+// 		}
+// 	},
+// 	{
+// 		TableName: "table_name1", // for table_name1
+// 		PutRows: []*OTSRowInBatchWriteRowResponseItem{
+// 			put_row_resp, ...
+// 		},
+// 		UpdateRows: []*OTSRowInBatchWriteRowResponseItem{
+// 			update_row_resp, ...
+// 		},
+// 		DeleteRows: []*OTSRowInBatchWriteRowResponseItem{
+// 			delete_row_resp, ...
+// 		}
+// 	},
+// 	...
+// }
+//
+// 其中put_row_resp，update_row_resp和delete_row_resp都是``*otstype.OTSRowInBatchWriteRowResponseItem``类的实例。
+//
+// 示例：
+//
+// put_row_item := OTSPutRowItem{
+// 	Condition: OTSCondition_EXPECT_NOT_EXIST, // OTSCondition_IGNORE
+// 	PrimaryKey: OTSPrimaryKey{
+// 		"gid": 2,
+// 		"uid": 202,
+// 	},
+// 	AttributeColumns: OTSAttribute{
+// 		"name":    "李四",
+// 		"address": "中国某地",
+// 		"age":     20,
+// 	},
+// }
+// // [2] update_row
+// update_row_item := OTSUpdateRowItem{
+// 	Condition: OTSCondition_IGNORE,
+// 	PrimaryKey: OTSPrimaryKey{
+// 		"gid": 3,
+// 		"uid": 303,
+// 	},
+// 	UpdateOfAttributeColumns: OTSUpdateOfAttribute{
+// 		OTSOperationType_PUT: OTSColumnsToPut{
+// 			"name":    "李三",
+// 			"address": "中国某地",
+// 		},
+// 		OTSOperationType_DELETE: OTSColumnsToDelete{
+// 			"mobile", "age",
+// 		},
+// 	},
+// }
+// // [3] delete_row
+// delete_row_item := OTSDeleteRowItem{
+// 	Condition: OTSCondition_IGNORE,
+// 	PrimaryKey: OTSPrimaryKey{
+// 		"gid": 4,
+// 		"uid": 404,
+// 	},
+// }
+// batch_list := &OTSBatchWriteRowRequest{
+// 	{
+// 		TableName: "myTable",
+// 		PutRows: OTSPutRows{
+// 			put_row_item,
+// 		},
+// 		UpdateRows: OTSUpdateRows{
+// 			update_row_item,
+// 		},
+// 		DeleteRows: OTSDeleteRows{
+// 			delete_row_item,
+// 		},
+// 	},
+// 	{
+// 		TableName: "notExistTable",
+// 		PutRows: OTSPutRows{
+// 			put_row_item,
+// 		},
+// 		UpdateRows: OTSUpdateRows{
+// 			update_row_item,
+// 		},
+// 		DeleteRows: OTSDeleteRows{
+// 			delete_row_item,
+// 		},
+// 	},
+// }
+// batch_write_response, ots_err := ots_client.BatchWriteRow(batch_list)
+//
+func (o *OTSClient) BatchWriteRow(batch_list *OTSBatchWriteRowRequest) (response_item_list *OTSBatchWriteRowResponse, err *OTSError) {
+	err = new(OTSError)
+	if batch_list == nil {
+		return nil, err.SetClientMessage("[BatchWriteRow] primary_key should not be nil")
+	}
 
+	resp, service_err := o._request_helper("BatchWriteRow", batch_list)
+	if service_err != nil {
+		return nil, err.SetServiceError(service_err)
+	}
+
+	r, e := o._check_request_helper_error(resp)
+	if e != nil {
+		return nil, err.SetClientMessage("[BatchWriteRow] %s", e)
+	}
+
+	return r.(*OTSBatchWriteRowResponse), nil
 }
 
 func (o *OTSClient) GetRange() {
@@ -809,4 +1071,8 @@ func (o *OTSClient) GetRange() {
 
 func (o *OTSClient) XGetRange() {
 
+}
+
+func (o *OTSClient) Version() string {
+	return "ots_golang_sdk_2.0.2"
 }
