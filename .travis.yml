@@ -7,3 +7,6 @@ go:
 
 install:
   - go get github.com/GiterLab/goots
+
+script: 
+  - go test
