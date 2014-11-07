@@ -5,7 +5,7 @@ Aliyun OTS(Open Table Service) golang SDK.
 
 [![wercker status](https://app.wercker.com/status/08d83208aa0215a6d6a0383b9b77b81d/m "wercker status")](https://app.wercker.com/project/bykey/08d83208aa0215a6d6a0383b9b77b81d)
 
-[![Build Status](https://travis-ci.org/gogits/gogs.svg?branch=master)](https://travis-ci.org/gogits/gogs)
+[![Build Status](https://travis-ci.org/GiterLab/goots.svg?branch=master)](https://travis-ci.org/GiterLab/goots)
 [![GoDoc](http://godoc.org/github.com/GiterLab/goots?status.svg)](http://godoc.org/github.com/GiterLab/goots)
 
 [![Build Status](https://drone.io/github.com/GiterLab/goots/status.png)](https://drone.io/github.com/GiterLab/goots/latest)
