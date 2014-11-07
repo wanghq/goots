@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-// urllib for ots2
+// Package urllib is a httplib for ots2
 package urllib
 
 import (

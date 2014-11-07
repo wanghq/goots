@@ -907,144 +907,143 @@ func (o *OTSClient) BatchGetRow(batch_list *OTSBatchGetRowRequest) (response_row
 	return r.(*OTSBatchGetRowResponse), nil
 }
 
-// 说明：批量修改多行数据。
+// 	说明：批量修改多行数据。
 //
-// ``batch_list``表示获取多行的条件列表，格式如下：
+// 	``batch_list``表示获取多行的条件列表，格式如下：
 //
-// batch_list := &OTSBatchWriteRowRequest{
-// 	{
-// 		TableName: "table_name0",
-// 		PutRows: OTSPutRows{
-// 			put_row_item, ...
+// 	batch_list := &OTSBatchWriteRowRequest{
+// 		{
+// 			TableName: "table_name0",
+// 			PutRows: OTSPutRows{
+// 				put_row_item, ...
+// 			},
+// 			UpdateRows: OTSUpdateRows{
+// 				update_row_item, ...
+// 			},
+// 			DeleteRows: OTSDeleteRows{
+// 				delete_row_item, ...
+// 			},
 // 		},
-// 		UpdateRows: OTSUpdateRows{
-// 			update_row_item, ...
+// 		{
+// 			TableName: "table_name1",
+// 			PutRows: OTSPutRows{
+// 				put_row_item, ...
+// 			},
+// 			UpdateRows: OTSUpdateRows{
+// 				update_row_item, ...
+// 			},
+// 			DeleteRows: OTSDeleteRows{
+// 				delete_row_item, ...
+// 			},
 // 		},
-// 		DeleteRows: OTSDeleteRows{
-// 			delete_row_item, ...
-// 		},
-// 	},
-// 	{
-// 		TableName: "table_name1",
-// 		PutRows: OTSPutRows{
-// 			put_row_item, ...
-// 		},
-// 		UpdateRows: OTSUpdateRows{
-// 			update_row_item, ...
-// 		},
-// 		DeleteRows: OTSDeleteRows{
-// 			delete_row_item, ...
-// 		},
-// 	},
-// 	...
-// }
+// 		...
+// 	}
 //
-// 其中，put_row_item, 是``otstype.OTSPutRows``类的实例；
-//       update_row_item, 是``otstype.OTSUpdateRows``类的实例；
-//       delete_row_item, 是``otstype.OTSDeleteRows``类的实例。
+// 	其中，put_row_item, 是``otstype.OTSPutRows``类的实例；
+// 	      update_row_item, 是``otstype.OTSUpdateRows``类的实例；
+// 	      delete_row_item, 是``otstype.OTSDeleteRows``类的实例。
 //
-// 返回：对应行的修改结果列表。
-//       错误信息。
+// 	返回：对应行的修改结果列表。
+// 	      错误信息。
 //
-//
-// ``response_items_list``为``otstype.OTSBatchWriteRowResponse``的实例
-// ``response_items_list.Tables``为返回的结果列表，与请求的顺序一一对应，格式如下：
-// response_items_list.Tables --> []*OTSTableInBatchWriteRowResponseItem{
-// 	{
-// 		TableName: "table_name0", // for table_name0
-// 		PutRows: []*OTSRowInBatchWriteRowResponseItem{
-// 			put_row_resp, ...
+// 	``response_items_list``为``otstype.OTSBatchWriteRowResponse``的实例
+// 	``response_items_list.Tables``为返回的结果列表，与请求的顺序一一对应，格式如下：
+// 	response_items_list.Tables --> []*OTSTableInBatchWriteRowResponseItem{
+// 		{
+// 			TableName: "table_name0", // for table_name0
+// 			PutRows: []*OTSRowInBatchWriteRowResponseItem{
+// 				put_row_resp, ...
+// 			},
+// 			UpdateRows: []*OTSRowInBatchWriteRowResponseItem{
+// 				update_row_resp, ...
+// 			},
+// 			DeleteRows: []*OTSRowInBatchWriteRowResponseItem{
+// 				delete_row_resp, ...
+// 			}
 // 		},
-// 		UpdateRows: []*OTSRowInBatchWriteRowResponseItem{
-// 			update_row_resp, ...
+// 		{
+// 			TableName: "table_name1", // for table_name1
+// 			PutRows: []*OTSRowInBatchWriteRowResponseItem{
+// 				put_row_resp, ...
+// 			},
+// 			UpdateRows: []*OTSRowInBatchWriteRowResponseItem{
+// 				update_row_resp, ...
+// 			},
+// 			DeleteRows: []*OTSRowInBatchWriteRowResponseItem{
+// 				delete_row_resp, ...
+// 			}
 // 		},
-// 		DeleteRows: []*OTSRowInBatchWriteRowResponseItem{
-// 			delete_row_resp, ...
-// 		}
-// 	},
-// 	{
-// 		TableName: "table_name1", // for table_name1
-// 		PutRows: []*OTSRowInBatchWriteRowResponseItem{
-// 			put_row_resp, ...
+// 		...
+// 	}
+//
+// 	其中put_row_resp，update_row_resp和delete_row_resp都是``*otstype.OTSRowInBatchWriteRowResponseItem``类的实例。
+//
+// 	示例：
+//
+// 	put_row_item := OTSPutRowItem{
+// 		Condition: OTSCondition_EXPECT_NOT_EXIST, // OTSCondition_IGNORE
+// 		PrimaryKey: OTSPrimaryKey{
+// 			"gid": 2,
+// 			"uid": 202,
 // 		},
-// 		UpdateRows: []*OTSRowInBatchWriteRowResponseItem{
-// 			update_row_resp, ...
-// 		},
-// 		DeleteRows: []*OTSRowInBatchWriteRowResponseItem{
-// 			delete_row_resp, ...
-// 		}
-// 	},
-// 	...
-// }
-//
-// 其中put_row_resp，update_row_resp和delete_row_resp都是``*otstype.OTSRowInBatchWriteRowResponseItem``类的实例。
-//
-// 示例：
-//
-// put_row_item := OTSPutRowItem{
-// 	Condition: OTSCondition_EXPECT_NOT_EXIST, // OTSCondition_IGNORE
-// 	PrimaryKey: OTSPrimaryKey{
-// 		"gid": 2,
-// 		"uid": 202,
-// 	},
-// 	AttributeColumns: OTSAttribute{
-// 		"name":    "李四",
-// 		"address": "中国某地",
-// 		"age":     20,
-// 	},
-// }
-// // [2] update_row
-// update_row_item := OTSUpdateRowItem{
-// 	Condition: OTSCondition_IGNORE,
-// 	PrimaryKey: OTSPrimaryKey{
-// 		"gid": 3,
-// 		"uid": 303,
-// 	},
-// 	UpdateOfAttributeColumns: OTSUpdateOfAttribute{
-// 		OTSOperationType_PUT: OTSColumnsToPut{
-// 			"name":    "李三",
+// 		AttributeColumns: OTSAttribute{
+// 			"name":    "李四",
 // 			"address": "中国某地",
+// 			"age":     20,
 // 		},
-// 		OTSOperationType_DELETE: OTSColumnsToDelete{
-// 			"mobile", "age",
+// 	}
+// 	// [2] update_row
+// 	update_row_item := OTSUpdateRowItem{
+// 		Condition: OTSCondition_IGNORE,
+// 		PrimaryKey: OTSPrimaryKey{
+// 			"gid": 3,
+// 			"uid": 303,
 // 		},
-// 	},
-// }
-// // [3] delete_row
-// delete_row_item := OTSDeleteRowItem{
-// 	Condition: OTSCondition_IGNORE,
-// 	PrimaryKey: OTSPrimaryKey{
-// 		"gid": 4,
-// 		"uid": 404,
-// 	},
-// }
-// batch_list := &OTSBatchWriteRowRequest{
-// 	{
-// 		TableName: "myTable",
-// 		PutRows: OTSPutRows{
-// 			put_row_item,
+// 		UpdateOfAttributeColumns: OTSUpdateOfAttribute{
+// 			OTSOperationType_PUT: OTSColumnsToPut{
+// 				"name":    "李三",
+// 				"address": "中国某地",
+// 			},
+// 			OTSOperationType_DELETE: OTSColumnsToDelete{
+// 				"mobile", "age",
+// 			},
 // 		},
-// 		UpdateRows: OTSUpdateRows{
-// 			update_row_item,
+// 	}
+// 	// [3] delete_row
+// 	delete_row_item := OTSDeleteRowItem{
+// 		Condition: OTSCondition_IGNORE,
+// 		PrimaryKey: OTSPrimaryKey{
+// 			"gid": 4,
+// 			"uid": 404,
 // 		},
-// 		DeleteRows: OTSDeleteRows{
-// 			delete_row_item,
+// 	}
+// 	batch_list := &OTSBatchWriteRowRequest{
+// 		{
+// 			TableName: "myTable",
+// 			PutRows: OTSPutRows{
+// 				put_row_item,
+// 			},
+// 			UpdateRows: OTSUpdateRows{
+// 				update_row_item,
+// 			},
+// 			DeleteRows: OTSDeleteRows{
+// 				delete_row_item,
+// 			},
 // 		},
-// 	},
-// 	{
-// 		TableName: "notExistTable",
-// 		PutRows: OTSPutRows{
-// 			put_row_item,
+// 		{
+// 			TableName: "notExistTable",
+// 			PutRows: OTSPutRows{
+// 				put_row_item,
+// 			},
+// 			UpdateRows: OTSUpdateRows{
+// 				update_row_item,
+// 			},
+// 			DeleteRows: OTSDeleteRows{
+// 				delete_row_item,
+// 			},
 // 		},
-// 		UpdateRows: OTSUpdateRows{
-// 			update_row_item,
-// 		},
-// 		DeleteRows: OTSDeleteRows{
-// 			delete_row_item,
-// 		},
-// 	},
-// }
-// batch_write_response, ots_err := ots_client.BatchWriteRow(batch_list)
+// 	}
+// 	batch_write_response, ots_err := ots_client.BatchWriteRow(batch_list)
 //
 func (o *OTSClient) BatchWriteRow(batch_list *OTSBatchWriteRowRequest) (response_item_list *OTSBatchWriteRowResponse, err *OTSError) {
 	err = new(OTSError)

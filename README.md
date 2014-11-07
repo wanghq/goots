@@ -3,6 +3,15 @@ goots
 
 Aliyun OTS(Open Table Service) golang SDK.
 
+[![wercker status](https://app.wercker.com/status/08d83208aa0215a6d6a0383b9b77b81d/m "wercker status")](https://app.wercker.com/project/bykey/08d83208aa0215a6d6a0383b9b77b81d)
+
+[![Build Status](https://travis-ci.org/gogits/gogs.svg?branch=master)](https://travis-ci.org/gogits/gogs)
+[![GoDoc](http://godoc.org/github.com/GiterLab/goots?status.svg)](http://godoc.org/github.com/GiterLab/goots)
+
+[![Build Status](https://drone.io/github.com/GiterLab/goots/status.png)](https://drone.io/github.com/GiterLab/goots/latest)
+[![Go Walker](http://gowalker.org/api/v1/badge)](http://gowalker.org/github.com/GiterLab/goots)
+[![](http://gocover.io/_badge/github.com/GiterLab/goots)](http://gocover.io/github.com/GiterLab/goots)
+
 ## Support API
 - **Table**
 	- [CreateTable](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/CreateTable.md) ☑
@@ -17,7 +26,7 @@ Aliyun OTS(Open Table Service) golang SDK.
 	- [DeleteRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/DeleteRow.md) ☑
 - **BatchRow**
 	- [BatchGetRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/BatchGetRow.md) ☑
-	- BatchWriteRow
+	- [BatchWriteRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/BatchWriteRow.md) ☑
 	- GetRange
 	- XGetRange
 
