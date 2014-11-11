@@ -407,7 +407,7 @@ func (o *OTSClient) _check_request_helper_error(resp []reflect.Value) (r interfa
 	return nil, errors.New("The program will not perform here")
 }
 
-// 		说明：根据表信息创建表。
+// 说明：根据表信息创建表。
 //
 // 		``table_meta``是``otstype.OTSTableMeta``类的实例，它包含表名和PrimaryKey的schema，
 // 		请参考``OTSTableMeta``类的文档。当创建了一个表之后，通常要等待1分钟时间使partition load
@@ -455,7 +455,7 @@ func (o *OTSClient) CreateTable(table_meta *OTSTableMeta, reserved_throughput *O
 	return nil
 }
 
-// 		说明：根据表名删除表。
+// 说明：根据表名删除表。
 //
 // 		``table_name``是对应的表名。
 //
@@ -485,7 +485,7 @@ func (o *OTSClient) DeleteTable(table_name string) (err *OTSError) {
 	return nil
 }
 
-// 		说明：获取所有表名的列表。
+// 说明：获取所有表名的列表。
 //
 // 		返回：表名列表。
 // 		      错误信息。
@@ -512,7 +512,7 @@ func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError
 	return r.(*OTSListTableResponse), nil
 }
 
-// 		说明：更新表属性，目前只支持修改预留读写吞吐量。
+// 说明：更新表属性，目前只支持修改预留读写吞吐量。
 //
 // 		``table_name``是对应的表名。
 // 		``reserved_throughput``是``otstype.ReservedThroughput``类的实例，表示预留读写吞吐量。
@@ -553,7 +553,7 @@ func (o *OTSClient) UpdateTable(table_name string, reserved_throughput *OTSReser
 	return r.(*OTSUpdateTableResponse), nil
 }
 
-// 		说明：获取表的描述信息。
+// 说明：获取表的描述信息。
 //
 // 		``table_name``是对应的表名。
 //
@@ -585,7 +585,7 @@ func (o *OTSClient) DescribeTable(table_name string) (describe_table_response *O
 	return r.(*OTSDescribeTableResponse), nil
 }
 
-// 		说明：获取一行数据。
+// 说明：获取一行数据。
 //
 // 		``table_name``是对应的表名。
 // 		``primary_key``是主键，类型为``otstype.OTSPrimaryKey``。
@@ -634,7 +634,7 @@ func (o *OTSClient) GetRow(table_name string, primary_key *OTSPrimaryKey, column
 	return r.(*OTSGetRowResponse), nil
 }
 
-// 		说明：写入一行数据。返回本次操作消耗的CapacityUnit。
+// 说明：写入一行数据。返回本次操作消耗的CapacityUnit。
 //
 // 		``table_name``是对应的表名。
 // 		``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
@@ -691,7 +691,7 @@ func (o *OTSClient) PutRow(table_name string, condition string, primary_key *OTS
 	return r.(*OTSPutRowResponse), nil
 }
 
-// 		说明：更新一行数据。
+// 说明：更新一行数据。
 //
 // 		``table_name``是对应的表名。
 // 		``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
@@ -754,7 +754,7 @@ func (o *OTSClient) UpdateRow(table_name string, condition string, primary_key *
 	return r.(*OTSUpdateRowResponse), nil
 }
 
-// 		说明：删除一行数据。
+// 说明：删除一行数据。
 //
 // 		``table_name``是对应的表名。
 // 		``condition``表示执行操作前做条件检查，满足条件才执行，是string的实例。
@@ -801,7 +801,7 @@ func (o *OTSClient) DeleteRow(table_name string, condition string, primary_key *
 	return r.(*OTSDeleteRowResponse), nil
 }
 
-// 		说明：批量获取多行数据。
+// 说明：批量获取多行数据。
 //
 // 		``batch_list``表示获取多行的条件列表，格式如下：
 //
@@ -907,7 +907,7 @@ func (o *OTSClient) BatchGetRow(batch_list *OTSBatchGetRowRequest) (response_row
 	return r.(*OTSBatchGetRowResponse), nil
 }
 
-// 		说明：批量修改多行数据。
+// 说明：批量修改多行数据。
 //
 // 		``batch_list``表示获取多行的条件列表，格式如下：
 //
@@ -1064,7 +1064,7 @@ func (o *OTSClient) BatchWriteRow(batch_list *OTSBatchWriteRowRequest) (response
 	return r.(*OTSBatchWriteRowResponse), nil
 }
 
-// DOC		说明：根据范围条件获取多行数据。
+// 说明：根据范围条件获取多行数据。
 //
 // 		``table_name``是对应的表名。
 // 		``direction``表示范围的方向，字符串格式，取值包括'FORWARD'和'BACKWARD'。
