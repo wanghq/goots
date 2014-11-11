@@ -400,8 +400,20 @@ func _decode_batch_write_row(buf []byte) (response_item_list *OTSBatchWriteRowRe
 	return response_item_list, nil
 }
 
-func _decode_get_range(buf []byte) {
+func _decode_get_range(buf []byte) (response_row_list *OTSGetRangeResponse, err error) {
+	pb := &GetRangeResponse{}
+	err = proto.Unmarshal(buf, pb)
+	if err != nil {
+		return nil, err
+	}
+	print_response_message(pb)
 
+	response_row_list = new(OTSGetRangeResponse)
+	response_row_list.Consumed = _parse_capacity_unit(pb.GetConsumed().GetCapacityUnit())
+	response_row_list.NextStartPrimaryKey = (OTSPrimaryKey)(_parse_column_dict(pb.GetNextStartPrimaryKey()))
+	response_row_list.Rows = _parse_row_list(pb.GetRows())
+
+	return response_row_list, nil
 }
 
 // request encode for ots2

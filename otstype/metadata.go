@@ -10,10 +10,10 @@ import (
 	"time"
 )
 
+var OTSColumnType_INF_MIN OTS_INF_MIN // only for GetRange
+var OTSColumnType_INF_MAX OTS_INF_MAX // only for GetRange
 const (
 	// OTSColumnType
-	OTSColumnType_INF_MIN = "INF_MIN" // only for GetRange
-	OTSColumnType_INF_MAX = "INF_MAX" // only for GetRange
 	OTSColumnType_INTEGER = "INTEGER"
 	OTSColumnType_STRING  = "STRING"
 	OTSColumnType_BOOLEAN = "BOOLEAN"
@@ -465,12 +465,44 @@ type OTSRowInBatchGetRowResponseItem struct {
 	Row *OTSRow
 }
 
+func (o *OTSRowInBatchGetRowResponseItem) GetErrorCode() string {
+	return o.ErrorCode
+}
+
+func (o *OTSRowInBatchGetRowResponseItem) GetErrorMessage() string {
+	return o.ErrorMessage
+}
+
+func (o *OTSRowInBatchGetRowResponseItem) GetReadConsumed() int32 {
+	if o.Consumed != nil {
+		return o.Consumed.GetRead()
+	}
+
+	return 0
+}
+
+func (o *OTSRowInBatchGetRowResponseItem) GetRow() *OTSRow {
+	if o.Row != nil {
+		return o.Row
+	}
+
+	return nil
+}
+
 // 在 BatchGetRow 操作的返回消息中，表示一个表的数据。
 type OTSTableInBatchGetRowResponseItem struct {
 	// 该表的表名
 	TableName string
 	// 该表中读取到的全部行数据
 	Rows []*OTSRowInBatchGetRowResponseItem
+}
+
+func (o *OTSTableInBatchGetRowResponseItem) GetTableName() string {
+	return o.TableName
+}
+
+func (o *OTSTableInBatchGetRowResponseItem) GetRows() []*OTSRowInBatchGetRowResponseItem {
+	return o.Rows
 }
 
 // 对应了每个 table 下读取到的数据。
@@ -497,6 +529,10 @@ type OTSBatchGetRowResponse struct {
 	Tables []*OTSTableInBatchGetRowResponseItem
 }
 
+func (o *OTSBatchGetRowResponse) GetTables() []*OTSTableInBatchGetRowResponseItem {
+	return o.Tables
+}
+
 // 在 BatchWriteRow 操作的返回消息中，表示一行写入操作的结果。
 type OTSRowInBatchWriteRowResponseItem struct {
 	// 该行操作是否成功。若为true，则该行写入成功，error 无效；若为false，则该行写入失败。
@@ -509,6 +545,22 @@ type OTSRowInBatchWriteRowResponseItem struct {
 	Consumed *OTSCapacityUnit
 }
 
+func (o *OTSRowInBatchWriteRowResponseItem) GetErrorCode() string {
+	return o.ErrorCode
+}
+
+func (o *OTSRowInBatchWriteRowResponseItem) GetErrorMessage() string {
+	return o.ErrorMessage
+}
+
+func (o *OTSRowInBatchWriteRowResponseItem) GetWriteConsumed() int32 {
+	if o.Consumed != nil {
+		return o.Consumed.GetWrite()
+	}
+
+	return 0
+}
+
 // 在 BatchWriteRow 操作中，表示对一个表进行写入的结果。
 type OTSTableInBatchWriteRowResponseItem struct {
 	// 该表的表名
@@ -519,6 +571,22 @@ type OTSTableInBatchWriteRowResponseItem struct {
 	UpdateRows []*OTSRowInBatchWriteRowResponseItem
 	// 该表中DeleteRow 操作的结果
 	DeleteRows []*OTSRowInBatchWriteRowResponseItem
+}
+
+func (o *OTSTableInBatchWriteRowResponseItem) GetTableName() string {
+	return o.TableName
+}
+
+func (o *OTSTableInBatchWriteRowResponseItem) GetPutRows() []*OTSRowInBatchWriteRowResponseItem {
+	return o.PutRows
+}
+
+func (o *OTSTableInBatchWriteRowResponseItem) GetUpdateRows() []*OTSRowInBatchWriteRowResponseItem {
+	return o.UpdateRows
+}
+
+func (o *OTSTableInBatchWriteRowResponseItem) GetDeleteRows() []*OTSRowInBatchWriteRowResponseItem {
+	return o.DeleteRows
 }
 
 // 对应了每个 table 下各操作的响应信息，包括是否成功执行，错误码和消耗的服务能力单元。
@@ -541,4 +609,63 @@ type OTSTableInBatchWriteRowResponseItem struct {
 // 依次视作相对应的写操作独立计算读服务能力单元。
 type OTSBatchWriteRowResponse struct {
 	Tables []*OTSTableInBatchWriteRowResponseItem
+}
+
+func (o *OTSBatchWriteRowResponse) GetTables() []*OTSTableInBatchWriteRowResponseItem {
+	return o.Tables
+}
+
+// 本次GetRange 操作的服务器反馈
+//
+// 服务能力单元消耗:
+// GetRange 操作消耗读服务能力单元的数值为查询范围内所有行数据大小除以1KB 向上取
+// 整。关于数据大小的计算请参见相关章节。
+// 如果请求超时，结果未定义，服务能力单元有可能被消耗，也可能未被消耗。
+// 如果返回内部错误（HTTP 状态码:5XX），则此次操作不消耗服务能力单元，其他错误情况
+// 消耗1 读服务能力单元。
+type OTSGetRangeResponse struct {
+	// 该行操作消耗的服务能力单元
+	Consumed *OTSCapacityUnit
+	// 本次GetRange 操作的断点信息
+	// 若为空，则本次GetRange 的响应消息中已包含了请求范围内的所有数据
+	// 若不为空， 则表示本次GetRange 的响应消息中只包含了[inclusive_start_primary_key,
+	// next_start_primary_key) 间的数据，若需要剩下的数据，需要将next_start_primary_key 作为inclusive_
+	// start_primary_key，原始请求中的exclusive_end_primary_key 作为exclusive_end_primary_key
+	// 继续执行GetRange 操作。
+	// 注意:OTS 系统中限制了GetRange 操作的响应消息中数据不超过5000 行，大小不超过1M。
+	// 即使在GetRange 请求中未设定limit，在响应中仍可能出现next_start_primary_key。因此在使用
+	// GetRange 时一定要对响应中是否有next_start_primary_key 进行处理。
+	NextStartPrimaryKey OTSPrimaryKey
+	// 读取到的所有数据，若请求中direction 为FORWARD，则所有行按照主键由小到大进行排
+	// 序；若请求中direction 为BACKWARD，则所有行按照主键由大到小进行排序
+	// 其中每行的primary_key_columns 和attribute_columns 均只包含在columns_to_get 中指定的
+	// 列，其顺序不保证与request 中的columns_to_get 一致；primary_key_columns 的顺序亦不保证与
+	// 建表时指定的顺序一致。
+	// 如果请求中指定的columns_to_get 不含有任何主键列，那么其主键在查询范围内，但没有任
+	// 何一个属性列在columns_to_get 中的行将不会出现在响应消息里。
+	Rows OTSRows
+}
+
+func (o *OTSGetRangeResponse) GetReadConsumed() int32 {
+	if o.Consumed != nil {
+		return o.Consumed.GetRead()
+	}
+
+	return 0
+}
+
+func (o *OTSGetRangeResponse) GetNextStartPrimaryKey() OTSPrimaryKey {
+	if o.NextStartPrimaryKey != nil {
+		return o.NextStartPrimaryKey
+	}
+
+	return nil
+}
+
+func (o *OTSGetRangeResponse) GetRows() OTSRows {
+	if o.Rows != nil {
+		return o.Rows
+	}
+
+	return nil
 }

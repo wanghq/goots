@@ -427,11 +427,11 @@ func (o *ots_protocol) handle_error(api_name, query, reason string, status int, 
 		proto.Unmarshal(body, pb_err)
 		if pb_err.Code != nil && pb_err.Message != nil {
 			OTSError{}.Log(OTSLoggerEnable, "OTS request failed, API: %s, HTTPStatus: %s, ErrorCode: %s, ErrorMessage: %s,  RequestID: %s", api_name, reason, pb_err.GetCode(), pb_err.GetMessage(), request_id)
-			return ots_service_err.SetErrorMessage("OTS request failed: " + pb_err.GetMessage()).SetHttpStatus(reason).SetErrorCode(pb_err.GetCode()).SetRequestId(request_id)
+			return ots_service_err.SetErrorMessage(pb_err.GetMessage()).SetHttpStatus(reason).SetErrorCode(pb_err.GetCode()).SetRequestId(request_id)
 		}
 
 		OTSError{}.Log(OTSLoggerEnable, "OTS request failed, API: %s, HTTPStatus: %s, ErrorCode: %d, ErrorMessage: %v,  RequestID: %s", api_name, reason, status, body, request_id)
-		return ots_service_err.SetErrorMessage("OTS request failed: " + strings.TrimSpace(string(body))).SetHttpStatus(reason).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
+		return ots_service_err.SetErrorMessage(strings.TrimSpace(string(body))).SetHttpStatus(reason).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
 	}
 
 	return nil

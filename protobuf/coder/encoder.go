@@ -89,7 +89,7 @@ func _make_column_value(pb *ColumnValue, value interface{}) error {
 	// you have to put 'int' under 'bool' in the switch case
 	// because a bool is also a int !!!
 
-	switch vtype := value.(type) {
+	switch value.(type) {
 	case string:
 		pcolumn_type := new(ColumnType)
 		*pcolumn_type = ColumnType_STRING
@@ -182,8 +182,18 @@ func _make_column_value(pb *ColumnValue, value interface{}) error {
 			return (OTSClientError{}.Set("don't expect the value of ColumnType"))
 		}
 
+	case OTS_INF_MIN:
+		pcolumn_type := new(ColumnType)
+		*pcolumn_type = ColumnType_INF_MIN
+		pb.Type = pcolumn_type
+
+	case OTS_INF_MAX:
+		pcolumn_type := new(ColumnType)
+		*pcolumn_type = ColumnType_INF_MAX
+		pb.Type = pcolumn_type
+
 	default:
-		return (OTSClientError{}.Set("expect string, bool, (u)int, (u)int8, (u)int16, (u)int32, (u)int64, (u)float32 or (u)float64 for colum value, not %v", vtype))
+		return (OTSClientError{}.Set("expect string, bool, (u)int, (u)int8, (u)int16, (u)int32, (u)int64, (u)float32 or (u)float64 for colum value, not %v", reflect.TypeOf(value)))
 	}
 
 	return nil
@@ -247,10 +257,12 @@ func _get_condition(condition_str string) Condition {
 	return Condition{}
 }
 
-func _get_direction(direction_str string) Direction {
+func _get_direction(direction_str string) *Direction {
 	v, ok := Direction_value[direction_str]
 	if ok {
-		return Direction(v)
+		dir := new(Direction)
+		*dir = Direction(v)
+		return dir
 	} else {
 		panic(OTSClientError{}.Set("direction should be one of [FORWARD, BACKWARD], not %s", direction_str))
 	}
@@ -2130,8 +2142,49 @@ func _encode_batch_write_row(batch_list *OTSBatchWriteRowRequest) (req *BatchWri
 	return pb, nil
 }
 
-func _encode_get_range() {
+func _encode_get_range(table_name string, direction string,
+	inclusive_start_primary_key *OTSPrimaryKey,
+	exclusive_end_primary_key *OTSPrimaryKey,
+	columns_to_get *OTSColumnsToGet,
+	limit int32) (req *GetRangeRequest, err error) {
+	pb := new(GetRangeRequest)
+	pb.TableName = NewString(table_name)
+	pb.Direction = _get_direction(direction)
 
+	_start_primary_key := new([]*Column)
+	err = _make_columns_with_dict(_start_primary_key, DictString(*inclusive_start_primary_key))
+	if err != nil {
+		return nil, err
+	}
+	pb.InclusiveStartPrimaryKey = *_start_primary_key
+
+	_end_primary_key := new([]*Column)
+	err = _make_columns_with_dict(_end_primary_key, DictString(*exclusive_end_primary_key))
+	if err != nil {
+		return nil, err
+	}
+	pb.ExclusiveEndPrimaryKey = *_end_primary_key
+
+	if limit != 0 {
+		pb.Limit = NewInt32(limit)
+	} else {
+		pb.Limit = nil
+	}
+
+	if columns_to_get != nil {
+		_columns_to_get := new([]string)
+		err = _make_repeated_column_names(_columns_to_get, []string(*columns_to_get))
+		if err != nil {
+			return nil, err
+		}
+		pb.ColumnsToGet = *_columns_to_get
+	} else {
+		pb.ColumnsToGet = nil
+	}
+
+	print_request_message(pb)
+
+	return pb, nil
 }
 
 // request encode for ots2

@@ -27,8 +27,8 @@ Aliyun OTS(Open Table Service) golang SDK.
 - **BatchRow**
 	- [BatchGetRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/BatchGetRow.md) ☑
 	- [BatchWriteRow](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/BatchWriteRow.md) ☑
-	- GetRange
-	- XGetRange
+	- [GetRange](https://github.com/GiterLab/goots/blob/master/doc/goots-doc/GetRange.md) ☑
+	- <del>XGetRange</del>
 
 ## Install
 
