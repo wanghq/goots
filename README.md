@@ -1,5 +1,6 @@
 goots
 =====
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/GiterLab/goots?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Aliyun OTS(Open Table Service) golang SDK.
 
