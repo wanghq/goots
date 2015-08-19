@@ -7,11 +7,13 @@ package urllib
 
 import (
 	"bytes"
+	"compress/gzip"
 	"crypto/tls"
 	"encoding/json"
 	"encoding/xml"
 	"io"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -25,14 +27,16 @@ import (
 )
 
 var defaultSetting = HttpSettings{
-	false,            // ShowDebug
-	"GiterLab",       // UserAgent
-	60 * time.Second, // ConnectTimeout
-	60 * time.Second, // ReadWriteTimeout
-	nil,              // TlsClientConfig
-	nil,              // Proxy
-	nil,              // Transport
-	false,            // EnableCookie
+	ShowDebug:        false,
+	UserAgent:        "GiterLab",
+	ConnectTimeout:   60 * time.Second,
+	ReadWriteTimeout: 60 * time.Second,
+	TlsClientConfig:  nil,
+	Proxy:            nil,
+	Transport:        nil,
+	EnableCookie:     false,
+	Gzip:             true,
+	DumpBody:         true,
 }
 var defaultCookieJar http.CookieJar
 var settingMutex sync.Mutex
@@ -66,16 +70,31 @@ func GetDefaultSetting() *HttpSettings {
 }
 
 // return *HttpRequest with specific method
-func newRequest(url, method string) *HttpRequest {
+func newRequest(rawurl, method string) *HttpRequest {
 	var resp http.Response
+	u, err := url.Parse(rawurl)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	req := http.Request{
+		URL:        u,
 		Method:     method,
 		Header:     make(http.Header),
 		Proto:      "HTTP/1.1",
 		ProtoMajor: 1,
 		ProtoMinor: 1,
 	}
-	return &HttpRequest{url, &req, map[string]string{}, map[string]string{}, defaultSetting, &resp, nil}
+
+	return &HttpRequest{
+		url:     rawurl,
+		req:     &req,
+		params:  map[string]string{},
+		files:   map[string]string{},
+		setting: defaultSetting,
+		resp:    &resp,
+		body:    nil,
+	}
 }
 
 // Get returns *HttpRequest with GET method.
@@ -113,6 +132,8 @@ type HttpSettings struct {
 	Proxy            func(*http.Request) (*url.URL, error)
 	Transport        http.RoundTripper
 	EnableCookie     bool
+	Gzip             bool
+	DumpBody         bool
 }
 
 // HttpRequest provides more useful methods for requesting one url than http.Request.
@@ -124,6 +145,7 @@ type HttpRequest struct {
 	setting HttpSettings
 	resp    *http.Response
 	body    []byte
+	dump    []byte
 }
 
 // Change request settings
@@ -156,6 +178,17 @@ func (b *HttpRequest) Debug(isdebug bool) *HttpRequest {
 	return b
 }
 
+// Dump Body.
+func (b *HttpRequest) DumpBody(isdump bool) *HttpRequest {
+	b.setting.DumpBody = isdump
+	return b
+}
+
+// return the DumpRequest
+func (b *HttpRequest) DumpRequest() []byte {
+	return b.dump
+}
+
 // SetTimeout sets connect time out and read-write time out for Request.
 func (b *HttpRequest) SetTimeout(connectTimeout, readWriteTimeout time.Duration) *HttpRequest {
 	b.setting.ConnectTimeout = connectTimeout
@@ -172,6 +205,12 @@ func (b *HttpRequest) SetTLSClientConfig(config *tls.Config) *HttpRequest {
 // Header add header item string in request.
 func (b *HttpRequest) Header(key, value string) *HttpRequest {
 	b.req.Header.Set(key, value)
+	return b
+}
+
+// Set HOST
+func (b *HttpRequest) SetHost(host string) *HttpRequest {
+	b.req.Host = host
 	return b
 }
 
@@ -244,10 +283,87 @@ func (b *HttpRequest) Body(data interface{}) *HttpRequest {
 	return b
 }
 
+// JsonBody adds request raw body encoding by JSON.
+func (b *HttpRequest) JsonBody(obj interface{}) (*HttpRequest, error) {
+	if b.req.Body == nil && obj != nil {
+		buf := bytes.NewBuffer(nil)
+		enc := json.NewEncoder(buf)
+		if err := enc.Encode(obj); err != nil {
+			return b, err
+		}
+		b.req.Body = ioutil.NopCloser(buf)
+		b.req.ContentLength = int64(buf.Len())
+		b.req.Header.Set("Content-Type", "application/json")
+	}
+	return b, nil
+}
+
+func (b *HttpRequest) buildUrl(paramBody string) {
+	// build GET url with query string
+	if b.req.Method == "GET" && len(paramBody) > 0 {
+		if strings.Index(b.url, "?") != -1 {
+			b.url += "&" + paramBody
+		} else {
+			b.url = b.url + "?" + paramBody
+		}
+		return
+	}
+
+	// build POST/PUT/PATCH url and body
+	if (b.req.Method == "POST" || b.req.Method == "PUT" || b.req.Method == "PATCH") && b.req.Body == nil {
+		// with files
+		if len(b.files) > 0 {
+			pr, pw := io.Pipe()
+			bodyWriter := multipart.NewWriter(pw)
+			go func() {
+				for formname, filename := range b.files {
+					fileWriter, err := bodyWriter.CreateFormFile(formname, filename)
+					if err != nil {
+						log.Fatal(err)
+					}
+					fh, err := os.Open(filename)
+					if err != nil {
+						log.Fatal(err)
+					}
+					//iocopy
+					_, err = io.Copy(fileWriter, fh)
+					fh.Close()
+					if err != nil {
+						log.Fatal(err)
+					}
+				}
+				for k, v := range b.params {
+					bodyWriter.WriteField(k, v)
+				}
+				bodyWriter.Close()
+				pw.Close()
+			}()
+			b.Header("Content-Type", bodyWriter.FormDataContentType())
+			b.req.Body = ioutil.NopCloser(pr)
+			return
+		}
+
+		// with params
+		if len(paramBody) > 0 {
+			b.Header("Content-Type", "application/x-www-form-urlencoded")
+			b.Body(paramBody)
+		}
+	}
+}
+
 func (b *HttpRequest) getResponse() (*http.Response, error) {
 	if b.resp.StatusCode != 0 {
 		return b.resp, nil
 	}
+	resp, err := b.SendOut()
+	if err != nil {
+		return nil, err
+	}
+	b.resp = resp
+	return resp, nil
+}
+
+func (b *HttpRequest) SendOut() (*http.Response, error) {
 	var paramBody string
 	if len(b.params) > 0 {
 		var buf bytes.Buffer
@@ -261,46 +377,7 @@ func (b *HttpRequest) getResponse() (*http.Response, error) {
 		paramBody = paramBody[0 : len(paramBody)-1]
 	}
 
-	if b.req.Method == "GET" && len(paramBody) > 0 {
-		if strings.Index(b.url, "?") != -1 {
-			b.url += "&" + paramBody
-		} else {
-			b.url = b.url + "?" + paramBody
-		}
-	} else if b.req.Method == "POST" && b.req.Body == nil && len(paramBody) > 0 {
-		if len(b.files) > 0 {
-			bodyBuf := &bytes.Buffer{}
-			bodyWriter := multipart.NewWriter(bodyBuf)
-			for formname, filename := range b.files {
-				fileWriter, err := bodyWriter.CreateFormFile(formname, filename)
-				if err != nil {
-					return nil, err
-				}
-				fh, err := os.Open(filename)
-				if err != nil {
-					return nil, err
-				}
-				//iocopy
-				_, err = io.Copy(fileWriter, fh)
-				fh.Close()
-				if err != nil {
-					return nil, err
-				}
-			}
-			for k, v := range b.params {
-				bodyWriter.WriteField(k, v)
-			}
-			contentType := bodyWriter.FormDataContentType()
-			bodyWriter.Close()
-			b.Header("Content-Type", contentType)
-			b.req.Body = ioutil.NopCloser(bodyBuf)
-			b.req.ContentLength = int64(bodyBuf.Len())
-		} else {
-			b.Header("Content-Type", "application/x-www-form-urlencoded")
-			b.Body(paramBody)
-		}
-	}
-
+	b.buildUrl(paramBody)
 	url, err := url.Parse(b.url)
 	if err != nil {
 		return nil, err
@@ -332,14 +409,12 @@ func (b *HttpRequest) getResponse() (*http.Response, error) {
 		}
 	}
 
-	var jar http.CookieJar
+	var jar http.CookieJar = nil
 	if b.setting.EnableCookie {
 		if defaultCookieJar == nil {
 			createDefaultCookie()
 		}
 		jar = defaultCookieJar
-	} else {
-		jar = nil
 	}
 
 	client := &http.Client{
@@ -347,24 +422,18 @@ func (b *HttpRequest) getResponse() (*http.Response, error) {
 		Jar:       jar,
 	}
 
-	if b.setting.UserAgent != "" {
+	if b.setting.UserAgent != "" && b.req.Header.Get("User-Agent") == "" {
 		b.req.Header.Set("User-Agent", b.setting.UserAgent)
 	}
 
 	if b.setting.ShowDebug {
-		dump, err := httputil.DumpRequest(b.req, true)
+		dump, err := httputil.DumpRequest(b.req, b.setting.DumpBody)
 		if err != nil {
-			println(err.Error())
+			log.Println(err.Error())
 		}
-		println(string(dump))
+		b.dump = dump
 	}
-
-	resp, err := client.Do(b.req)
-	if err != nil {
-		return nil, err
-	}
-	b.resp = resp
-	return resp, nil
+	return client.Do(b.req)
 }
 
 // String returns the body string in response.
@@ -392,12 +461,16 @@ func (b *HttpRequest) Bytes() ([]byte, error) {
 		return nil, nil
 	}
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if b.setting.Gzip && resp.Header.Get("Content-Encoding") == "gzip" {
+		reader, err := gzip.NewReader(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		b.body, err = ioutil.ReadAll(reader)
+	} else {
+		b.body, err = ioutil.ReadAll(resp.Body)
 	}
-	b.body = data
-	return data, nil
+	return b.body, err
 }
 
 // ToFile saves the body data in response to one file.
@@ -428,8 +501,7 @@ func (b *HttpRequest) ToJson(v interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(data, v)
-	return err
+	return json.Unmarshal(data, v)
 }
 
 // ToXml returns the map that marshals from the body bytes as xml in response .
@@ -439,8 +511,7 @@ func (b *HttpRequest) ToXml(v interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = xml.Unmarshal(data, v)
-	return err
+	return xml.Unmarshal(data, v)
 }
 
 // Response executes request client gets response mannually.
@@ -455,7 +526,7 @@ func TimeoutDialer(cTimeout time.Duration, rwTimeout time.Duration) func(net, ad
 		if err != nil {
 			return nil, err
 		}
-		conn.SetDeadline(time.Now().Add(rwTimeout))
-		return conn, nil
+		err = conn.SetDeadline(time.Now().Add(rwTimeout))
+		return conn, err
 	}
 }

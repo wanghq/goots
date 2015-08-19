@@ -127,6 +127,8 @@ func New(end_point, accessid, accesskey, instance_name string, kwargs ...interfa
 		nil,              // Proxy
 		nil,              // Transport
 		false,            // EnableCookie
+		true,             // Gzip
+		true,             // DumpBody
 	}
 	if o.SocketTimeout != 0 {
 		url_setting.ConnectTimeout = time.Duration(o.SocketTimeout) * time.Second
