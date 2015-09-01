@@ -457,13 +457,13 @@ func hmacSha1(key string, src []byte) []byte {
 
 // base64 encode
 func base64Encode(src []byte) string {
-	coder := base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
+	coder := base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
 	return coder.EncodeToString(src)
 }
 
 // base64 decode
 func base64Decode(src []byte) ([]byte, error) {
-	coder := base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
+	coder := base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
 	return coder.DecodeString(string(src))
 }
 
