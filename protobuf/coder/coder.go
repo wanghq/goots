@@ -8,7 +8,7 @@ package coder
 import (
 	"fmt"
 
-	"code.google.com/p/goprotobuf/proto"
+	"github.com/golang/protobuf/proto"
 	. "github.com/GiterLab/goots/protobuf"
 )
 

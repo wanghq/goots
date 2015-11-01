@@ -33,23 +33,22 @@ Aliyun OTS(Open Table Service) golang SDK.
 
 ## Install
 
-	$ go get -u code.google.com/p/goprotobuf/{proto,protoc-gen-go}
+	$ go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
 	$ go get github.com/GiterLab/goots
-> **NOTE**: If you can't get `goprotobuf` package (you known why)，Please refer to [gopm.io](http://gopm.io/download) to download manually.
 
 ## Usage
 
 	package main
-	
+
 	import (
 		"fmt"
 		"os"
-	
+
 		ots2 "github.com/GiterLab/goots"
 		"github.com/GiterLab/goots/log"
 		. "github.com/GiterLab/goots/otstype"
 	)
-	
+
 	// modify it to yours
 	const (
 		ENDPOINT     = "http://127.0.0.1:8800"
@@ -57,20 +56,20 @@ Aliyun OTS(Open Table Service) golang SDK.
 		ACCESSKEY    = "OTSMultiUser177_accesskey"
 		INSTANCENAME = "TestInstance177"
 	)
-	
+
 	func main() {
 		// set running environment
 		ots2.OTSDebugEnable = true
 		ots2.OTSLoggerEnable = true
 		log.OTSErrorPanicMode = true // 默认为开启，如果不喜欢panic则设置此为false
-	
+
 		fmt.Println("Test goots start ...")
-	
+
 		ots_client, err := ots2.New(ENDPOINT, ACCESSID, ACCESSKEY, INSTANCENAME)
 		if err != nil {
 			fmt.Println(err)
 		}
-	
+
 		// delete a table
 		ots_err := ots_client.DeleteTable("myTable")
 		if ots_err != nil {
@@ -78,7 +77,7 @@ Aliyun OTS(Open Table Service) golang SDK.
 			// os.Exit(1)
 		}
 		fmt.Println("表已删除")
-	
+
 		// create a table
 		table_meta := &OTSTableMeta{
 			TableName: "myTable",
@@ -87,18 +86,18 @@ Aliyun OTS(Open Table Service) golang SDK.
 				"uid": "INTEGER",
 			},
 		}
-	
+
 		reserved_throughput := &OTSReservedThroughput{
 			OTSCapacityUnit{100, 100},
 		}
-	
+
 		ots_err = ots_client.CreateTable(table_meta, reserved_throughput)
 		if ots_err != nil {
 			fmt.Println(ots_err)
 			os.Exit(1)
 		}
 		fmt.Println("表已创建")
-	
+
 		// list tables
 		list_tables, ots_err := ots_client.ListTable()
 		if ots_err != nil {

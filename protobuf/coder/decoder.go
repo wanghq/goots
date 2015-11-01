@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"time"
 
-	"code.google.com/p/goprotobuf/proto"
+	"github.com/golang/protobuf/proto"
 	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
 	. "github.com/GiterLab/goots/protobuf"
