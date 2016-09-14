@@ -12,6 +12,8 @@ import (
 	ots2 "github.com/GiterLab/goots"
 	"github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
+	. "github.com/GiterLab/goots/protobuf"
+	proto "github.com/golang/protobuf/proto"
 )
 
 // modify it to yours
@@ -40,7 +42,60 @@ func main() {
 		"gid": 1,
 		"uid": 101,
 	}
-	condition := OTSCondition_IGNORE
+	//condition := OTSCondition_EXPECT_NOT_EXIST
+	subCondition1 := &RelationCondition{
+		Comparator: ComparatorType_CT_EQUAL.Enum(),
+		ColumnName: NewString("age"),
+		ColumnValue: &ColumnValue{
+			Type: ColumnType_INTEGER.Enum(),
+			VInt: NewInt64(20),
+		},
+		PassIfMissing: NewBool(false),
+	}
+	b1, err := proto.Marshal(subCondition1)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	subCondition2 := &RelationCondition{
+		Comparator: ComparatorType_CT_EQUAL.Enum(),
+		ColumnName: NewString("name"),
+		ColumnValue: &ColumnValue{
+			Type:    ColumnType_STRING.Enum(),
+			VString: NewString("张三"),
+		},
+		PassIfMissing: NewBool(false),
+	}
+	b2, err := proto.Marshal(subCondition2)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	compCondition := &CompositeCondition{
+		Combinator: LogicalOperator_LO_AND.Enum(),
+		SubConditions: []*ColumnCondition{
+			&ColumnCondition{
+				Type:      ColumnConditionType_CCT_RELATION.Enum(),
+				Condition: b1,
+			},
+			&ColumnCondition{
+				Type:      ColumnConditionType_CCT_RELATION.Enum(),
+				Condition: b2,
+			},
+		},
+	}
+	c, err := proto.Marshal(compCondition)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	condition := &Condition{
+		RowExistence: RowExistenceExpectation_EXPECT_EXIST.Enum(),
+		ColumnCondition: &ColumnCondition{
+			Type:      ColumnConditionType_CCT_COMPOSITE.Enum(),
+			Condition: c,
+		},
+	}
 	delete_row_response, ots_err := ots_client.DeleteRow("myTable", condition, primary_key)
 	if ots_err != nil {
 		fmt.Println(ots_err)

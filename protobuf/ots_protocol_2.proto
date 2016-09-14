@@ -1,3 +1,5 @@
+syntax = "proto2";
+
 package protobuf;
 
 message Error {
@@ -7,13 +9,13 @@ message Error {
 
 
 enum ColumnType {
-    INF_MIN = 0; // only for GetRange 
+    INF_MIN = 0; // only for GetRange
     INF_MAX = 1; // only for GetRange
     INTEGER = 2;
     STRING = 3;
     BOOLEAN = 4;
     DOUBLE = 5;
-    BINARY = 6; 
+    BINARY = 6;
 }
 
 message ColumnSchema {
@@ -27,7 +29,7 @@ message ColumnValue {
     optional string v_string = 3;
     optional bool v_bool = 4;
     optional double v_double = 5;
-    optional bytes v_binary = 6; 
+    optional bytes v_binary = 6;
 }
 
 message Column {
@@ -51,8 +53,46 @@ enum RowExistenceExpectation {
     EXPECT_NOT_EXIST = 2;
 }
 
+enum ColumnConditionType {
+    CCT_RELATION                 = 1;
+    CCT_COMPOSITE                = 2;
+}
+
+enum ComparatorType {
+    CT_EQUAL                    = 1;
+    CT_NOT_EQUAL                = 2;
+    CT_GREATER_THAN             = 3;
+    CT_GREATER_EQUAL            = 4;
+    CT_LESS_THAN                = 5;
+    CT_LESS_EQUAL               = 6;
+}
+
+message RelationCondition {
+    required ComparatorType comparator     = 1;
+    required string column_name            = 2;
+    required ColumnValue column_value      = 3;
+    required bool pass_if_missing          = 4;
+}
+
+enum LogicalOperator {
+    LO_NOT                      = 1;
+    LO_AND                      = 2;
+    LO_OR                       = 3;
+}
+
+message CompositeCondition {
+    required LogicalOperator combinator     = 1;
+    repeated ColumnCondition sub_conditions = 2;
+}
+
+message ColumnCondition {
+    required ColumnConditionType type    = 1;
+    required bytes condition = 2;  // Serialized bytes of column condition of the type
+}
+
 message Condition {
     required RowExistenceExpectation row_existence = 1;
+    optional ColumnCondition column_condition      = 2;
 }
 
 message CapacityUnit {
@@ -88,7 +128,7 @@ message CreateTableResponse {
 
 message UpdateTableRequest {
     required string table_name = 1;
-    required ReservedThroughput reserved_throughput = 2; 
+    required ReservedThroughput reserved_throughput = 2;
 }
 
 message UpdateTableResponse {
@@ -126,6 +166,7 @@ message GetRowRequest {
     required string table_name = 1;
     repeated Column primary_key = 2;
     repeated string columns_to_get = 3;
+    optional ColumnCondition filter = 4;
 }
 
 message GetRowResponse {
@@ -149,7 +190,7 @@ message UpdateRowRequest {
     required string table_name = 1;
     required Condition condition = 2;
     repeated Column primary_key = 3;
-    repeated ColumnUpdate attribute_columns = 4; 
+    repeated ColumnUpdate attribute_columns = 4;
 }
 
 message UpdateRowResponse {
@@ -161,7 +202,7 @@ message PutRowRequest {
     required string table_name = 1;
     required Condition condition = 2;
     repeated Column primary_key = 3;
-    repeated Column attribute_columns = 4; 
+    repeated Column attribute_columns = 4;
 }
 
 message PutRowResponse {
@@ -188,6 +229,7 @@ message TableInBatchGetRowRequest {
     required string table_name = 1;
     repeated RowInBatchGetRowRequest rows = 2;
     repeated string columns_to_get = 3;
+    optional ColumnCondition filter = 4;
 }
 
 message BatchGetRowRequest {
@@ -214,13 +256,13 @@ message BatchGetRowResponse {
 message PutRowInBatchWriteRowRequest {
     required Condition condition = 1;
     repeated Column primary_key = 2;
-    repeated Column attribute_columns = 3; 
+    repeated Column attribute_columns = 3;
 }
 
 message UpdateRowInBatchWriteRowRequest {
     required Condition condition = 1;
     repeated Column primary_key = 2;
-    repeated ColumnUpdate attribute_columns = 3; 
+    repeated ColumnUpdate attribute_columns = 3;
 }
 
 message DeleteRowInBatchWriteRowRequest {
@@ -269,6 +311,7 @@ message GetRangeRequest {
     optional int32 limit = 4;
     repeated Column inclusive_start_primary_key = 5; // required all PKs, possibly filled with INF_MIN/INF_MAX
     repeated Column exclusive_end_primary_key = 6; // required all PKs, possibly filled with INF_MIN/INF_MAX
+    optional ColumnCondition filter = 7;
 }
 
 message GetRangeResponse {

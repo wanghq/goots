@@ -15,6 +15,9 @@ It has these top-level messages:
 	Column
 	Row
 	TableMeta
+	RelationCondition
+	CompositeCondition
+	ColumnCondition
 	Condition
 	CapacityUnit
 	ReservedThroughputDetails
@@ -59,11 +62,19 @@ It has these top-level messages:
 package protobuf
 
 import proto "github.com/golang/protobuf/proto"
+import fmt "fmt"
 import math "math"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
+var _ = fmt.Errorf
 var _ = math.Inf
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type ColumnType int32
 
@@ -112,6 +123,7 @@ func (x *ColumnType) UnmarshalJSON(data []byte) error {
 	*x = ColumnType(value)
 	return nil
 }
+func (ColumnType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
 type RowExistenceExpectation int32
 
@@ -148,6 +160,124 @@ func (x *RowExistenceExpectation) UnmarshalJSON(data []byte) error {
 	*x = RowExistenceExpectation(value)
 	return nil
 }
+func (RowExistenceExpectation) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+type ColumnConditionType int32
+
+const (
+	ColumnConditionType_CCT_RELATION  ColumnConditionType = 1
+	ColumnConditionType_CCT_COMPOSITE ColumnConditionType = 2
+)
+
+var ColumnConditionType_name = map[int32]string{
+	1: "CCT_RELATION",
+	2: "CCT_COMPOSITE",
+}
+var ColumnConditionType_value = map[string]int32{
+	"CCT_RELATION":  1,
+	"CCT_COMPOSITE": 2,
+}
+
+func (x ColumnConditionType) Enum() *ColumnConditionType {
+	p := new(ColumnConditionType)
+	*p = x
+	return p
+}
+func (x ColumnConditionType) String() string {
+	return proto.EnumName(ColumnConditionType_name, int32(x))
+}
+func (x *ColumnConditionType) UnmarshalJSON(data []byte) error {
+	value, err := proto.UnmarshalJSONEnum(ColumnConditionType_value, data, "ColumnConditionType")
+	if err != nil {
+		return err
+	}
+	*x = ColumnConditionType(value)
+	return nil
+}
+func (ColumnConditionType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+type ComparatorType int32
+
+const (
+	ComparatorType_CT_EQUAL         ComparatorType = 1
+	ComparatorType_CT_NOT_EQUAL     ComparatorType = 2
+	ComparatorType_CT_GREATER_THAN  ComparatorType = 3
+	ComparatorType_CT_GREATER_EQUAL ComparatorType = 4
+	ComparatorType_CT_LESS_THAN     ComparatorType = 5
+	ComparatorType_CT_LESS_EQUAL    ComparatorType = 6
+)
+
+var ComparatorType_name = map[int32]string{
+	1: "CT_EQUAL",
+	2: "CT_NOT_EQUAL",
+	3: "CT_GREATER_THAN",
+	4: "CT_GREATER_EQUAL",
+	5: "CT_LESS_THAN",
+	6: "CT_LESS_EQUAL",
+}
+var ComparatorType_value = map[string]int32{
+	"CT_EQUAL":         1,
+	"CT_NOT_EQUAL":     2,
+	"CT_GREATER_THAN":  3,
+	"CT_GREATER_EQUAL": 4,
+	"CT_LESS_THAN":     5,
+	"CT_LESS_EQUAL":    6,
+}
+
+func (x ComparatorType) Enum() *ComparatorType {
+	p := new(ComparatorType)
+	*p = x
+	return p
+}
+func (x ComparatorType) String() string {
+	return proto.EnumName(ComparatorType_name, int32(x))
+}
+func (x *ComparatorType) UnmarshalJSON(data []byte) error {
+	value, err := proto.UnmarshalJSONEnum(ComparatorType_value, data, "ComparatorType")
+	if err != nil {
+		return err
+	}
+	*x = ComparatorType(value)
+	return nil
+}
+func (ComparatorType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+
+type LogicalOperator int32
+
+const (
+	LogicalOperator_LO_NOT LogicalOperator = 1
+	LogicalOperator_LO_AND LogicalOperator = 2
+	LogicalOperator_LO_OR  LogicalOperator = 3
+)
+
+var LogicalOperator_name = map[int32]string{
+	1: "LO_NOT",
+	2: "LO_AND",
+	3: "LO_OR",
+}
+var LogicalOperator_value = map[string]int32{
+	"LO_NOT": 1,
+	"LO_AND": 2,
+	"LO_OR":  3,
+}
+
+func (x LogicalOperator) Enum() *LogicalOperator {
+	p := new(LogicalOperator)
+	*p = x
+	return p
+}
+func (x LogicalOperator) String() string {
+	return proto.EnumName(LogicalOperator_name, int32(x))
+}
+func (x *LogicalOperator) UnmarshalJSON(data []byte) error {
+	value, err := proto.UnmarshalJSONEnum(LogicalOperator_value, data, "LogicalOperator")
+	if err != nil {
+		return err
+	}
+	*x = LogicalOperator(value)
+	return nil
+}
+func (LogicalOperator) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 // UpdateRow
 type OperationType int32
@@ -182,6 +312,7 @@ func (x *OperationType) UnmarshalJSON(data []byte) error {
 	*x = OperationType(value)
 	return nil
 }
+func (OperationType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
 // GetRange
 type Direction int32
@@ -216,6 +347,7 @@ func (x *Direction) UnmarshalJSON(data []byte) error {
 	*x = Direction(value)
 	return nil
 }
+func (Direction) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 type Error struct {
 	Code             *string `protobuf:"bytes,1,req,name=code" json:"code,omitempty"`
@@ -223,9 +355,10 @@ type Error struct {
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *Error) Reset()         { *m = Error{} }
-func (m *Error) String() string { return proto.CompactTextString(m) }
-func (*Error) ProtoMessage()    {}
+func (m *Error) Reset()                    { *m = Error{} }
+func (m *Error) String() string            { return proto.CompactTextString(m) }
+func (*Error) ProtoMessage()               {}
+func (*Error) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
 func (m *Error) GetCode() string {
 	if m != nil && m.Code != nil {
@@ -247,9 +380,10 @@ type ColumnSchema struct {
 	XXX_unrecognized []byte      `json:"-"`
 }
 
-func (m *ColumnSchema) Reset()         { *m = ColumnSchema{} }
-func (m *ColumnSchema) String() string { return proto.CompactTextString(m) }
-func (*ColumnSchema) ProtoMessage()    {}
+func (m *ColumnSchema) Reset()                    { *m = ColumnSchema{} }
+func (m *ColumnSchema) String() string            { return proto.CompactTextString(m) }
+func (*ColumnSchema) ProtoMessage()               {}
+func (*ColumnSchema) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
 func (m *ColumnSchema) GetName() string {
 	if m != nil && m.Name != nil {
@@ -267,17 +401,18 @@ func (m *ColumnSchema) GetType() ColumnType {
 
 type ColumnValue struct {
 	Type             *ColumnType `protobuf:"varint,1,req,name=type,enum=protobuf.ColumnType" json:"type,omitempty"`
-	VInt             *int64      `protobuf:"varint,2,opt,name=v_int" json:"v_int,omitempty"`
-	VString          *string     `protobuf:"bytes,3,opt,name=v_string" json:"v_string,omitempty"`
-	VBool            *bool       `protobuf:"varint,4,opt,name=v_bool" json:"v_bool,omitempty"`
-	VDouble          *float64    `protobuf:"fixed64,5,opt,name=v_double" json:"v_double,omitempty"`
-	VBinary          []byte      `protobuf:"bytes,6,opt,name=v_binary" json:"v_binary,omitempty"`
+	VInt             *int64      `protobuf:"varint,2,opt,name=v_int,json=vInt" json:"v_int,omitempty"`
+	VString          *string     `protobuf:"bytes,3,opt,name=v_string,json=vString" json:"v_string,omitempty"`
+	VBool            *bool       `protobuf:"varint,4,opt,name=v_bool,json=vBool" json:"v_bool,omitempty"`
+	VDouble          *float64    `protobuf:"fixed64,5,opt,name=v_double,json=vDouble" json:"v_double,omitempty"`
+	VBinary          []byte      `protobuf:"bytes,6,opt,name=v_binary,json=vBinary" json:"v_binary,omitempty"`
 	XXX_unrecognized []byte      `json:"-"`
 }
 
-func (m *ColumnValue) Reset()         { *m = ColumnValue{} }
-func (m *ColumnValue) String() string { return proto.CompactTextString(m) }
-func (*ColumnValue) ProtoMessage()    {}
+func (m *ColumnValue) Reset()                    { *m = ColumnValue{} }
+func (m *ColumnValue) String() string            { return proto.CompactTextString(m) }
+func (*ColumnValue) ProtoMessage()               {}
+func (*ColumnValue) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
 func (m *ColumnValue) GetType() ColumnType {
 	if m != nil && m.Type != nil {
@@ -327,9 +462,10 @@ type Column struct {
 	XXX_unrecognized []byte       `json:"-"`
 }
 
-func (m *Column) Reset()         { *m = Column{} }
-func (m *Column) String() string { return proto.CompactTextString(m) }
-func (*Column) ProtoMessage()    {}
+func (m *Column) Reset()                    { *m = Column{} }
+func (m *Column) String() string            { return proto.CompactTextString(m) }
+func (*Column) ProtoMessage()               {}
+func (*Column) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
 func (m *Column) GetName() string {
 	if m != nil && m.Name != nil {
@@ -346,14 +482,15 @@ func (m *Column) GetValue() *ColumnValue {
 }
 
 type Row struct {
-	PrimaryKeyColumns []*Column `protobuf:"bytes,1,rep,name=primary_key_columns" json:"primary_key_columns,omitempty"`
-	AttributeColumns  []*Column `protobuf:"bytes,2,rep,name=attribute_columns" json:"attribute_columns,omitempty"`
+	PrimaryKeyColumns []*Column `protobuf:"bytes,1,rep,name=primary_key_columns,json=primaryKeyColumns" json:"primary_key_columns,omitempty"`
+	AttributeColumns  []*Column `protobuf:"bytes,2,rep,name=attribute_columns,json=attributeColumns" json:"attribute_columns,omitempty"`
 	XXX_unrecognized  []byte    `json:"-"`
 }
 
-func (m *Row) Reset()         { *m = Row{} }
-func (m *Row) String() string { return proto.CompactTextString(m) }
-func (*Row) ProtoMessage()    {}
+func (m *Row) Reset()                    { *m = Row{} }
+func (m *Row) String() string            { return proto.CompactTextString(m) }
+func (*Row) ProtoMessage()               {}
+func (*Row) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *Row) GetPrimaryKeyColumns() []*Column {
 	if m != nil {
@@ -370,14 +507,15 @@ func (m *Row) GetAttributeColumns() []*Column {
 }
 
 type TableMeta struct {
-	TableName        *string         `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
-	PrimaryKey       []*ColumnSchema `protobuf:"bytes,2,rep,name=primary_key" json:"primary_key,omitempty"`
+	TableName        *string         `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
+	PrimaryKey       []*ColumnSchema `protobuf:"bytes,2,rep,name=primary_key,json=primaryKey" json:"primary_key,omitempty"`
 	XXX_unrecognized []byte          `json:"-"`
 }
 
-func (m *TableMeta) Reset()         { *m = TableMeta{} }
-func (m *TableMeta) String() string { return proto.CompactTextString(m) }
-func (*TableMeta) ProtoMessage()    {}
+func (m *TableMeta) Reset()                    { *m = TableMeta{} }
+func (m *TableMeta) String() string            { return proto.CompactTextString(m) }
+func (*TableMeta) ProtoMessage()               {}
+func (*TableMeta) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
 func (m *TableMeta) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -393,14 +531,107 @@ func (m *TableMeta) GetPrimaryKey() []*ColumnSchema {
 	return nil
 }
 
+type RelationCondition struct {
+	Comparator       *ComparatorType `protobuf:"varint,1,req,name=comparator,enum=protobuf.ComparatorType" json:"comparator,omitempty"`
+	ColumnName       *string         `protobuf:"bytes,2,req,name=column_name,json=columnName" json:"column_name,omitempty"`
+	ColumnValue      *ColumnValue    `protobuf:"bytes,3,req,name=column_value,json=columnValue" json:"column_value,omitempty"`
+	PassIfMissing    *bool           `protobuf:"varint,4,req,name=pass_if_missing,json=passIfMissing" json:"pass_if_missing,omitempty"`
+	XXX_unrecognized []byte          `json:"-"`
+}
+
+func (m *RelationCondition) Reset()                    { *m = RelationCondition{} }
+func (m *RelationCondition) String() string            { return proto.CompactTextString(m) }
+func (*RelationCondition) ProtoMessage()               {}
+func (*RelationCondition) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+
+func (m *RelationCondition) GetComparator() ComparatorType {
+	if m != nil && m.Comparator != nil {
+		return *m.Comparator
+	}
+	return ComparatorType_CT_EQUAL
+}
+
+func (m *RelationCondition) GetColumnName() string {
+	if m != nil && m.ColumnName != nil {
+		return *m.ColumnName
+	}
+	return ""
+}
+
+func (m *RelationCondition) GetColumnValue() *ColumnValue {
+	if m != nil {
+		return m.ColumnValue
+	}
+	return nil
+}
+
+func (m *RelationCondition) GetPassIfMissing() bool {
+	if m != nil && m.PassIfMissing != nil {
+		return *m.PassIfMissing
+	}
+	return false
+}
+
+type CompositeCondition struct {
+	Combinator       *LogicalOperator   `protobuf:"varint,1,req,name=combinator,enum=protobuf.LogicalOperator" json:"combinator,omitempty"`
+	SubConditions    []*ColumnCondition `protobuf:"bytes,2,rep,name=sub_conditions,json=subConditions" json:"sub_conditions,omitempty"`
+	XXX_unrecognized []byte             `json:"-"`
+}
+
+func (m *CompositeCondition) Reset()                    { *m = CompositeCondition{} }
+func (m *CompositeCondition) String() string            { return proto.CompactTextString(m) }
+func (*CompositeCondition) ProtoMessage()               {}
+func (*CompositeCondition) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+
+func (m *CompositeCondition) GetCombinator() LogicalOperator {
+	if m != nil && m.Combinator != nil {
+		return *m.Combinator
+	}
+	return LogicalOperator_LO_NOT
+}
+
+func (m *CompositeCondition) GetSubConditions() []*ColumnCondition {
+	if m != nil {
+		return m.SubConditions
+	}
+	return nil
+}
+
+type ColumnCondition struct {
+	Type             *ColumnConditionType `protobuf:"varint,1,req,name=type,enum=protobuf.ColumnConditionType" json:"type,omitempty"`
+	Condition        []byte               `protobuf:"bytes,2,req,name=condition" json:"condition,omitempty"`
+	XXX_unrecognized []byte               `json:"-"`
+}
+
+func (m *ColumnCondition) Reset()                    { *m = ColumnCondition{} }
+func (m *ColumnCondition) String() string            { return proto.CompactTextString(m) }
+func (*ColumnCondition) ProtoMessage()               {}
+func (*ColumnCondition) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+
+func (m *ColumnCondition) GetType() ColumnConditionType {
+	if m != nil && m.Type != nil {
+		return *m.Type
+	}
+	return ColumnConditionType_CCT_RELATION
+}
+
+func (m *ColumnCondition) GetCondition() []byte {
+	if m != nil {
+		return m.Condition
+	}
+	return nil
+}
+
 type Condition struct {
-	RowExistence     *RowExistenceExpectation `protobuf:"varint,1,req,name=row_existence,enum=protobuf.RowExistenceExpectation" json:"row_existence,omitempty"`
+	RowExistence     *RowExistenceExpectation `protobuf:"varint,1,req,name=row_existence,json=rowExistence,enum=protobuf.RowExistenceExpectation" json:"row_existence,omitempty"`
+	ColumnCondition  *ColumnCondition         `protobuf:"bytes,2,opt,name=column_condition,json=columnCondition" json:"column_condition,omitempty"`
 	XXX_unrecognized []byte                   `json:"-"`
 }
 
-func (m *Condition) Reset()         { *m = Condition{} }
-func (m *Condition) String() string { return proto.CompactTextString(m) }
-func (*Condition) ProtoMessage()    {}
+func (m *Condition) Reset()                    { *m = Condition{} }
+func (m *Condition) String() string            { return proto.CompactTextString(m) }
+func (*Condition) ProtoMessage()               {}
+func (*Condition) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *Condition) GetRowExistence() RowExistenceExpectation {
 	if m != nil && m.RowExistence != nil {
@@ -409,15 +640,23 @@ func (m *Condition) GetRowExistence() RowExistenceExpectation {
 	return RowExistenceExpectation_IGNORE
 }
 
+func (m *Condition) GetColumnCondition() *ColumnCondition {
+	if m != nil {
+		return m.ColumnCondition
+	}
+	return nil
+}
+
 type CapacityUnit struct {
 	Read             *int32 `protobuf:"varint,1,opt,name=read" json:"read,omitempty"`
 	Write            *int32 `protobuf:"varint,2,opt,name=write" json:"write,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *CapacityUnit) Reset()         { *m = CapacityUnit{} }
-func (m *CapacityUnit) String() string { return proto.CompactTextString(m) }
-func (*CapacityUnit) ProtoMessage()    {}
+func (m *CapacityUnit) Reset()                    { *m = CapacityUnit{} }
+func (m *CapacityUnit) String() string            { return proto.CompactTextString(m) }
+func (*CapacityUnit) ProtoMessage()               {}
+func (*CapacityUnit) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
 
 func (m *CapacityUnit) GetRead() int32 {
 	if m != nil && m.Read != nil {
@@ -434,16 +673,17 @@ func (m *CapacityUnit) GetWrite() int32 {
 }
 
 type ReservedThroughputDetails struct {
-	CapacityUnit           *CapacityUnit `protobuf:"bytes,1,req,name=capacity_unit" json:"capacity_unit,omitempty"`
-	LastIncreaseTime       *int64        `protobuf:"varint,2,req,name=last_increase_time" json:"last_increase_time,omitempty"`
-	LastDecreaseTime       *int64        `protobuf:"varint,3,opt,name=last_decrease_time" json:"last_decrease_time,omitempty"`
-	NumberOfDecreasesToday *int32        `protobuf:"varint,4,req,name=number_of_decreases_today" json:"number_of_decreases_today,omitempty"`
+	CapacityUnit           *CapacityUnit `protobuf:"bytes,1,req,name=capacity_unit,json=capacityUnit" json:"capacity_unit,omitempty"`
+	LastIncreaseTime       *int64        `protobuf:"varint,2,req,name=last_increase_time,json=lastIncreaseTime" json:"last_increase_time,omitempty"`
+	LastDecreaseTime       *int64        `protobuf:"varint,3,opt,name=last_decrease_time,json=lastDecreaseTime" json:"last_decrease_time,omitempty"`
+	NumberOfDecreasesToday *int32        `protobuf:"varint,4,req,name=number_of_decreases_today,json=numberOfDecreasesToday" json:"number_of_decreases_today,omitempty"`
 	XXX_unrecognized       []byte        `json:"-"`
 }
 
-func (m *ReservedThroughputDetails) Reset()         { *m = ReservedThroughputDetails{} }
-func (m *ReservedThroughputDetails) String() string { return proto.CompactTextString(m) }
-func (*ReservedThroughputDetails) ProtoMessage()    {}
+func (m *ReservedThroughputDetails) Reset()                    { *m = ReservedThroughputDetails{} }
+func (m *ReservedThroughputDetails) String() string            { return proto.CompactTextString(m) }
+func (*ReservedThroughputDetails) ProtoMessage()               {}
+func (*ReservedThroughputDetails) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
 
 func (m *ReservedThroughputDetails) GetCapacityUnit() *CapacityUnit {
 	if m != nil {
@@ -474,13 +714,14 @@ func (m *ReservedThroughputDetails) GetNumberOfDecreasesToday() int32 {
 }
 
 type ReservedThroughput struct {
-	CapacityUnit     *CapacityUnit `protobuf:"bytes,1,req,name=capacity_unit" json:"capacity_unit,omitempty"`
+	CapacityUnit     *CapacityUnit `protobuf:"bytes,1,req,name=capacity_unit,json=capacityUnit" json:"capacity_unit,omitempty"`
 	XXX_unrecognized []byte        `json:"-"`
 }
 
-func (m *ReservedThroughput) Reset()         { *m = ReservedThroughput{} }
-func (m *ReservedThroughput) String() string { return proto.CompactTextString(m) }
-func (*ReservedThroughput) ProtoMessage()    {}
+func (m *ReservedThroughput) Reset()                    { *m = ReservedThroughput{} }
+func (m *ReservedThroughput) String() string            { return proto.CompactTextString(m) }
+func (*ReservedThroughput) ProtoMessage()               {}
+func (*ReservedThroughput) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
 
 func (m *ReservedThroughput) GetCapacityUnit() *CapacityUnit {
 	if m != nil {
@@ -490,13 +731,14 @@ func (m *ReservedThroughput) GetCapacityUnit() *CapacityUnit {
 }
 
 type ConsumedCapacity struct {
-	CapacityUnit     *CapacityUnit `protobuf:"bytes,1,req,name=capacity_unit" json:"capacity_unit,omitempty"`
+	CapacityUnit     *CapacityUnit `protobuf:"bytes,1,req,name=capacity_unit,json=capacityUnit" json:"capacity_unit,omitempty"`
 	XXX_unrecognized []byte        `json:"-"`
 }
 
-func (m *ConsumedCapacity) Reset()         { *m = ConsumedCapacity{} }
-func (m *ConsumedCapacity) String() string { return proto.CompactTextString(m) }
-func (*ConsumedCapacity) ProtoMessage()    {}
+func (m *ConsumedCapacity) Reset()                    { *m = ConsumedCapacity{} }
+func (m *ConsumedCapacity) String() string            { return proto.CompactTextString(m) }
+func (*ConsumedCapacity) ProtoMessage()               {}
+func (*ConsumedCapacity) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
 
 func (m *ConsumedCapacity) GetCapacityUnit() *CapacityUnit {
 	if m != nil {
@@ -507,14 +749,15 @@ func (m *ConsumedCapacity) GetCapacityUnit() *CapacityUnit {
 
 // CreateTable
 type CreateTableRequest struct {
-	TableMeta          *TableMeta          `protobuf:"bytes,1,req,name=table_meta" json:"table_meta,omitempty"`
-	ReservedThroughput *ReservedThroughput `protobuf:"bytes,2,req,name=reserved_throughput" json:"reserved_throughput,omitempty"`
+	TableMeta          *TableMeta          `protobuf:"bytes,1,req,name=table_meta,json=tableMeta" json:"table_meta,omitempty"`
+	ReservedThroughput *ReservedThroughput `protobuf:"bytes,2,req,name=reserved_throughput,json=reservedThroughput" json:"reserved_throughput,omitempty"`
 	XXX_unrecognized   []byte              `json:"-"`
 }
 
-func (m *CreateTableRequest) Reset()         { *m = CreateTableRequest{} }
-func (m *CreateTableRequest) String() string { return proto.CompactTextString(m) }
-func (*CreateTableRequest) ProtoMessage()    {}
+func (m *CreateTableRequest) Reset()                    { *m = CreateTableRequest{} }
+func (m *CreateTableRequest) String() string            { return proto.CompactTextString(m) }
+func (*CreateTableRequest) ProtoMessage()               {}
+func (*CreateTableRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
 
 func (m *CreateTableRequest) GetTableMeta() *TableMeta {
 	if m != nil {
@@ -534,19 +777,21 @@ type CreateTableResponse struct {
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *CreateTableResponse) Reset()         { *m = CreateTableResponse{} }
-func (m *CreateTableResponse) String() string { return proto.CompactTextString(m) }
-func (*CreateTableResponse) ProtoMessage()    {}
+func (m *CreateTableResponse) Reset()                    { *m = CreateTableResponse{} }
+func (m *CreateTableResponse) String() string            { return proto.CompactTextString(m) }
+func (*CreateTableResponse) ProtoMessage()               {}
+func (*CreateTableResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
 
 type UpdateTableRequest struct {
-	TableName          *string             `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
-	ReservedThroughput *ReservedThroughput `protobuf:"bytes,2,req,name=reserved_throughput" json:"reserved_throughput,omitempty"`
+	TableName          *string             `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
+	ReservedThroughput *ReservedThroughput `protobuf:"bytes,2,req,name=reserved_throughput,json=reservedThroughput" json:"reserved_throughput,omitempty"`
 	XXX_unrecognized   []byte              `json:"-"`
 }
 
-func (m *UpdateTableRequest) Reset()         { *m = UpdateTableRequest{} }
-func (m *UpdateTableRequest) String() string { return proto.CompactTextString(m) }
-func (*UpdateTableRequest) ProtoMessage()    {}
+func (m *UpdateTableRequest) Reset()                    { *m = UpdateTableRequest{} }
+func (m *UpdateTableRequest) String() string            { return proto.CompactTextString(m) }
+func (*UpdateTableRequest) ProtoMessage()               {}
+func (*UpdateTableRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
 
 func (m *UpdateTableRequest) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -563,13 +808,14 @@ func (m *UpdateTableRequest) GetReservedThroughput() *ReservedThroughput {
 }
 
 type UpdateTableResponse struct {
-	ReservedThroughputDetails *ReservedThroughputDetails `protobuf:"bytes,1,req,name=reserved_throughput_details" json:"reserved_throughput_details,omitempty"`
+	ReservedThroughputDetails *ReservedThroughputDetails `protobuf:"bytes,1,req,name=reserved_throughput_details,json=reservedThroughputDetails" json:"reserved_throughput_details,omitempty"`
 	XXX_unrecognized          []byte                     `json:"-"`
 }
 
-func (m *UpdateTableResponse) Reset()         { *m = UpdateTableResponse{} }
-func (m *UpdateTableResponse) String() string { return proto.CompactTextString(m) }
-func (*UpdateTableResponse) ProtoMessage()    {}
+func (m *UpdateTableResponse) Reset()                    { *m = UpdateTableResponse{} }
+func (m *UpdateTableResponse) String() string            { return proto.CompactTextString(m) }
+func (*UpdateTableResponse) ProtoMessage()               {}
+func (*UpdateTableResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
 
 func (m *UpdateTableResponse) GetReservedThroughputDetails() *ReservedThroughputDetails {
 	if m != nil {
@@ -580,13 +826,14 @@ func (m *UpdateTableResponse) GetReservedThroughputDetails() *ReservedThroughput
 
 // DescribeTable
 type DescribeTableRequest struct {
-	TableName        *string `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
+	TableName        *string `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *DescribeTableRequest) Reset()         { *m = DescribeTableRequest{} }
-func (m *DescribeTableRequest) String() string { return proto.CompactTextString(m) }
-func (*DescribeTableRequest) ProtoMessage()    {}
+func (m *DescribeTableRequest) Reset()                    { *m = DescribeTableRequest{} }
+func (m *DescribeTableRequest) String() string            { return proto.CompactTextString(m) }
+func (*DescribeTableRequest) ProtoMessage()               {}
+func (*DescribeTableRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
 
 func (m *DescribeTableRequest) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -596,14 +843,15 @@ func (m *DescribeTableRequest) GetTableName() string {
 }
 
 type DescribeTableResponse struct {
-	TableMeta                 *TableMeta                 `protobuf:"bytes,1,req,name=table_meta" json:"table_meta,omitempty"`
-	ReservedThroughputDetails *ReservedThroughputDetails `protobuf:"bytes,2,req,name=reserved_throughput_details" json:"reserved_throughput_details,omitempty"`
+	TableMeta                 *TableMeta                 `protobuf:"bytes,1,req,name=table_meta,json=tableMeta" json:"table_meta,omitempty"`
+	ReservedThroughputDetails *ReservedThroughputDetails `protobuf:"bytes,2,req,name=reserved_throughput_details,json=reservedThroughputDetails" json:"reserved_throughput_details,omitempty"`
 	XXX_unrecognized          []byte                     `json:"-"`
 }
 
-func (m *DescribeTableResponse) Reset()         { *m = DescribeTableResponse{} }
-func (m *DescribeTableResponse) String() string { return proto.CompactTextString(m) }
-func (*DescribeTableResponse) ProtoMessage()    {}
+func (m *DescribeTableResponse) Reset()                    { *m = DescribeTableResponse{} }
+func (m *DescribeTableResponse) String() string            { return proto.CompactTextString(m) }
+func (*DescribeTableResponse) ProtoMessage()               {}
+func (*DescribeTableResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
 
 func (m *DescribeTableResponse) GetTableMeta() *TableMeta {
 	if m != nil {
@@ -624,18 +872,20 @@ type ListTableRequest struct {
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *ListTableRequest) Reset()         { *m = ListTableRequest{} }
-func (m *ListTableRequest) String() string { return proto.CompactTextString(m) }
-func (*ListTableRequest) ProtoMessage()    {}
+func (m *ListTableRequest) Reset()                    { *m = ListTableRequest{} }
+func (m *ListTableRequest) String() string            { return proto.CompactTextString(m) }
+func (*ListTableRequest) ProtoMessage()               {}
+func (*ListTableRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
 
 type ListTableResponse struct {
-	TableNames       []string `protobuf:"bytes,1,rep,name=table_names" json:"table_names,omitempty"`
+	TableNames       []string `protobuf:"bytes,1,rep,name=table_names,json=tableNames" json:"table_names,omitempty"`
 	XXX_unrecognized []byte   `json:"-"`
 }
 
-func (m *ListTableResponse) Reset()         { *m = ListTableResponse{} }
-func (m *ListTableResponse) String() string { return proto.CompactTextString(m) }
-func (*ListTableResponse) ProtoMessage()    {}
+func (m *ListTableResponse) Reset()                    { *m = ListTableResponse{} }
+func (m *ListTableResponse) String() string            { return proto.CompactTextString(m) }
+func (*ListTableResponse) ProtoMessage()               {}
+func (*ListTableResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
 
 func (m *ListTableResponse) GetTableNames() []string {
 	if m != nil {
@@ -646,13 +896,14 @@ func (m *ListTableResponse) GetTableNames() []string {
 
 // DeleteTable
 type DeleteTableRequest struct {
-	TableName        *string `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
+	TableName        *string `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *DeleteTableRequest) Reset()         { *m = DeleteTableRequest{} }
-func (m *DeleteTableRequest) String() string { return proto.CompactTextString(m) }
-func (*DeleteTableRequest) ProtoMessage()    {}
+func (m *DeleteTableRequest) Reset()                    { *m = DeleteTableRequest{} }
+func (m *DeleteTableRequest) String() string            { return proto.CompactTextString(m) }
+func (*DeleteTableRequest) ProtoMessage()               {}
+func (*DeleteTableRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{22} }
 
 func (m *DeleteTableRequest) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -665,21 +916,24 @@ type DeleteTableResponse struct {
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *DeleteTableResponse) Reset()         { *m = DeleteTableResponse{} }
-func (m *DeleteTableResponse) String() string { return proto.CompactTextString(m) }
-func (*DeleteTableResponse) ProtoMessage()    {}
+func (m *DeleteTableResponse) Reset()                    { *m = DeleteTableResponse{} }
+func (m *DeleteTableResponse) String() string            { return proto.CompactTextString(m) }
+func (*DeleteTableResponse) ProtoMessage()               {}
+func (*DeleteTableResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{23} }
 
 // GetRow
 type GetRowRequest struct {
-	TableName        *string   `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
-	PrimaryKey       []*Column `protobuf:"bytes,2,rep,name=primary_key" json:"primary_key,omitempty"`
-	ColumnsToGet     []string  `protobuf:"bytes,3,rep,name=columns_to_get" json:"columns_to_get,omitempty"`
-	XXX_unrecognized []byte    `json:"-"`
+	TableName        *string          `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
+	PrimaryKey       []*Column        `protobuf:"bytes,2,rep,name=primary_key,json=primaryKey" json:"primary_key,omitempty"`
+	ColumnsToGet     []string         `protobuf:"bytes,3,rep,name=columns_to_get,json=columnsToGet" json:"columns_to_get,omitempty"`
+	Filter           *ColumnCondition `protobuf:"bytes,4,opt,name=filter" json:"filter,omitempty"`
+	XXX_unrecognized []byte           `json:"-"`
 }
 
-func (m *GetRowRequest) Reset()         { *m = GetRowRequest{} }
-func (m *GetRowRequest) String() string { return proto.CompactTextString(m) }
-func (*GetRowRequest) ProtoMessage()    {}
+func (m *GetRowRequest) Reset()                    { *m = GetRowRequest{} }
+func (m *GetRowRequest) String() string            { return proto.CompactTextString(m) }
+func (*GetRowRequest) ProtoMessage()               {}
+func (*GetRowRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{24} }
 
 func (m *GetRowRequest) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -702,15 +956,23 @@ func (m *GetRowRequest) GetColumnsToGet() []string {
 	return nil
 }
 
+func (m *GetRowRequest) GetFilter() *ColumnCondition {
+	if m != nil {
+		return m.Filter
+	}
+	return nil
+}
+
 type GetRowResponse struct {
 	Consumed         *ConsumedCapacity `protobuf:"bytes,1,req,name=consumed" json:"consumed,omitempty"`
 	Row              *Row              `protobuf:"bytes,2,req,name=row" json:"row,omitempty"`
 	XXX_unrecognized []byte            `json:"-"`
 }
 
-func (m *GetRowResponse) Reset()         { *m = GetRowResponse{} }
-func (m *GetRowResponse) String() string { return proto.CompactTextString(m) }
-func (*GetRowResponse) ProtoMessage()    {}
+func (m *GetRowResponse) Reset()                    { *m = GetRowResponse{} }
+func (m *GetRowResponse) String() string            { return proto.CompactTextString(m) }
+func (*GetRowResponse) ProtoMessage()               {}
+func (*GetRowResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{25} }
 
 func (m *GetRowResponse) GetConsumed() *ConsumedCapacity {
 	if m != nil {
@@ -733,9 +995,10 @@ type ColumnUpdate struct {
 	XXX_unrecognized []byte         `json:"-"`
 }
 
-func (m *ColumnUpdate) Reset()         { *m = ColumnUpdate{} }
-func (m *ColumnUpdate) String() string { return proto.CompactTextString(m) }
-func (*ColumnUpdate) ProtoMessage()    {}
+func (m *ColumnUpdate) Reset()                    { *m = ColumnUpdate{} }
+func (m *ColumnUpdate) String() string            { return proto.CompactTextString(m) }
+func (*ColumnUpdate) ProtoMessage()               {}
+func (*ColumnUpdate) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{26} }
 
 func (m *ColumnUpdate) GetType() OperationType {
 	if m != nil && m.Type != nil {
@@ -759,16 +1022,17 @@ func (m *ColumnUpdate) GetValue() *ColumnValue {
 }
 
 type UpdateRowRequest struct {
-	TableName        *string         `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
+	TableName        *string         `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
 	Condition        *Condition      `protobuf:"bytes,2,req,name=condition" json:"condition,omitempty"`
-	PrimaryKey       []*Column       `protobuf:"bytes,3,rep,name=primary_key" json:"primary_key,omitempty"`
-	AttributeColumns []*ColumnUpdate `protobuf:"bytes,4,rep,name=attribute_columns" json:"attribute_columns,omitempty"`
+	PrimaryKey       []*Column       `protobuf:"bytes,3,rep,name=primary_key,json=primaryKey" json:"primary_key,omitempty"`
+	AttributeColumns []*ColumnUpdate `protobuf:"bytes,4,rep,name=attribute_columns,json=attributeColumns" json:"attribute_columns,omitempty"`
 	XXX_unrecognized []byte          `json:"-"`
 }
 
-func (m *UpdateRowRequest) Reset()         { *m = UpdateRowRequest{} }
-func (m *UpdateRowRequest) String() string { return proto.CompactTextString(m) }
-func (*UpdateRowRequest) ProtoMessage()    {}
+func (m *UpdateRowRequest) Reset()                    { *m = UpdateRowRequest{} }
+func (m *UpdateRowRequest) String() string            { return proto.CompactTextString(m) }
+func (*UpdateRowRequest) ProtoMessage()               {}
+func (*UpdateRowRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{27} }
 
 func (m *UpdateRowRequest) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -803,9 +1067,10 @@ type UpdateRowResponse struct {
 	XXX_unrecognized []byte            `json:"-"`
 }
 
-func (m *UpdateRowResponse) Reset()         { *m = UpdateRowResponse{} }
-func (m *UpdateRowResponse) String() string { return proto.CompactTextString(m) }
-func (*UpdateRowResponse) ProtoMessage()    {}
+func (m *UpdateRowResponse) Reset()                    { *m = UpdateRowResponse{} }
+func (m *UpdateRowResponse) String() string            { return proto.CompactTextString(m) }
+func (*UpdateRowResponse) ProtoMessage()               {}
+func (*UpdateRowResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{28} }
 
 func (m *UpdateRowResponse) GetConsumed() *ConsumedCapacity {
 	if m != nil {
@@ -816,16 +1081,17 @@ func (m *UpdateRowResponse) GetConsumed() *ConsumedCapacity {
 
 // PutRow
 type PutRowRequest struct {
-	TableName        *string    `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
+	TableName        *string    `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
 	Condition        *Condition `protobuf:"bytes,2,req,name=condition" json:"condition,omitempty"`
-	PrimaryKey       []*Column  `protobuf:"bytes,3,rep,name=primary_key" json:"primary_key,omitempty"`
-	AttributeColumns []*Column  `protobuf:"bytes,4,rep,name=attribute_columns" json:"attribute_columns,omitempty"`
+	PrimaryKey       []*Column  `protobuf:"bytes,3,rep,name=primary_key,json=primaryKey" json:"primary_key,omitempty"`
+	AttributeColumns []*Column  `protobuf:"bytes,4,rep,name=attribute_columns,json=attributeColumns" json:"attribute_columns,omitempty"`
 	XXX_unrecognized []byte     `json:"-"`
 }
 
-func (m *PutRowRequest) Reset()         { *m = PutRowRequest{} }
-func (m *PutRowRequest) String() string { return proto.CompactTextString(m) }
-func (*PutRowRequest) ProtoMessage()    {}
+func (m *PutRowRequest) Reset()                    { *m = PutRowRequest{} }
+func (m *PutRowRequest) String() string            { return proto.CompactTextString(m) }
+func (*PutRowRequest) ProtoMessage()               {}
+func (*PutRowRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{29} }
 
 func (m *PutRowRequest) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -860,9 +1126,10 @@ type PutRowResponse struct {
 	XXX_unrecognized []byte            `json:"-"`
 }
 
-func (m *PutRowResponse) Reset()         { *m = PutRowResponse{} }
-func (m *PutRowResponse) String() string { return proto.CompactTextString(m) }
-func (*PutRowResponse) ProtoMessage()    {}
+func (m *PutRowResponse) Reset()                    { *m = PutRowResponse{} }
+func (m *PutRowResponse) String() string            { return proto.CompactTextString(m) }
+func (*PutRowResponse) ProtoMessage()               {}
+func (*PutRowResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{30} }
 
 func (m *PutRowResponse) GetConsumed() *ConsumedCapacity {
 	if m != nil {
@@ -873,15 +1140,16 @@ func (m *PutRowResponse) GetConsumed() *ConsumedCapacity {
 
 // DeleteRow
 type DeleteRowRequest struct {
-	TableName        *string    `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
+	TableName        *string    `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
 	Condition        *Condition `protobuf:"bytes,2,req,name=condition" json:"condition,omitempty"`
-	PrimaryKey       []*Column  `protobuf:"bytes,3,rep,name=primary_key" json:"primary_key,omitempty"`
+	PrimaryKey       []*Column  `protobuf:"bytes,3,rep,name=primary_key,json=primaryKey" json:"primary_key,omitempty"`
 	XXX_unrecognized []byte     `json:"-"`
 }
 
-func (m *DeleteRowRequest) Reset()         { *m = DeleteRowRequest{} }
-func (m *DeleteRowRequest) String() string { return proto.CompactTextString(m) }
-func (*DeleteRowRequest) ProtoMessage()    {}
+func (m *DeleteRowRequest) Reset()                    { *m = DeleteRowRequest{} }
+func (m *DeleteRowRequest) String() string            { return proto.CompactTextString(m) }
+func (*DeleteRowRequest) ProtoMessage()               {}
+func (*DeleteRowRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{31} }
 
 func (m *DeleteRowRequest) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -909,9 +1177,10 @@ type DeleteRowResponse struct {
 	XXX_unrecognized []byte            `json:"-"`
 }
 
-func (m *DeleteRowResponse) Reset()         { *m = DeleteRowResponse{} }
-func (m *DeleteRowResponse) String() string { return proto.CompactTextString(m) }
-func (*DeleteRowResponse) ProtoMessage()    {}
+func (m *DeleteRowResponse) Reset()                    { *m = DeleteRowResponse{} }
+func (m *DeleteRowResponse) String() string            { return proto.CompactTextString(m) }
+func (*DeleteRowResponse) ProtoMessage()               {}
+func (*DeleteRowResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{32} }
 
 func (m *DeleteRowResponse) GetConsumed() *ConsumedCapacity {
 	if m != nil {
@@ -922,13 +1191,14 @@ func (m *DeleteRowResponse) GetConsumed() *ConsumedCapacity {
 
 // BatchGetRow
 type RowInBatchGetRowRequest struct {
-	PrimaryKey       []*Column `protobuf:"bytes,1,rep,name=primary_key" json:"primary_key,omitempty"`
+	PrimaryKey       []*Column `protobuf:"bytes,1,rep,name=primary_key,json=primaryKey" json:"primary_key,omitempty"`
 	XXX_unrecognized []byte    `json:"-"`
 }
 
-func (m *RowInBatchGetRowRequest) Reset()         { *m = RowInBatchGetRowRequest{} }
-func (m *RowInBatchGetRowRequest) String() string { return proto.CompactTextString(m) }
-func (*RowInBatchGetRowRequest) ProtoMessage()    {}
+func (m *RowInBatchGetRowRequest) Reset()                    { *m = RowInBatchGetRowRequest{} }
+func (m *RowInBatchGetRowRequest) String() string            { return proto.CompactTextString(m) }
+func (*RowInBatchGetRowRequest) ProtoMessage()               {}
+func (*RowInBatchGetRowRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{33} }
 
 func (m *RowInBatchGetRowRequest) GetPrimaryKey() []*Column {
 	if m != nil {
@@ -938,15 +1208,17 @@ func (m *RowInBatchGetRowRequest) GetPrimaryKey() []*Column {
 }
 
 type TableInBatchGetRowRequest struct {
-	TableName        *string                    `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
+	TableName        *string                    `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
 	Rows             []*RowInBatchGetRowRequest `protobuf:"bytes,2,rep,name=rows" json:"rows,omitempty"`
-	ColumnsToGet     []string                   `protobuf:"bytes,3,rep,name=columns_to_get" json:"columns_to_get,omitempty"`
+	ColumnsToGet     []string                   `protobuf:"bytes,3,rep,name=columns_to_get,json=columnsToGet" json:"columns_to_get,omitempty"`
+	Filter           *ColumnCondition           `protobuf:"bytes,4,opt,name=filter" json:"filter,omitempty"`
 	XXX_unrecognized []byte                     `json:"-"`
 }
 
-func (m *TableInBatchGetRowRequest) Reset()         { *m = TableInBatchGetRowRequest{} }
-func (m *TableInBatchGetRowRequest) String() string { return proto.CompactTextString(m) }
-func (*TableInBatchGetRowRequest) ProtoMessage()    {}
+func (m *TableInBatchGetRowRequest) Reset()                    { *m = TableInBatchGetRowRequest{} }
+func (m *TableInBatchGetRowRequest) String() string            { return proto.CompactTextString(m) }
+func (*TableInBatchGetRowRequest) ProtoMessage()               {}
+func (*TableInBatchGetRowRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{34} }
 
 func (m *TableInBatchGetRowRequest) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -969,14 +1241,22 @@ func (m *TableInBatchGetRowRequest) GetColumnsToGet() []string {
 	return nil
 }
 
+func (m *TableInBatchGetRowRequest) GetFilter() *ColumnCondition {
+	if m != nil {
+		return m.Filter
+	}
+	return nil
+}
+
 type BatchGetRowRequest struct {
 	Tables           []*TableInBatchGetRowRequest `protobuf:"bytes,1,rep,name=tables" json:"tables,omitempty"`
 	XXX_unrecognized []byte                       `json:"-"`
 }
 
-func (m *BatchGetRowRequest) Reset()         { *m = BatchGetRowRequest{} }
-func (m *BatchGetRowRequest) String() string { return proto.CompactTextString(m) }
-func (*BatchGetRowRequest) ProtoMessage()    {}
+func (m *BatchGetRowRequest) Reset()                    { *m = BatchGetRowRequest{} }
+func (m *BatchGetRowRequest) String() string            { return proto.CompactTextString(m) }
+func (*BatchGetRowRequest) ProtoMessage()               {}
+func (*BatchGetRowRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{35} }
 
 func (m *BatchGetRowRequest) GetTables() []*TableInBatchGetRowRequest {
 	if m != nil {
@@ -986,16 +1266,17 @@ func (m *BatchGetRowRequest) GetTables() []*TableInBatchGetRowRequest {
 }
 
 type RowInBatchGetRowResponse struct {
-	IsOk             *bool             `protobuf:"varint,1,req,name=is_ok,def=1" json:"is_ok,omitempty"`
+	IsOk             *bool             `protobuf:"varint,1,req,name=is_ok,json=isOk,def=1" json:"is_ok,omitempty"`
 	Error            *Error            `protobuf:"bytes,2,opt,name=error" json:"error,omitempty"`
 	Consumed         *ConsumedCapacity `protobuf:"bytes,3,opt,name=consumed" json:"consumed,omitempty"`
 	Row              *Row              `protobuf:"bytes,4,opt,name=row" json:"row,omitempty"`
 	XXX_unrecognized []byte            `json:"-"`
 }
 
-func (m *RowInBatchGetRowResponse) Reset()         { *m = RowInBatchGetRowResponse{} }
-func (m *RowInBatchGetRowResponse) String() string { return proto.CompactTextString(m) }
-func (*RowInBatchGetRowResponse) ProtoMessage()    {}
+func (m *RowInBatchGetRowResponse) Reset()                    { *m = RowInBatchGetRowResponse{} }
+func (m *RowInBatchGetRowResponse) String() string            { return proto.CompactTextString(m) }
+func (*RowInBatchGetRowResponse) ProtoMessage()               {}
+func (*RowInBatchGetRowResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{36} }
 
 const Default_RowInBatchGetRowResponse_IsOk bool = true
 
@@ -1028,14 +1309,15 @@ func (m *RowInBatchGetRowResponse) GetRow() *Row {
 }
 
 type TableInBatchGetRowResponse struct {
-	TableName        *string                     `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
+	TableName        *string                     `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
 	Rows             []*RowInBatchGetRowResponse `protobuf:"bytes,2,rep,name=rows" json:"rows,omitempty"`
 	XXX_unrecognized []byte                      `json:"-"`
 }
 
-func (m *TableInBatchGetRowResponse) Reset()         { *m = TableInBatchGetRowResponse{} }
-func (m *TableInBatchGetRowResponse) String() string { return proto.CompactTextString(m) }
-func (*TableInBatchGetRowResponse) ProtoMessage()    {}
+func (m *TableInBatchGetRowResponse) Reset()                    { *m = TableInBatchGetRowResponse{} }
+func (m *TableInBatchGetRowResponse) String() string            { return proto.CompactTextString(m) }
+func (*TableInBatchGetRowResponse) ProtoMessage()               {}
+func (*TableInBatchGetRowResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{37} }
 
 func (m *TableInBatchGetRowResponse) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -1056,9 +1338,10 @@ type BatchGetRowResponse struct {
 	XXX_unrecognized []byte                        `json:"-"`
 }
 
-func (m *BatchGetRowResponse) Reset()         { *m = BatchGetRowResponse{} }
-func (m *BatchGetRowResponse) String() string { return proto.CompactTextString(m) }
-func (*BatchGetRowResponse) ProtoMessage()    {}
+func (m *BatchGetRowResponse) Reset()                    { *m = BatchGetRowResponse{} }
+func (m *BatchGetRowResponse) String() string            { return proto.CompactTextString(m) }
+func (*BatchGetRowResponse) ProtoMessage()               {}
+func (*BatchGetRowResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{38} }
 
 func (m *BatchGetRowResponse) GetTables() []*TableInBatchGetRowResponse {
 	if m != nil {
@@ -1070,14 +1353,15 @@ func (m *BatchGetRowResponse) GetTables() []*TableInBatchGetRowResponse {
 // BatchWriteRow
 type PutRowInBatchWriteRowRequest struct {
 	Condition        *Condition `protobuf:"bytes,1,req,name=condition" json:"condition,omitempty"`
-	PrimaryKey       []*Column  `protobuf:"bytes,2,rep,name=primary_key" json:"primary_key,omitempty"`
-	AttributeColumns []*Column  `protobuf:"bytes,3,rep,name=attribute_columns" json:"attribute_columns,omitempty"`
+	PrimaryKey       []*Column  `protobuf:"bytes,2,rep,name=primary_key,json=primaryKey" json:"primary_key,omitempty"`
+	AttributeColumns []*Column  `protobuf:"bytes,3,rep,name=attribute_columns,json=attributeColumns" json:"attribute_columns,omitempty"`
 	XXX_unrecognized []byte     `json:"-"`
 }
 
-func (m *PutRowInBatchWriteRowRequest) Reset()         { *m = PutRowInBatchWriteRowRequest{} }
-func (m *PutRowInBatchWriteRowRequest) String() string { return proto.CompactTextString(m) }
-func (*PutRowInBatchWriteRowRequest) ProtoMessage()    {}
+func (m *PutRowInBatchWriteRowRequest) Reset()                    { *m = PutRowInBatchWriteRowRequest{} }
+func (m *PutRowInBatchWriteRowRequest) String() string            { return proto.CompactTextString(m) }
+func (*PutRowInBatchWriteRowRequest) ProtoMessage()               {}
+func (*PutRowInBatchWriteRowRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{39} }
 
 func (m *PutRowInBatchWriteRowRequest) GetCondition() *Condition {
 	if m != nil {
@@ -1102,14 +1386,17 @@ func (m *PutRowInBatchWriteRowRequest) GetAttributeColumns() []*Column {
 
 type UpdateRowInBatchWriteRowRequest struct {
 	Condition        *Condition      `protobuf:"bytes,1,req,name=condition" json:"condition,omitempty"`
-	PrimaryKey       []*Column       `protobuf:"bytes,2,rep,name=primary_key" json:"primary_key,omitempty"`
-	AttributeColumns []*ColumnUpdate `protobuf:"bytes,3,rep,name=attribute_columns" json:"attribute_columns,omitempty"`
+	PrimaryKey       []*Column       `protobuf:"bytes,2,rep,name=primary_key,json=primaryKey" json:"primary_key,omitempty"`
+	AttributeColumns []*ColumnUpdate `protobuf:"bytes,3,rep,name=attribute_columns,json=attributeColumns" json:"attribute_columns,omitempty"`
 	XXX_unrecognized []byte          `json:"-"`
 }
 
 func (m *UpdateRowInBatchWriteRowRequest) Reset()         { *m = UpdateRowInBatchWriteRowRequest{} }
 func (m *UpdateRowInBatchWriteRowRequest) String() string { return proto.CompactTextString(m) }
 func (*UpdateRowInBatchWriteRowRequest) ProtoMessage()    {}
+func (*UpdateRowInBatchWriteRowRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{40}
+}
 
 func (m *UpdateRowInBatchWriteRowRequest) GetCondition() *Condition {
 	if m != nil {
@@ -1134,13 +1421,16 @@ func (m *UpdateRowInBatchWriteRowRequest) GetAttributeColumns() []*ColumnUpdate 
 
 type DeleteRowInBatchWriteRowRequest struct {
 	Condition        *Condition `protobuf:"bytes,1,req,name=condition" json:"condition,omitempty"`
-	PrimaryKey       []*Column  `protobuf:"bytes,2,rep,name=primary_key" json:"primary_key,omitempty"`
+	PrimaryKey       []*Column  `protobuf:"bytes,2,rep,name=primary_key,json=primaryKey" json:"primary_key,omitempty"`
 	XXX_unrecognized []byte     `json:"-"`
 }
 
 func (m *DeleteRowInBatchWriteRowRequest) Reset()         { *m = DeleteRowInBatchWriteRowRequest{} }
 func (m *DeleteRowInBatchWriteRowRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteRowInBatchWriteRowRequest) ProtoMessage()    {}
+func (*DeleteRowInBatchWriteRowRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{41}
+}
 
 func (m *DeleteRowInBatchWriteRowRequest) GetCondition() *Condition {
 	if m != nil {
@@ -1157,16 +1447,17 @@ func (m *DeleteRowInBatchWriteRowRequest) GetPrimaryKey() []*Column {
 }
 
 type TableInBatchWriteRowRequest struct {
-	TableName        *string                            `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
-	PutRows          []*PutRowInBatchWriteRowRequest    `protobuf:"bytes,2,rep,name=put_rows" json:"put_rows,omitempty"`
-	UpdateRows       []*UpdateRowInBatchWriteRowRequest `protobuf:"bytes,3,rep,name=update_rows" json:"update_rows,omitempty"`
-	DeleteRows       []*DeleteRowInBatchWriteRowRequest `protobuf:"bytes,4,rep,name=delete_rows" json:"delete_rows,omitempty"`
+	TableName        *string                            `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
+	PutRows          []*PutRowInBatchWriteRowRequest    `protobuf:"bytes,2,rep,name=put_rows,json=putRows" json:"put_rows,omitempty"`
+	UpdateRows       []*UpdateRowInBatchWriteRowRequest `protobuf:"bytes,3,rep,name=update_rows,json=updateRows" json:"update_rows,omitempty"`
+	DeleteRows       []*DeleteRowInBatchWriteRowRequest `protobuf:"bytes,4,rep,name=delete_rows,json=deleteRows" json:"delete_rows,omitempty"`
 	XXX_unrecognized []byte                             `json:"-"`
 }
 
-func (m *TableInBatchWriteRowRequest) Reset()         { *m = TableInBatchWriteRowRequest{} }
-func (m *TableInBatchWriteRowRequest) String() string { return proto.CompactTextString(m) }
-func (*TableInBatchWriteRowRequest) ProtoMessage()    {}
+func (m *TableInBatchWriteRowRequest) Reset()                    { *m = TableInBatchWriteRowRequest{} }
+func (m *TableInBatchWriteRowRequest) String() string            { return proto.CompactTextString(m) }
+func (*TableInBatchWriteRowRequest) ProtoMessage()               {}
+func (*TableInBatchWriteRowRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{42} }
 
 func (m *TableInBatchWriteRowRequest) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -1201,9 +1492,10 @@ type BatchWriteRowRequest struct {
 	XXX_unrecognized []byte                         `json:"-"`
 }
 
-func (m *BatchWriteRowRequest) Reset()         { *m = BatchWriteRowRequest{} }
-func (m *BatchWriteRowRequest) String() string { return proto.CompactTextString(m) }
-func (*BatchWriteRowRequest) ProtoMessage()    {}
+func (m *BatchWriteRowRequest) Reset()                    { *m = BatchWriteRowRequest{} }
+func (m *BatchWriteRowRequest) String() string            { return proto.CompactTextString(m) }
+func (*BatchWriteRowRequest) ProtoMessage()               {}
+func (*BatchWriteRowRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{43} }
 
 func (m *BatchWriteRowRequest) GetTables() []*TableInBatchWriteRowRequest {
 	if m != nil {
@@ -1213,15 +1505,16 @@ func (m *BatchWriteRowRequest) GetTables() []*TableInBatchWriteRowRequest {
 }
 
 type RowInBatchWriteRowResponse struct {
-	IsOk             *bool             `protobuf:"varint,1,req,name=is_ok,def=1" json:"is_ok,omitempty"`
+	IsOk             *bool             `protobuf:"varint,1,req,name=is_ok,json=isOk,def=1" json:"is_ok,omitempty"`
 	Error            *Error            `protobuf:"bytes,2,opt,name=error" json:"error,omitempty"`
 	Consumed         *ConsumedCapacity `protobuf:"bytes,3,opt,name=consumed" json:"consumed,omitempty"`
 	XXX_unrecognized []byte            `json:"-"`
 }
 
-func (m *RowInBatchWriteRowResponse) Reset()         { *m = RowInBatchWriteRowResponse{} }
-func (m *RowInBatchWriteRowResponse) String() string { return proto.CompactTextString(m) }
-func (*RowInBatchWriteRowResponse) ProtoMessage()    {}
+func (m *RowInBatchWriteRowResponse) Reset()                    { *m = RowInBatchWriteRowResponse{} }
+func (m *RowInBatchWriteRowResponse) String() string            { return proto.CompactTextString(m) }
+func (*RowInBatchWriteRowResponse) ProtoMessage()               {}
+func (*RowInBatchWriteRowResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{44} }
 
 const Default_RowInBatchWriteRowResponse_IsOk bool = true
 
@@ -1247,16 +1540,17 @@ func (m *RowInBatchWriteRowResponse) GetConsumed() *ConsumedCapacity {
 }
 
 type TableInBatchWriteRowResponse struct {
-	TableName        *string                       `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
-	PutRows          []*RowInBatchWriteRowResponse `protobuf:"bytes,2,rep,name=put_rows" json:"put_rows,omitempty"`
-	UpdateRows       []*RowInBatchWriteRowResponse `protobuf:"bytes,3,rep,name=update_rows" json:"update_rows,omitempty"`
-	DeleteRows       []*RowInBatchWriteRowResponse `protobuf:"bytes,4,rep,name=delete_rows" json:"delete_rows,omitempty"`
+	TableName        *string                       `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
+	PutRows          []*RowInBatchWriteRowResponse `protobuf:"bytes,2,rep,name=put_rows,json=putRows" json:"put_rows,omitempty"`
+	UpdateRows       []*RowInBatchWriteRowResponse `protobuf:"bytes,3,rep,name=update_rows,json=updateRows" json:"update_rows,omitempty"`
+	DeleteRows       []*RowInBatchWriteRowResponse `protobuf:"bytes,4,rep,name=delete_rows,json=deleteRows" json:"delete_rows,omitempty"`
 	XXX_unrecognized []byte                        `json:"-"`
 }
 
-func (m *TableInBatchWriteRowResponse) Reset()         { *m = TableInBatchWriteRowResponse{} }
-func (m *TableInBatchWriteRowResponse) String() string { return proto.CompactTextString(m) }
-func (*TableInBatchWriteRowResponse) ProtoMessage()    {}
+func (m *TableInBatchWriteRowResponse) Reset()                    { *m = TableInBatchWriteRowResponse{} }
+func (m *TableInBatchWriteRowResponse) String() string            { return proto.CompactTextString(m) }
+func (*TableInBatchWriteRowResponse) ProtoMessage()               {}
+func (*TableInBatchWriteRowResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{45} }
 
 func (m *TableInBatchWriteRowResponse) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -1291,9 +1585,10 @@ type BatchWriteRowResponse struct {
 	XXX_unrecognized []byte                          `json:"-"`
 }
 
-func (m *BatchWriteRowResponse) Reset()         { *m = BatchWriteRowResponse{} }
-func (m *BatchWriteRowResponse) String() string { return proto.CompactTextString(m) }
-func (*BatchWriteRowResponse) ProtoMessage()    {}
+func (m *BatchWriteRowResponse) Reset()                    { *m = BatchWriteRowResponse{} }
+func (m *BatchWriteRowResponse) String() string            { return proto.CompactTextString(m) }
+func (*BatchWriteRowResponse) ProtoMessage()               {}
+func (*BatchWriteRowResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{46} }
 
 func (m *BatchWriteRowResponse) GetTables() []*TableInBatchWriteRowResponse {
 	if m != nil {
@@ -1303,18 +1598,20 @@ func (m *BatchWriteRowResponse) GetTables() []*TableInBatchWriteRowResponse {
 }
 
 type GetRangeRequest struct {
-	TableName                *string    `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`
-	Direction                *Direction `protobuf:"varint,2,req,name=direction,enum=protobuf.Direction" json:"direction,omitempty"`
-	ColumnsToGet             []string   `protobuf:"bytes,3,rep,name=columns_to_get" json:"columns_to_get,omitempty"`
-	Limit                    *int32     `protobuf:"varint,4,opt,name=limit" json:"limit,omitempty"`
-	InclusiveStartPrimaryKey []*Column  `protobuf:"bytes,5,rep,name=inclusive_start_primary_key" json:"inclusive_start_primary_key,omitempty"`
-	ExclusiveEndPrimaryKey   []*Column  `protobuf:"bytes,6,rep,name=exclusive_end_primary_key" json:"exclusive_end_primary_key,omitempty"`
-	XXX_unrecognized         []byte     `json:"-"`
+	TableName                *string          `protobuf:"bytes,1,req,name=table_name,json=tableName" json:"table_name,omitempty"`
+	Direction                *Direction       `protobuf:"varint,2,req,name=direction,enum=protobuf.Direction" json:"direction,omitempty"`
+	ColumnsToGet             []string         `protobuf:"bytes,3,rep,name=columns_to_get,json=columnsToGet" json:"columns_to_get,omitempty"`
+	Limit                    *int32           `protobuf:"varint,4,opt,name=limit" json:"limit,omitempty"`
+	InclusiveStartPrimaryKey []*Column        `protobuf:"bytes,5,rep,name=inclusive_start_primary_key,json=inclusiveStartPrimaryKey" json:"inclusive_start_primary_key,omitempty"`
+	ExclusiveEndPrimaryKey   []*Column        `protobuf:"bytes,6,rep,name=exclusive_end_primary_key,json=exclusiveEndPrimaryKey" json:"exclusive_end_primary_key,omitempty"`
+	Filter                   *ColumnCondition `protobuf:"bytes,7,opt,name=filter" json:"filter,omitempty"`
+	XXX_unrecognized         []byte           `json:"-"`
 }
 
-func (m *GetRangeRequest) Reset()         { *m = GetRangeRequest{} }
-func (m *GetRangeRequest) String() string { return proto.CompactTextString(m) }
-func (*GetRangeRequest) ProtoMessage()    {}
+func (m *GetRangeRequest) Reset()                    { *m = GetRangeRequest{} }
+func (m *GetRangeRequest) String() string            { return proto.CompactTextString(m) }
+func (*GetRangeRequest) ProtoMessage()               {}
+func (*GetRangeRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{47} }
 
 func (m *GetRangeRequest) GetTableName() string {
 	if m != nil && m.TableName != nil {
@@ -1358,16 +1655,24 @@ func (m *GetRangeRequest) GetExclusiveEndPrimaryKey() []*Column {
 	return nil
 }
 
+func (m *GetRangeRequest) GetFilter() *ColumnCondition {
+	if m != nil {
+		return m.Filter
+	}
+	return nil
+}
+
 type GetRangeResponse struct {
 	Consumed            *ConsumedCapacity `protobuf:"bytes,1,req,name=consumed" json:"consumed,omitempty"`
-	NextStartPrimaryKey []*Column         `protobuf:"bytes,2,rep,name=next_start_primary_key" json:"next_start_primary_key,omitempty"`
+	NextStartPrimaryKey []*Column         `protobuf:"bytes,2,rep,name=next_start_primary_key,json=nextStartPrimaryKey" json:"next_start_primary_key,omitempty"`
 	Rows                []*Row            `protobuf:"bytes,3,rep,name=rows" json:"rows,omitempty"`
 	XXX_unrecognized    []byte            `json:"-"`
 }
 
-func (m *GetRangeResponse) Reset()         { *m = GetRangeResponse{} }
-func (m *GetRangeResponse) String() string { return proto.CompactTextString(m) }
-func (*GetRangeResponse) ProtoMessage()    {}
+func (m *GetRangeResponse) Reset()                    { *m = GetRangeResponse{} }
+func (m *GetRangeResponse) String() string            { return proto.CompactTextString(m) }
+func (*GetRangeResponse) ProtoMessage()               {}
+func (*GetRangeResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{48} }
 
 func (m *GetRangeResponse) GetConsumed() *ConsumedCapacity {
 	if m != nil {
@@ -1391,8 +1696,190 @@ func (m *GetRangeResponse) GetRows() []*Row {
 }
 
 func init() {
+	proto.RegisterType((*Error)(nil), "protobuf.Error")
+	proto.RegisterType((*ColumnSchema)(nil), "protobuf.ColumnSchema")
+	proto.RegisterType((*ColumnValue)(nil), "protobuf.ColumnValue")
+	proto.RegisterType((*Column)(nil), "protobuf.Column")
+	proto.RegisterType((*Row)(nil), "protobuf.Row")
+	proto.RegisterType((*TableMeta)(nil), "protobuf.TableMeta")
+	proto.RegisterType((*RelationCondition)(nil), "protobuf.RelationCondition")
+	proto.RegisterType((*CompositeCondition)(nil), "protobuf.CompositeCondition")
+	proto.RegisterType((*ColumnCondition)(nil), "protobuf.ColumnCondition")
+	proto.RegisterType((*Condition)(nil), "protobuf.Condition")
+	proto.RegisterType((*CapacityUnit)(nil), "protobuf.CapacityUnit")
+	proto.RegisterType((*ReservedThroughputDetails)(nil), "protobuf.ReservedThroughputDetails")
+	proto.RegisterType((*ReservedThroughput)(nil), "protobuf.ReservedThroughput")
+	proto.RegisterType((*ConsumedCapacity)(nil), "protobuf.ConsumedCapacity")
+	proto.RegisterType((*CreateTableRequest)(nil), "protobuf.CreateTableRequest")
+	proto.RegisterType((*CreateTableResponse)(nil), "protobuf.CreateTableResponse")
+	proto.RegisterType((*UpdateTableRequest)(nil), "protobuf.UpdateTableRequest")
+	proto.RegisterType((*UpdateTableResponse)(nil), "protobuf.UpdateTableResponse")
+	proto.RegisterType((*DescribeTableRequest)(nil), "protobuf.DescribeTableRequest")
+	proto.RegisterType((*DescribeTableResponse)(nil), "protobuf.DescribeTableResponse")
+	proto.RegisterType((*ListTableRequest)(nil), "protobuf.ListTableRequest")
+	proto.RegisterType((*ListTableResponse)(nil), "protobuf.ListTableResponse")
+	proto.RegisterType((*DeleteTableRequest)(nil), "protobuf.DeleteTableRequest")
+	proto.RegisterType((*DeleteTableResponse)(nil), "protobuf.DeleteTableResponse")
+	proto.RegisterType((*GetRowRequest)(nil), "protobuf.GetRowRequest")
+	proto.RegisterType((*GetRowResponse)(nil), "protobuf.GetRowResponse")
+	proto.RegisterType((*ColumnUpdate)(nil), "protobuf.ColumnUpdate")
+	proto.RegisterType((*UpdateRowRequest)(nil), "protobuf.UpdateRowRequest")
+	proto.RegisterType((*UpdateRowResponse)(nil), "protobuf.UpdateRowResponse")
+	proto.RegisterType((*PutRowRequest)(nil), "protobuf.PutRowRequest")
+	proto.RegisterType((*PutRowResponse)(nil), "protobuf.PutRowResponse")
+	proto.RegisterType((*DeleteRowRequest)(nil), "protobuf.DeleteRowRequest")
+	proto.RegisterType((*DeleteRowResponse)(nil), "protobuf.DeleteRowResponse")
+	proto.RegisterType((*RowInBatchGetRowRequest)(nil), "protobuf.RowInBatchGetRowRequest")
+	proto.RegisterType((*TableInBatchGetRowRequest)(nil), "protobuf.TableInBatchGetRowRequest")
+	proto.RegisterType((*BatchGetRowRequest)(nil), "protobuf.BatchGetRowRequest")
+	proto.RegisterType((*RowInBatchGetRowResponse)(nil), "protobuf.RowInBatchGetRowResponse")
+	proto.RegisterType((*TableInBatchGetRowResponse)(nil), "protobuf.TableInBatchGetRowResponse")
+	proto.RegisterType((*BatchGetRowResponse)(nil), "protobuf.BatchGetRowResponse")
+	proto.RegisterType((*PutRowInBatchWriteRowRequest)(nil), "protobuf.PutRowInBatchWriteRowRequest")
+	proto.RegisterType((*UpdateRowInBatchWriteRowRequest)(nil), "protobuf.UpdateRowInBatchWriteRowRequest")
+	proto.RegisterType((*DeleteRowInBatchWriteRowRequest)(nil), "protobuf.DeleteRowInBatchWriteRowRequest")
+	proto.RegisterType((*TableInBatchWriteRowRequest)(nil), "protobuf.TableInBatchWriteRowRequest")
+	proto.RegisterType((*BatchWriteRowRequest)(nil), "protobuf.BatchWriteRowRequest")
+	proto.RegisterType((*RowInBatchWriteRowResponse)(nil), "protobuf.RowInBatchWriteRowResponse")
+	proto.RegisterType((*TableInBatchWriteRowResponse)(nil), "protobuf.TableInBatchWriteRowResponse")
+	proto.RegisterType((*BatchWriteRowResponse)(nil), "protobuf.BatchWriteRowResponse")
+	proto.RegisterType((*GetRangeRequest)(nil), "protobuf.GetRangeRequest")
+	proto.RegisterType((*GetRangeResponse)(nil), "protobuf.GetRangeResponse")
 	proto.RegisterEnum("protobuf.ColumnType", ColumnType_name, ColumnType_value)
 	proto.RegisterEnum("protobuf.RowExistenceExpectation", RowExistenceExpectation_name, RowExistenceExpectation_value)
+	proto.RegisterEnum("protobuf.ColumnConditionType", ColumnConditionType_name, ColumnConditionType_value)
+	proto.RegisterEnum("protobuf.ComparatorType", ComparatorType_name, ComparatorType_value)
+	proto.RegisterEnum("protobuf.LogicalOperator", LogicalOperator_name, LogicalOperator_value)
 	proto.RegisterEnum("protobuf.OperationType", OperationType_name, OperationType_value)
 	proto.RegisterEnum("protobuf.Direction", Direction_name, Direction_value)
+}
+
+func init() { proto.RegisterFile("ots_protocol_2.proto", fileDescriptor0) }
+
+var fileDescriptor0 = []byte{
+	// 1978 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xcc, 0x59, 0xcd, 0x73, 0x1b, 0x49,
+	0x15, 0xdf, 0xd6, 0x87, 0x3f, 0x9e, 0xbf, 0xc6, 0x2d, 0x3b, 0x2b, 0x27, 0xd9, 0xb2, 0x77, 0x36,
+	0x9b, 0x12, 0x5e, 0x2a, 0x55, 0x31, 0x9b, 0x25, 0xbb, 0x4b, 0x60, 0x65, 0x69, 0xe2, 0x15, 0x91,
+	0x25, 0xa7, 0x2d, 0x93, 0x70, 0x9a, 0x1a, 0x8d, 0xda, 0xce, 0x54, 0xa4, 0x19, 0x31, 0xd3, 0x23,
+	0xc7, 0x14, 0x07, 0x8a, 0x03, 0x5c, 0xb8, 0x70, 0x21, 0xc5, 0x7f, 0xc1, 0x61, 0xb9, 0x70, 0xe5,
+	0x46, 0x71, 0xa0, 0x8a, 0x2b, 0xff, 0x03, 0xfc, 0x09, 0xd4, 0x74, 0xf7, 0x7c, 0x7a, 0x6c, 0x2b,
+	0xf1, 0x52, 0xd9, 0x93, 0xbb, 0x5f, 0xbf, 0xaf, 0xdf, 0x7b, 0xaf, 0x5f, 0x3f, 0x8d, 0x61, 0xcd,
+	0x61, 0x9e, 0x3e, 0x76, 0x1d, 0xe6, 0x98, 0xce, 0x50, 0xdf, 0xb9, 0xc7, 0x97, 0x78, 0x8e, 0xff,
+	0xe9, 0xfb, 0xc7, 0xea, 0x03, 0x28, 0x6b, 0xae, 0xeb, 0xb8, 0x18, 0x43, 0xc9, 0x74, 0x06, 0xb4,
+	0x8a, 0xb6, 0x0a, 0xb5, 0x79, 0xc2, 0xd7, 0xb8, 0x0a, 0xb3, 0x23, 0xea, 0x79, 0xc6, 0x09, 0xad,
+	0x16, 0xb6, 0x50, 0x6d, 0x9e, 0x84, 0x5b, 0xb5, 0x0d, 0x8b, 0x0d, 0x67, 0xe8, 0x8f, 0xec, 0x43,
+	0xf3, 0x05, 0x1d, 0x19, 0x81, 0xb4, 0x6d, 0x8c, 0x22, 0xe9, 0x60, 0x8d, 0x6b, 0x50, 0x62, 0x67,
+	0xe3, 0x40, 0xb4, 0x50, 0x5b, 0xde, 0x59, 0xbb, 0x17, 0xda, 0xbc, 0x27, 0x24, 0x7b, 0x67, 0x63,
+	0x4a, 0x38, 0x87, 0xfa, 0x0d, 0x82, 0x05, 0x41, 0xfc, 0x99, 0x31, 0xf4, 0x63, 0x49, 0x74, 0x95,
+	0x24, 0xae, 0x40, 0x79, 0xa2, 0x5b, 0x36, 0xe3, 0xfe, 0x15, 0x49, 0x69, 0xd2, 0xb2, 0x19, 0xde,
+	0x80, 0xb9, 0x89, 0xee, 0x31, 0xd7, 0xb2, 0x4f, 0xaa, 0x45, 0xe1, 0xf7, 0xe4, 0x90, 0x6f, 0xf1,
+	0x3a, 0xcc, 0x4c, 0xf4, 0xbe, 0xe3, 0x0c, 0xab, 0xa5, 0x2d, 0x54, 0x9b, 0x23, 0xe5, 0xc9, 0xae,
+	0xe3, 0x0c, 0x85, 0xc4, 0xc0, 0xf1, 0xfb, 0x43, 0x5a, 0x2d, 0x6f, 0xa1, 0x1a, 0x22, 0xb3, 0x93,
+	0x26, 0xdf, 0x8a, 0xa3, 0xbe, 0x65, 0x1b, 0xee, 0x59, 0x75, 0x66, 0x0b, 0xd5, 0x16, 0xc9, 0xec,
+	0x64, 0x97, 0x6f, 0xd5, 0x16, 0xcc, 0x08, 0x87, 0x72, 0xe1, 0x7f, 0x02, 0xe5, 0x49, 0x80, 0x86,
+	0xe3, 0x5f, 0xd8, 0x59, 0xcf, 0xa2, 0xe0, 0x50, 0x89, 0xe0, 0x51, 0x7f, 0x8b, 0xa0, 0x48, 0x9c,
+	0x53, 0xfc, 0x15, 0x54, 0xc6, 0xae, 0x35, 0x32, 0xdc, 0x33, 0xfd, 0x25, 0x3d, 0xd3, 0x4d, 0xce,
+	0xe9, 0x55, 0xd1, 0x56, 0xb1, 0xb6, 0xb0, 0xa3, 0x64, 0x55, 0x90, 0x55, 0xc9, 0xfc, 0x84, 0x9e,
+	0x09, 0x8a, 0x87, 0x1f, 0xc1, 0xaa, 0xc1, 0x98, 0x6b, 0xf5, 0x7d, 0x46, 0x23, 0xf9, 0xc2, 0x05,
+	0xf2, 0x4a, 0xc4, 0x2a, 0xc5, 0x55, 0x13, 0xe6, 0x7b, 0x46, 0x7f, 0x48, 0xf7, 0x29, 0x33, 0xf0,
+	0x07, 0x00, 0x2c, 0xd8, 0xe8, 0x09, 0x70, 0xf3, 0x9c, 0xd2, 0x09, 0x10, 0xfe, 0x10, 0x16, 0x12,
+	0xce, 0x4a, 0x23, 0x37, 0xb2, 0x46, 0x44, 0x85, 0x10, 0x88, 0x5d, 0x55, 0xff, 0x89, 0x60, 0x95,
+	0xd0, 0xa1, 0xc1, 0x2c, 0xc7, 0x6e, 0x38, 0xf6, 0xc0, 0x0a, 0x16, 0xf8, 0x21, 0x80, 0xe9, 0x8c,
+	0xc6, 0x86, 0x6b, 0x30, 0xc7, 0x95, 0xb9, 0xaf, 0x26, 0xb5, 0x85, 0x67, 0x3c, 0xff, 0x09, 0x5e,
+	0xbc, 0x09, 0x0b, 0x02, 0xa9, 0x70, 0xb4, 0xc0, 0x1d, 0x05, 0x41, 0xe2, 0x9e, 0x3e, 0x84, 0x45,
+	0xc9, 0x20, 0x52, 0x52, 0xbc, 0x2c, 0x25, 0x52, 0x97, 0x28, 0xc5, 0xbb, 0xb0, 0x32, 0x36, 0x3c,
+	0x4f, 0xb7, 0x8e, 0xf5, 0x91, 0xe5, 0x79, 0x41, 0x49, 0x95, 0xb6, 0x0a, 0xb5, 0x39, 0xb2, 0x14,
+	0x90, 0x5b, 0xc7, 0xfb, 0x82, 0xa8, 0xfe, 0x01, 0x01, 0x0e, 0x3c, 0x74, 0x3c, 0x2b, 0x08, 0x66,
+	0x88, 0xe9, 0x73, 0x8e, 0x29, 0x28, 0x9f, 0x18, 0xd3, 0x46, 0x6c, 0xb6, 0xed, 0x9c, 0x58, 0xa6,
+	0x31, 0xec, 0x8e, 0x29, 0x07, 0x42, 0x12, 0xcc, 0xf8, 0x2b, 0x58, 0xf6, 0xfc, 0xbe, 0x6e, 0x86,
+	0xba, 0xc2, 0x2c, 0x6e, 0x64, 0xbd, 0x8e, 0xac, 0x91, 0x25, 0xcf, 0xef, 0x47, 0x3b, 0x4f, 0xed,
+	0xc3, 0x4a, 0x86, 0x03, 0xdf, 0x4f, 0xdd, 0xac, 0x0f, 0x2e, 0x54, 0x95, 0xb8, 0x62, 0xb7, 0x61,
+	0x3e, 0xf2, 0x81, 0x87, 0x76, 0x91, 0xc4, 0x04, 0xf5, 0x4f, 0x08, 0xe6, 0x63, 0xf5, 0x8f, 0x61,
+	0xc9, 0x75, 0x4e, 0x75, 0xfa, 0xca, 0xf2, 0x18, 0xb5, 0xcd, 0xd0, 0xce, 0x87, 0xb1, 0x1d, 0xe2,
+	0x9c, 0x6a, 0xe1, 0xa9, 0xf6, 0x6a, 0x4c, 0x4d, 0xc6, 0xab, 0x80, 0x2c, 0xba, 0x89, 0x03, 0xdc,
+	0x04, 0x45, 0xe6, 0x2b, 0x69, 0x1a, 0x5d, 0x8e, 0x7e, 0xc5, 0x4c, 0x13, 0xd4, 0x87, 0xb0, 0xd8,
+	0x30, 0xc6, 0x86, 0x69, 0xb1, 0xb3, 0x23, 0xdb, 0x62, 0xc1, 0x2d, 0x75, 0xa9, 0x31, 0xa8, 0xa2,
+	0x2d, 0x54, 0x2b, 0x13, 0xbe, 0xc6, 0x6b, 0x50, 0x3e, 0x75, 0x2d, 0x26, 0x1a, 0x5c, 0x99, 0x88,
+	0x8d, 0xfa, 0x1f, 0x04, 0x1b, 0x84, 0x7a, 0xd4, 0x9d, 0xd0, 0x41, 0xef, 0x85, 0xeb, 0xf8, 0x27,
+	0x2f, 0xc6, 0x3e, 0x6b, 0x52, 0x66, 0x58, 0x43, 0x0f, 0x7f, 0x09, 0x4b, 0xa6, 0xd4, 0xab, 0xfb,
+	0xb6, 0xc5, 0x38, 0xca, 0x74, 0xe5, 0x27, 0xcc, 0x92, 0x45, 0x33, 0xe9, 0xc4, 0xf7, 0x01, 0x0f,
+	0x0d, 0x8f, 0xe9, 0x96, 0x6d, 0xba, 0xd4, 0xf0, 0xa8, 0xce, 0x2c, 0x59, 0xb2, 0x45, 0xa2, 0x04,
+	0x27, 0x2d, 0x79, 0xd0, 0xb3, 0x46, 0x34, 0xe2, 0x1e, 0xd0, 0x24, 0x77, 0x91, 0x37, 0x3b, 0xce,
+	0xdd, 0xa4, 0x09, 0xee, 0xcf, 0x61, 0xc3, 0xf6, 0x47, 0x7d, 0xea, 0xea, 0xce, 0x71, 0x24, 0xe2,
+	0xe9, 0xcc, 0x19, 0x18, 0x67, 0xbc, 0x6c, 0xcb, 0xe4, 0x86, 0x60, 0xe8, 0x1e, 0x87, 0x82, 0x5e,
+	0x2f, 0x38, 0x55, 0x9f, 0x02, 0x3e, 0x0f, 0xf8, 0x5a, 0x48, 0xd5, 0x2e, 0x28, 0x0d, 0xc7, 0xf6,
+	0xfc, 0x11, 0x1d, 0x84, 0x5c, 0xd7, 0x53, 0xf8, 0x3a, 0xb8, 0x63, 0x2e, 0x35, 0x18, 0xe5, 0x2d,
+	0x8a, 0xd0, 0x5f, 0xf8, 0xd4, 0x63, 0x78, 0x27, 0xec, 0x52, 0x23, 0xca, 0x0c, 0xa9, 0xb0, 0x12,
+	0x2b, 0x8c, 0xda, 0x99, 0x6c, 0x5d, 0xbc, 0xb3, 0xed, 0x43, 0xc5, 0x95, 0x70, 0x75, 0x16, 0xe1,
+	0x95, 0xad, 0xfa, 0x76, 0xa2, 0x5c, 0xcf, 0xc5, 0x84, 0x60, 0xf7, 0x1c, 0x4d, 0x5d, 0x87, 0x4a,
+	0xca, 0x31, 0x6f, 0xec, 0xd8, 0x1e, 0x55, 0x7f, 0x83, 0x00, 0x1f, 0x8d, 0x07, 0x59, 0x87, 0xaf,
+	0x68, 0xab, 0xdf, 0xb2, 0x6f, 0xbf, 0x84, 0x4a, 0xca, 0x07, 0xe1, 0x1b, 0x36, 0xe1, 0x56, 0x8e,
+	0x15, 0x7d, 0x20, 0x6a, 0x5c, 0x86, 0xf1, 0xa3, 0xcb, 0xac, 0xc9, 0xeb, 0x40, 0x36, 0xdc, 0x8b,
+	0x8e, 0xd4, 0x07, 0xb0, 0xd6, 0xa4, 0x9e, 0xe9, 0x5a, 0xfd, 0x37, 0x89, 0x80, 0xfa, 0x67, 0x04,
+	0xeb, 0x19, 0x39, 0xe9, 0xf5, 0xdb, 0xe4, 0xfa, 0x0a, 0xa4, 0x85, 0x6f, 0x05, 0x29, 0x06, 0xa5,
+	0x6d, 0x79, 0x2c, 0x89, 0x52, 0xfd, 0x14, 0x56, 0x13, 0x34, 0x89, 0x60, 0x13, 0x16, 0x62, 0xe8,
+	0xe2, 0x65, 0x9f, 0x27, 0x10, 0x61, 0xf7, 0xd4, 0x1f, 0x00, 0x6e, 0xd2, 0x21, 0x7d, 0xa3, 0x9a,
+	0x09, 0x0a, 0x30, 0x25, 0x24, 0x0b, 0xf0, 0xaf, 0x08, 0x96, 0xf6, 0x28, 0x23, 0xce, 0xe9, 0x94,
+	0xb5, 0x77, 0x3f, 0xef, 0x49, 0x3f, 0x3f, 0x37, 0x24, 0x1e, 0x73, 0x7c, 0x07, 0x96, 0xe5, 0x98,
+	0xa1, 0x33, 0x47, 0x3f, 0xa1, 0xac, 0x5a, 0xe4, 0x98, 0xe4, 0x8b, 0xeb, 0xf5, 0x9c, 0x3d, 0xca,
+	0xf0, 0x7d, 0x98, 0x39, 0xb6, 0x86, 0x8c, 0xba, 0x7c, 0xf0, 0xba, 0xb4, 0x8f, 0x4b, 0x46, 0xd5,
+	0x82, 0xe5, 0xd0, 0x77, 0x19, 0xbb, 0xcf, 0x60, 0xce, 0x94, 0x1d, 0x45, 0xe6, 0xfe, 0x66, 0x52,
+	0x4d, 0xba, 0xd7, 0x90, 0x88, 0x17, 0x6f, 0x42, 0xd1, 0x75, 0x4e, 0x65, 0xa6, 0x97, 0x52, 0x8f,
+	0x11, 0x09, 0x4e, 0xd4, 0x5f, 0x85, 0xe3, 0xac, 0xb8, 0x29, 0xf8, 0x93, 0xd4, 0x33, 0xf9, 0x7e,
+	0x2c, 0x21, 0x5e, 0xea, 0xf4, 0x03, 0x19, 0x0e, 0x7f, 0x85, 0xbc, 0xe1, 0xaf, 0xc8, 0xd1, 0x5e,
+	0x3e, 0xfc, 0xfd, 0x1b, 0x81, 0x22, 0x0c, 0xbf, 0x49, 0xa2, 0x32, 0xaf, 0x72, 0xea, 0x1e, 0xc4,
+	0xc1, 0x8c, 0xb9, 0xb2, 0xb9, 0x2d, 0x4e, 0x91, 0xdb, 0x46, 0xde, 0x30, 0x59, 0xca, 0x9f, 0xf3,
+	0x24, 0x82, 0xf3, 0x23, 0xe5, 0x13, 0x58, 0x4d, 0xa0, 0xbb, 0x5e, 0x2a, 0xd5, 0x7f, 0x21, 0x58,
+	0x3a, 0xf0, 0xd9, 0x77, 0x2d, 0x50, 0x8f, 0x2e, 0x0e, 0xd4, 0x34, 0x53, 0xf7, 0xd7, 0xb0, 0x1c,
+	0x82, 0xba, 0x66, 0x7c, 0x5e, 0x23, 0x50, 0x44, 0x27, 0xf8, 0x8e, 0x85, 0x28, 0x28, 0x83, 0x84,
+	0x63, 0xd7, 0x84, 0xd9, 0x86, 0xf7, 0x89, 0x73, 0xda, 0xb2, 0x77, 0x0d, 0x66, 0xbe, 0x48, 0x77,
+	0xb8, 0x8c, 0x6b, 0x68, 0x0a, 0xd7, 0xfe, 0x8e, 0x60, 0x83, 0x37, 0xce, 0x5c, 0x85, 0x57, 0x44,
+	0xef, 0x01, 0x94, 0x5c, 0xe7, 0x34, 0x9c, 0xce, 0xd3, 0xa3, 0x6e, 0x9e, 0x3e, 0xc2, 0xd9, 0xff,
+	0x7f, 0x6d, 0xf3, 0x29, 0xe0, 0x1c, 0x10, 0x5f, 0xc2, 0x0c, 0x77, 0x39, 0xfc, 0x2d, 0xf9, 0x51,
+	0xe6, 0xd1, 0xcc, 0xf5, 0x54, 0x8a, 0xa8, 0x7f, 0x41, 0x50, 0x3d, 0x8f, 0x46, 0xa6, 0x70, 0x03,
+	0xca, 0x96, 0xa7, 0x3b, 0x2f, 0x79, 0x64, 0xe6, 0xbe, 0x28, 0x31, 0xd7, 0xa7, 0xa4, 0x64, 0x79,
+	0xdd, 0x97, 0xf8, 0x63, 0x28, 0x53, 0xd7, 0x75, 0x5c, 0x39, 0xbb, 0xaf, 0xc4, 0x36, 0xf9, 0x37,
+	0x07, 0x22, 0x4e, 0x53, 0x45, 0x20, 0xfa, 0xe5, 0x1b, 0xb5, 0x75, 0x11, 0x99, 0xbc, 0xb6, 0xee,
+	0xc1, 0xcd, 0x3c, 0x70, 0xd2, 0xf1, 0x2b, 0xf2, 0xfa, 0x59, 0x2a, 0xaf, 0xea, 0x65, 0x79, 0x15,
+	0x0a, 0x45, 0x62, 0xd5, 0x43, 0xa8, 0xe4, 0x59, 0xfb, 0x51, 0x26, 0x01, 0x77, 0x2e, 0x4f, 0x80,
+	0x54, 0x19, 0x66, 0xe0, 0x6f, 0x08, 0x6e, 0x8b, 0x0e, 0x21, 0xf9, 0x9e, 0x05, 0xbf, 0x53, 0x52,
+	0x55, 0x9f, 0xb8, 0xc3, 0xe8, 0x6d, 0xee, 0x70, 0xe1, 0x6d, 0xdb, 0x5c, 0x71, 0xea, 0x36, 0xf7,
+	0x0f, 0x04, 0x9b, 0xd1, 0x53, 0xf0, 0x4e, 0x81, 0x34, 0x2e, 0x06, 0x32, 0xfd, 0xc3, 0xf6, 0x3b,
+	0x04, 0x9b, 0x51, 0x4b, 0x7b, 0x97, 0x70, 0xd4, 0xd7, 0x05, 0xb8, 0x95, 0xac, 0xa2, 0xac, 0x17,
+	0x57, 0x94, 0x7a, 0x1d, 0xe6, 0x82, 0x89, 0x38, 0x51, 0xee, 0x77, 0x63, 0x73, 0x97, 0x95, 0x1d,
+	0x99, 0x1d, 0xf3, 0x53, 0x0f, 0xff, 0x14, 0x16, 0x7c, 0x1e, 0x27, 0xa1, 0x45, 0x84, 0xf2, 0x7b,
+	0xb1, 0x96, 0x2b, 0xd2, 0x4e, 0xc0, 0x0f, 0x19, 0xb8, 0xae, 0x01, 0x0f, 0xab, 0xd0, 0x55, 0xca,
+	0xea, 0xba, 0x22, 0xe6, 0x04, 0x06, 0x21, 0x83, 0xa7, 0x1e, 0xc1, 0x5a, 0x6e, 0x44, 0x1e, 0x65,
+	0xae, 0xe3, 0xc7, 0xf9, 0xd7, 0x31, 0xab, 0x3a, 0xbc, 0x8f, 0x7f, 0x44, 0x70, 0x33, 0xcf, 0x81,
+	0x77, 0xdd, 0x13, 0xd5, 0xdf, 0x17, 0xe0, 0x76, 0x3e, 0x80, 0xe9, 0xba, 0xde, 0x4f, 0xce, 0x95,
+	0xc2, 0x9d, 0xbc, 0xce, 0x97, 0x55, 0x1b, 0x17, 0x82, 0x96, 0x57, 0x08, 0xd3, 0xe9, 0x48, 0xd6,
+	0x80, 0x96, 0x57, 0x03, 0x53, 0xaa, 0x49, 0xa4, 0xff, 0x19, 0xac, 0xe7, 0x87, 0xe1, 0xc7, 0x99,
+	0xfc, 0xdf, 0xbd, 0x2a, 0xff, 0x99, 0x86, 0xfc, 0xdf, 0x02, 0xac, 0x04, 0xbd, 0xda, 0xb0, 0x4f,
+	0xe8, 0xf4, 0x63, 0xd6, 0xc0, 0x72, 0xa9, 0x19, 0x8d, 0x59, 0xcb, 0xc9, 0x56, 0xd0, 0x0c, 0x8f,
+	0x48, 0xcc, 0x35, 0xe5, 0x90, 0xb0, 0x06, 0xe5, 0xa1, 0x35, 0xb2, 0x18, 0x7f, 0x09, 0xcb, 0x44,
+	0x6c, 0x70, 0x17, 0x6e, 0x59, 0xb6, 0x39, 0xf4, 0x3d, 0x6b, 0x42, 0x75, 0x8f, 0x19, 0x2e, 0xd3,
+	0x93, 0x6d, 0xa5, 0x7c, 0x41, 0x5b, 0xa9, 0x46, 0x42, 0x87, 0x81, 0xcc, 0x41, 0xdc, 0x33, 0x9f,
+	0xc0, 0x06, 0x7d, 0x15, 0x2a, 0xa4, 0xf6, 0x20, 0xa5, 0x6e, 0xe6, 0x02, 0x75, 0x37, 0x22, 0x11,
+	0xcd, 0x1e, 0x24, 0x94, 0xc5, 0x83, 0xcd, 0xec, 0xb4, 0x83, 0xcd, 0x37, 0x08, 0x94, 0x38, 0xe4,
+	0xd7, 0xfc, 0x49, 0xa8, 0xc1, 0x0d, 0x9b, 0xbe, 0x62, 0x39, 0x81, 0xb9, 0xa8, 0xdf, 0x56, 0x02,
+	0xfe, 0x6c, 0x4c, 0x3e, 0x94, 0x43, 0x82, 0x28, 0xf3, 0xcc, 0x0c, 0xc2, 0x8f, 0xb6, 0x07, 0x00,
+	0xf1, 0xbf, 0x2d, 0xf0, 0x02, 0xcc, 0xb6, 0x3a, 0x8f, 0xf5, 0xfd, 0x56, 0x47, 0x79, 0x2f, 0xda,
+	0xd4, 0x9f, 0x2b, 0x48, 0x6c, 0x7a, 0xda, 0x9e, 0x46, 0x94, 0x02, 0x06, 0x98, 0x39, 0xec, 0x91,
+	0x56, 0x67, 0x4f, 0x29, 0x06, 0x07, 0xbb, 0xdd, 0x6e, 0x5b, 0xab, 0x77, 0x94, 0x52, 0x70, 0xd0,
+	0xec, 0x1e, 0xed, 0xb6, 0x35, 0xa5, 0x1c, 0xac, 0x77, 0x5b, 0x9d, 0x3a, 0xf9, 0xb9, 0x32, 0xb3,
+	0xbd, 0xcf, 0x07, 0xe2, 0xbc, 0x4f, 0xab, 0x01, 0x5b, 0x6b, 0xaf, 0xd3, 0x25, 0x9a, 0xf2, 0x1e,
+	0x56, 0x60, 0x51, 0x7b, 0x7e, 0xa0, 0x35, 0x7a, 0xba, 0xf6, 0xbc, 0x75, 0xd8, 0x53, 0x10, 0x5e,
+	0x03, 0x45, 0x52, 0x3a, 0xdd, 0x90, 0x5a, 0xd8, 0xfe, 0x02, 0x2a, 0x39, 0x5f, 0x84, 0x03, 0xf1,
+	0x46, 0xa3, 0xa7, 0x13, 0xad, 0x5d, 0xef, 0xb5, 0xba, 0x1d, 0x05, 0xe1, 0x55, 0x58, 0x0a, 0x28,
+	0x8d, 0xee, 0xfe, 0x41, 0xf7, 0xb0, 0xd5, 0xd3, 0x94, 0xc2, 0xf6, 0xaf, 0x11, 0x2c, 0xa7, 0x3f,
+	0xd6, 0xe3, 0x45, 0x98, 0x0b, 0x4c, 0x3e, 0x3d, 0xaa, 0xb7, 0x15, 0xc4, 0xb5, 0x48, 0x73, 0x9c,
+	0x52, 0xc0, 0x15, 0x58, 0x69, 0xf4, 0xf4, 0x3d, 0xa2, 0xd5, 0x7b, 0x1a, 0xd1, 0x7b, 0x5f, 0xd7,
+	0x3b, 0x4a, 0x31, 0xf0, 0x2c, 0x41, 0x14, 0xac, 0x25, 0x29, 0xdc, 0xd6, 0x0e, 0x0f, 0x05, 0x5f,
+	0x99, 0xbb, 0x20, 0x29, 0x82, 0x69, 0x66, 0xfb, 0x53, 0x58, 0xc9, 0x7c, 0x5a, 0x0f, 0xa2, 0xd0,
+	0xee, 0x06, 0x46, 0x15, 0x24, 0xd7, 0xf5, 0x4e, 0x53, 0x29, 0xe0, 0x79, 0x28, 0xb7, 0xbb, 0x7a,
+	0x97, 0x28, 0xc5, 0xed, 0x3b, 0xb0, 0x94, 0xfa, 0x7d, 0x8f, 0x67, 0xa1, 0x78, 0x70, 0x24, 0x05,
+	0x9a, 0x5a, 0x5b, 0xe3, 0xf0, 0xee, 0xc2, 0x7c, 0x74, 0x57, 0x83, 0xdc, 0x3c, 0xee, 0x92, 0x67,
+	0x75, 0xd2, 0x54, 0xde, 0x0b, 0x50, 0xee, 0xd6, 0x1b, 0x4f, 0xf8, 0x0e, 0xfd, 0x2f, 0x00, 0x00,
+	0xff, 0xff, 0xba, 0x30, 0xb4, 0x1d, 0x7a, 0x1b, 0x00, 0x00,
 }

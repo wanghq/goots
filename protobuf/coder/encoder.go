@@ -211,23 +211,9 @@ func _get_column_type(type_str string) ColumnType {
 func _make_condition(pb *Condition, condition interface{}) error {
 	switch condition.(type) {
 	case Condition:
-		exp := *condition.(Condition).RowExistence
-		if v, ok := RowExistenceExpectation_name[int32(exp)]; ok {
-			item := new(RowExistenceExpectation)
-			*item = RowExistenceExpectation(RowExistenceExpectation_value[v])
-			pb.RowExistence = item
-		} else {
-			return (OTSClientError{}.Set("condition value should be one of [IGNORE(0), EXPECT_EXIST(1), EXPECT_NOT_EXIST(2)], not %v", exp))
-		}
+		*pb = condition.(Condition)
 	case *Condition:
-		exp := *condition.(*Condition).RowExistence
-		if v, ok := RowExistenceExpectation_name[int32(exp)]; ok {
-			item := new(RowExistenceExpectation)
-			*item = RowExistenceExpectation(RowExistenceExpectation_value[v])
-			pb.RowExistence = item
-		} else {
-			return (OTSClientError{}.Set("condition value should be one of [IGNORE(0), EXPECT_EXIST(1), EXPECT_NOT_EXIST(2)], not %v", exp))
-		}
+		*pb = *condition.(*Condition)
 	case string:
 		exp := condition.(string)
 		if v, ok := RowExistenceExpectation_value[exp]; ok {
@@ -2041,7 +2027,7 @@ func _encode_get_row(table_name string, primary_key *OTSPrimaryKey, columns_to_g
 	return pb, nil
 }
 
-func _encode_put_row(table_name string, condition string, primary_key *OTSPrimaryKey, attribute_columns *OTSAttribute) (req *PutRowRequest, err error) {
+func _encode_put_row(table_name string, condition interface{}, primary_key *OTSPrimaryKey, attribute_columns *OTSAttribute) (req *PutRowRequest, err error) {
 	pb := new(PutRowRequest)
 	pb.TableName = NewString(table_name)
 	pb.Condition = new(Condition)
@@ -2069,7 +2055,7 @@ func _encode_put_row(table_name string, condition string, primary_key *OTSPrimar
 	return pb, nil
 }
 
-func _encode_update_row(table_name string, condition string, primary_key *OTSPrimaryKey, update_of_attribute_columns *OTSUpdateOfAttribute) (req *UpdateRowRequest, err error) {
+func _encode_update_row(table_name string, condition interface{}, primary_key *OTSPrimaryKey, update_of_attribute_columns *OTSUpdateOfAttribute) (req *UpdateRowRequest, err error) {
 	pb := new(UpdateRowRequest)
 	pb.TableName = NewString(table_name)
 	pb.Condition = new(Condition)
@@ -2097,7 +2083,7 @@ func _encode_update_row(table_name string, condition string, primary_key *OTSPri
 	return pb, nil
 }
 
-func _encode_delete_row(table_name string, condition string, primary_key *OTSPrimaryKey) (req *DeleteRowRequest, err error) {
+func _encode_delete_row(table_name string, condition interface{}, primary_key *OTSPrimaryKey) (req *DeleteRowRequest, err error) {
 	pb := new(DeleteRowRequest)
 	pb.TableName = NewString(table_name)
 	pb.Condition = new(Condition)

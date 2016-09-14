@@ -665,13 +665,13 @@ func (o *OTSClient) GetRow(table_name string, primary_key *OTSPrimaryKey, column
 // 		condition := OTSCondition_EXPECT_NOT_EXIST
 // 		put_row_response, ots_err := ots_client.PutRow("myTable", condition, primary_key, attribute_columns)
 //
-func (o *OTSClient) PutRow(table_name string, condition string, primary_key *OTSPrimaryKey, attribute_columns *OTSAttribute) (put_row_response *OTSPutRowResponse, err *OTSError) {
+func (o *OTSClient) PutRow(table_name string, condition interface{}, primary_key *OTSPrimaryKey, attribute_columns *OTSAttribute) (put_row_response *OTSPutRowResponse, err *OTSError) {
 	err = new(OTSError)
 	if table_name == "" {
 		return nil, err.SetClientMessage("[PutRow] table_name should not be empty")
 	}
-	if condition == "" {
-		return nil, err.SetClientMessage("[PutRow] condition should not be empty")
+	if condition == nil {
+		return nil, err.SetClientMessage("[PutRow] condition should not be nil")
 	}
 	if primary_key == nil {
 		return nil, err.SetClientMessage("[PutRow] primary_key should not be nil")
@@ -728,13 +728,13 @@ func (o *OTSClient) PutRow(table_name string, condition string, primary_key *OTS
 // 		condition := OTSCondition_EXPECT_EXIST
 // 		update_row_response, ots_err := ots_client.UpdateRow("myTable", condition, primary_key, update_of_attribute_columns)
 //
-func (o *OTSClient) UpdateRow(table_name string, condition string, primary_key *OTSPrimaryKey, update_of_attribute_columns *OTSUpdateOfAttribute) (update_row_response *OTSUpdateRowResponse, err *OTSError) {
+func (o *OTSClient) UpdateRow(table_name string, condition interface{}, primary_key *OTSPrimaryKey, update_of_attribute_columns *OTSUpdateOfAttribute) (update_row_response *OTSUpdateRowResponse, err *OTSError) {
 	err = new(OTSError)
 	if table_name == "" {
 		return nil, err.SetClientMessage("[UpdateRow] table_name should not be empty")
 	}
-	if condition == "" {
-		return nil, err.SetClientMessage("[UpdateRow] condition should not be empty")
+	if condition == nil {
+		return nil, err.SetClientMessage("[UpdateRow] condition should not be nil")
 	}
 	if primary_key == nil {
 		return nil, err.SetClientMessage("[UpdateRow] primary_key should not be nil")
@@ -778,13 +778,13 @@ func (o *OTSClient) UpdateRow(table_name string, condition string, primary_key *
 // 		condition := OTSCondition_IGNORE
 // 		delete_row_response, ots_err := ots_client.DeleteRow("myTable", condition, primary_key)
 //
-func (o *OTSClient) DeleteRow(table_name string, condition string, primary_key *OTSPrimaryKey) (delete_row_response *OTSDeleteRowResponse, err *OTSError) {
+func (o *OTSClient) DeleteRow(table_name string, condition interface{}, primary_key *OTSPrimaryKey) (delete_row_response *OTSDeleteRowResponse, err *OTSError) {
 	err = new(OTSError)
 	if table_name == "" {
 		return nil, err.SetClientMessage("[DeleteRow] table_name should not be empty")
 	}
-	if condition == "" {
-		return nil, err.SetClientMessage("[DeleteRow] condition should not be empty")
+	if condition == nil {
+		return nil, err.SetClientMessage("[DeleteRow] condition should not be nil")
 	}
 	if primary_key == nil {
 		return nil, err.SetClientMessage("[DeleteRow] primary_key should not be nil")
