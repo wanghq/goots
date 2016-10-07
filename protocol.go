@@ -20,11 +20,11 @@ import (
 	// "sync"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
 	. "github.com/GiterLab/goots/protobuf"
 	"github.com/GiterLab/goots/protobuf/coder"
+	"github.com/golang/protobuf/proto"
 )
 
 var API_VERSION = "2014-08-08"
@@ -209,7 +209,7 @@ func (o *ots_protocol) _make_response_signature(query string, headers DictString
 	return signature, nil
 }
 
-func (o *ots_protocol) _check_headers(headers DictString, body []byte) (ok bool, err error) {
+func (o *ots_protocol) _check_headers(headers DictString, body []byte, status int) (ok bool, err error) {
 	// check the response headers and process response body if needed.
 
 	// 1, make sure we have all headers
@@ -220,31 +220,36 @@ func (o *ots_protocol) _check_headers(headers DictString, body []byte) (ok bool,
 		"x-ots-contenttype",
 	}
 
-	for _, name := range header_names {
-		if _, ok := headers[name]; !ok {
-			return false, (OTSClientError{}.Set("\"%s\" is missing in response header", name))
+	if status >= 200 && status < 300 {
+		for _, name := range header_names {
+			if _, ok := headers[name]; !ok {
+				return false, (OTSClientError{}.Set("\"%s\" is missing in response header", name))
+			}
 		}
 	}
 
 	// 2, check md5
-	md5 := base64Encode(md5Encode(body))
-	if md5 != headers["x-ots-contentmd5"] {
-		return false, (OTSClientError{}.Set("MD5 mismatch in response"))
+	if _, ok := headers["x-ots-contentmd5"]; ok {
+		md5 := base64Encode(md5Encode(body))
+		if md5 != headers["x-ots-contentmd5"] {
+			return false, (OTSClientError{}.Set("MD5 mismatch in response"))
+		}
 	}
 
 	// 3. check date
-	server_time, err := time.Parse(("Mon, 02 Jan 2006 15:04:05 GMT"), headers["x-ots-date"].(string))
-	if err != nil {
-		return false, (OTSClientError{}.Set("Invalid date format in response - %s", err))
-	}
+	if _, ok := headers["x-ots-date"]; ok {
+		server_time, err := time.Parse(("Mon, 02 Jan 2006 15:04:05 GMT"), headers["x-ots-date"].(string))
+		if err != nil {
+			return false, (OTSClientError{}.Set("Invalid date format in response - %s", err))
+		}
 
-	// 4, check date range
-	server_unix_time := server_time.UTC()
-	now_unix_time := time.Now().UTC()
-
-	d := now_unix_time.Sub(server_unix_time)
-	if math.Abs(float64(d.Seconds())) > float64(15*60*time.Second) {
-		return false, (OTSClientError{}.Set("The difference between date in response and system time is more than 15 minutes"))
+		// 4, check date range
+		server_unix_time := server_time.UTC()
+		now_unix_time := time.Now().UTC()
+		d := now_unix_time.Sub(server_unix_time)
+		if math.Abs(float64(d.Seconds())) > float64(15*60*time.Second) {
+			return false, (OTSClientError{}.Set("The difference between date in response and system time is more than 15 minutes"))
+		}
 	}
 
 	return true, nil
@@ -363,7 +368,7 @@ func (o *ots_protocol) make_request(api_name string, args ...interface{}) (query
 	// prevent MessageToString from happening
 	// when no log is going to be actually printed
 	// since it's very time consuming
-	OTSError{}.Log(OTSLoggerEnable, "OTS request, API: %s, Protobuf: %v", api_name, pb[0].Interface())
+	OTSError{}.Log(OTSLoggerEnable, "OTS request, API: %s, Headers: %s, Protobuf: %v", api_name, fmt.Sprintf("%v", headers), pb[0].Interface())
 
 	return query, headers, body, nil
 }
@@ -387,14 +392,14 @@ func (o *ots_protocol) parse_response(api_name, reason string, status int, heade
 	if err != nil {
 		request_id := o._get_request_id_string(headers)
 		error_message := fmt.Sprintf("Response format is invalid, %s, RequestID: %s, HTTP status: %s, Body: %v.", err, request_id, reason, body)
-
 		return nil, ots_service_err.SetErrorMessage(error_message).SetHttpStatus(reason).SetRequestId(request_id).SetErrorCode(fmt.Sprintf("%d", status))
 	}
 
 	// prevent MessageToString from happening
 	// when no log is going to be actually printed
 	// since it's very time consuming
-	OTSError{}.Log(OTSLoggerEnable, "OTS request, API: %s, Protobuf: %v RequestID: %s", api_name, ret[0].Interface(), o._get_request_id_string(headers))
+	request_id := o._get_request_id_string(headers)
+	OTSError{}.Log(OTSLoggerEnable, "OTS request, API: %s, RequestID: %s, Protobuf: %v", api_name, request_id, ret[0].Interface())
 
 	return ret, nil
 }
@@ -407,7 +412,7 @@ func (o *ots_protocol) handle_error(api_name, query, reason string, status int, 
 	}
 
 	// 1. check headers & _check authorization
-	if ok, err := o._check_headers(headers, body); !ok {
+	if ok, err := o._check_headers(headers, body, status); !ok {
 		return ots_service_err.SetErrorMessage("check headers failed - %s", err).SetHttpStatus(reason).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
 	}
 	if status != 403 {
