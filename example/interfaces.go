@@ -17,10 +17,10 @@ import (
 
 // modify it to yours
 const (
-	ENDPOINT     = "http://127.0.0.1:8800"
-	ACCESSID     = "OTSMultiUser177_accessid"
-	ACCESSKEY    = "OTSMultiUser177_accesskey"
-	INSTANCENAME = "TestInstance177"
+	ENDPOINT     = "your_instance_address"
+	ACCESSID     = "your_accessid"
+	ACCESSKEY    = "your_accesskey"
+	INSTANCENAME = "your_instance_name"
 )
 
 func main() {
@@ -45,6 +45,7 @@ func main() {
 	fmt.Println("表已删除")
 
 	// create_table
+	// 注意：OTS是按设置的ReservedThroughput计量收费，即使没有读写也会产生费用。
 	table_meta := &OTSTableMeta{
 		TableName: "myTable",
 		SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
@@ -54,7 +55,7 @@ func main() {
 	}
 
 	reserved_throughput := &OTSReservedThroughput{
-		OTSCapacityUnit{100, 100},
+		OTSCapacityUnit{9, 9},
 	}
 
 	ots_err = ots_client.CreateTable(table_meta, reserved_throughput)
@@ -82,8 +83,9 @@ func main() {
 	//
 	// 每次调整操作的间隔应大于10分钟
 	// 如果是刚创建表，需要10分钟之后才能调整表的预留读写吞吐量。
+	// 注意：OTS是按设置的ReservedThroughput计量收费，即使没有读写也会产生费用。
 	update_reserved_throughput := &OTSReservedThroughput{
-		OTSCapacityUnit{5000, 5000},
+		OTSCapacityUnit{5, 5},
 	}
 
 	fmt.Println("Need to sleep 12 Minute, be patient...")
@@ -140,7 +142,8 @@ func main() {
 	columns_to_get := &OTSColumnsToGet{
 		"name", "address", "age",
 	}
-	// columns_to_get = nil // read all
+	// columns_to_get = nil
+	// read all
 	get_row_response, ots_err := ots_client.GetRow("myTable", primary_key, columns_to_get)
 	if ots_err != nil {
 		fmt.Println(ots_err)

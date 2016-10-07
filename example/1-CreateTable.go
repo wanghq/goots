@@ -16,10 +16,10 @@ import (
 
 // modify it to yours
 const (
-	ENDPOINT     = "http://127.0.0.1:8800"
-	ACCESSID     = "OTSMultiUser177_accessid"
-	ACCESSKEY    = "OTSMultiUser177_accesskey"
-	INSTANCENAME = "TestInstance177"
+	ENDPOINT     = "your_instance_address"
+	ACCESSID     = "your_accessid"
+	ACCESSKEY    = "your_accesskey"
+	INSTANCENAME = "your_instance_name"
 )
 
 func main() {
@@ -36,6 +36,7 @@ func main() {
 	}
 
 	// create_table
+	// 注意：OTS是按设置的ReservedThroughput计量收费，即使没有读写也会产生费用。
 	table_meta := &OTSTableMeta{
 		TableName: "myTable",
 		SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
@@ -45,7 +46,7 @@ func main() {
 	}
 
 	reserved_throughput := &OTSReservedThroughput{
-		OTSCapacityUnit{100, 100},
+		OTSCapacityUnit{9, 9},
 	}
 
 	ots_err := ots_client.CreateTable(table_meta, reserved_throughput)

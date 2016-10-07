@@ -15,10 +15,10 @@ import (
 
 // modify it for yours
 const (
-	ENDPOINT     = "http://127.0.0.1:8800"
-	ACCESSID     = "OTSMultiUser177_accessid"
-	ACCESSKEY    = "OTSMultiUser177_accesskey"
-	INSTANCENAME = "TestInstance177"
+	ENDPOINT     = "your_instance_address"
+	ACCESSID     = "your_accessid"
+	ACCESSKEY    = "your_accesskey"
+	INSTANCENAME = "your_instance_name"
 )
 
 func main() {
