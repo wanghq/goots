@@ -1139,5 +1139,5 @@ func (o *OTSClient) GetRange(table_name string, direction string,
 // }
 
 func (o *OTSClient) Version() string {
-	return "ots_golang_sdk_2.0.2"
+	return "ots_golang_sdk_" + VERSION
 }
