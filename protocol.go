@@ -366,9 +366,7 @@ func (o *ots_protocol) make_request(api_name string, args ...interface{}) (query
 		return "", DictString{}, nil, err
 	}
 
-	// prevent MessageToString from happening
-	// when no log is going to be actually printed
-	// since it's very time consuming
+	// prevent to generate formatted message which is time consuming
 	OTSError{}.Log(OTSLoggerEnable, "OTS request, API: %s, Headers: %s, Protobuf: %v", api_name, fmt.Sprintf("%v", headers), pb[0].Interface())
 
 	return query, headers, body, nil
@@ -392,33 +390,34 @@ func (o *ots_protocol) parse_response(api_name, reason string, status int, heade
 	ret, err := o.decoder(api_name, body)
 	if err != nil {
 		request_id := o._get_request_id_string(headers)
-		error_message := fmt.Sprintf("Response format is invalid, %s, RequestID: %s, HTTP status: %s, Body: %v.", err, request_id, reason, body)
-		return nil, ots_service_err.SetErrorMessage(error_message).SetHttpStatus(reason).SetRequestId(request_id).SetErrorCode(fmt.Sprintf("%d", status))
+		error_message := fmt.Sprintf("Response format is invalid, %s, RequestID: %s, HTTP status: %s, Body: %v.", err, request_id, status, body)
+		return nil, ots_service_err.SetErrorMessage(error_message).SetHttpStatus(status).SetRequestId(request_id).SetErrorCode(fmt.Sprintf("%d", status))
 	}
 
-	// prevent MessageToString from happening
-	// when no log is going to be actually printed
-	// since it's very time consuming
+	// prevent to generate formatted message which is time consuming
 	request_id := o._get_request_id_string(headers)
-	OTSError{}.Log(OTSLoggerEnable, "OTS request, API: %s, RequestID: %s, Protobuf: %v", api_name, request_id, ret[0].Interface())
+	OTSError{}.Log(OTSLoggerEnable, "OTS response, API: %s, RequestID: %s, Protobuf: %v.", api_name, request_id, ret[0].Interface())
 
 	return ret, nil
 }
 
 func (o *ots_protocol) handle_error(api_name, query, reason string, status int, headers DictString, body []byte) (ots_service_err *OTSServiceError) {
+	// prevent to generate formatted message which is time consuming
+	OTSError{}.Log(OTSLoggerEnable, "OTS response, API: %s, Status: %d, Reason: %s, Headers: %s", api_name, status, reason, headers)
+
 	ots_service_err = new(OTSServiceError)
 	request_id := o._get_request_id_string(headers)
 	if _, ok := api_list[api_name]; !ok {
-		return ots_service_err.SetErrorMessage("API %s is not supported", api_name).SetHttpStatus(reason).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
+		return ots_service_err.SetErrorMessage("API %s is not supported", api_name).SetHttpStatus(status).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
 	}
 
 	// 1. check headers & _check authorization
 	if ok, err := o._check_headers(headers, body, status); !ok {
-		return ots_service_err.SetErrorMessage("check headers failed - %s", err).SetHttpStatus(reason).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
+		return ots_service_err.SetErrorMessage("check headers failed - %s", err).SetHttpStatus(status).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
 	}
 	if status != 403 {
 		if ok, err := o._check_authorization(query, headers); !ok {
-			return ots_service_err.SetErrorMessage("check authorization failed - %s", err).SetHttpStatus(reason).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
+			return ots_service_err.SetErrorMessage("check authorization failed - %s", err).SetHttpStatus(status).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
 		}
 	}
 
@@ -426,18 +425,27 @@ func (o *ots_protocol) handle_error(api_name, query, reason string, status int, 
 	if status >= 200 && status < 300 {
 		return nil
 	} else {
-		// prevent MessageToString from happening
-		// when no log is going to be actually printed
-		// since it's very time consuming
 		pb_err := &Error{}
-		proto.Unmarshal(body, pb_err)
-		if pb_err.Code != nil && pb_err.Message != nil {
-			OTSError{}.Log(OTSLoggerEnable, "OTS request failed, API: %s, HTTPStatus: %s, ErrorCode: %s, ErrorMessage: %s,  RequestID: %s", api_name, reason, pb_err.GetCode(), pb_err.GetMessage(), request_id)
-			return ots_service_err.SetErrorMessage(pb_err.GetMessage()).SetHttpStatus(reason).SetErrorCode(pb_err.GetCode()).SetRequestId(request_id)
+		err := proto.Unmarshal(body, pb_err)
+		if err != nil {
+			error_message := fmt.Sprintf("HTTP status: %d, reason: %s.", status, reason)
+			return ots_service_err.SetErrorMessage(error_message).SetHttpStatus(status).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
 		}
 
-		OTSError{}.Log(OTSLoggerEnable, "OTS request failed, API: %s, HTTPStatus: %s, ErrorCode: %d, ErrorMessage: %v,  RequestID: %s", api_name, reason, status, body, request_id)
-		return ots_service_err.SetErrorMessage(strings.TrimSpace(string(body))).SetHttpStatus(reason).SetErrorCode(fmt.Sprintf("%d", status)).SetRequestId(request_id)
+		if pb_err.Code != nil && pb_err.Message != nil {
+			if status == 403 && pb_err.GetCode() != "OTSAuthFailed" {
+				if ok, _ := o._check_authorization(query, headers); !ok {
+					error_message := fmt.Sprintf("HTTP status: %d, reason: %s.", status, reason)
+					return ots_service_err.SetErrorMessage(error_message).SetHttpStatus(status).SetErrorCode(pb_err.GetCode()).SetRequestId(request_id)
+				}
+			}
+
+			OTSError{}.Log(OTSLoggerEnable, "OTS request failed, API: %s, HTTPStatus: %s, ErrorCode: %s, ErrorMessage: %s,  RequestID: %s", api_name, reason, pb_err.GetCode(), pb_err.GetMessage(), request_id)
+			return ots_service_err.SetErrorMessage(pb_err.GetMessage()).SetHttpStatus(status).SetErrorCode(pb_err.GetCode()).SetRequestId(request_id)
+		} else {
+			error_message := fmt.Sprintf("HTTP status: %d, reason: %s.", status, reason)
+			return ots_service_err.SetErrorMessage(error_message).SetHttpStatus(status).SetErrorCode(pb_err.GetCode()).SetRequestId(request_id)
+		}
 	}
 
 	return nil
