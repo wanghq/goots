@@ -1,3 +1,3 @@
 package goots
 
-const VERSION string = "2.0.5"
+const VERSION string = "2.0.6"

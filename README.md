@@ -4,7 +4,11 @@ goots
 
 Aliyun OTS <del>(Open Table Service)</del> golang SDK.
 
-OTS现更名为表格存储(Table Store)
+- OTS现更名为表格存储(Table Store)
+
+- 此 golang SDK基于 [阿里云表格存储服务](https://www.aliyun.com/product/ots/) API构架，API兼容[Python SDK](https://github.com/aliyun/aliyun-tablestore-python-sdk)
+
+- 阿里云表格存储是构建在阿里云飞天分布式系统之上的NoSQL数据存储服务，提供海量结构化数据的存储和实时访问。
 
 [![wercker status](https://app.wercker.com/status/08d83208aa0215a6d6a0383b9b77b81d/m "wercker status")](https://app.wercker.com/project/bykey/08d83208aa0215a6d6a0383b9b77b81d)
 
@@ -67,6 +71,8 @@ OTS现更名为表格存储(Table Store)
 
 		fmt.Println("Test goots start ...")
 
+		// 用户可以使用 ots2.NewWithRetryPolicy 来创建带自定义重试策略的 ots_client 对象
+		// 用户可以参考 DefaultRetryPolicy 的代码来自定义重试策略
 		ots_client, err := ots2.New(ENDPOINT, ACCESSID, ACCESSKEY, INSTANCENAME)
 		if err != nil {
 			fmt.Println(err)
