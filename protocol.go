@@ -191,7 +191,7 @@ func (o *ots_protocol) _make_headers(body []byte, query string) (headers DictStr
 		return nil, err
 	}
 	headers["x-ots-signature"] = signature
-	headers["User-Agent"] = "aliyun-sdk-python 2.0.6"
+	headers["User-Agent"] = "aliyun-tablestore-sdk-golang/" + VERSION
 
 	return headers, nil
 }
