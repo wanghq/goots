@@ -1,0 +1,819 @@
+Help on package ots2:
+
+NAME
+    ots2 - 开放结构化数据服务（Open Table Service，OTS，http://www.aliyun.com/product/ots）是构建在飞天大规模分布式计算系统之上的海量结构化和半结构化数据存储与实时查询的服务。它通过RESTful API来提供服务，并且也有方便的WEB GUI。
+
+
+DESCRIPTION
+
+    This document is encoded in UTF-8.
+    
+    OTS Python SDK提供了通过Python API访问OTS的方式。它实现了连接池管理，链接超时，日志输出等功能。
+    
+    这个SDK的文档包含了对每个接口的详细说明和使用样例。而作为开头，这里有一个建表，插入一行，并读取的例子。
+    
+        from ots2 import *
+    
+        client = OTSClient(
+            'http://your_ots_address/',
+            'your_access_id',
+            'your_access_key',
+            'your_instance_name',
+        )
+    
+        table_meta = TableMeta(
+            'sample_table',                                             # table name
+            [('sample_pk1', 'STRING'), ('sample_pk2', 'INTEGER')],      # primary key schema
+        )
+        capacity_unit = CapacityUnit(
+            0,                                                        # read capacity
+            0                                                         # write capacity
+        )
+        reserved_throughput = ReservedThroughput(capacity_unit)
+        client.create_table(table_meta, reserved_throughput)
+    
+        # you probably should wait for a while until the table partition is loaded
+    
+        condition = Condition('IGNORE')
+        consumed = client.put_row(
+            'sample_table',                                             # table name
+            condition,                                                  # condition
+            {'sample_pk1':'Hangzhou', 'sample_pk2':123456},             # primary key
+            {'sample_col1':True, 'sample_col2':3.14}                    # attribute_columns
+        )
+    
+        #return:
+        #   consumed                                                    # consumed capacity unit
+    
+        consumed, primary_key_columns, attribute_columns = client.get_row(
+            'sample_table',                                             # table name
+            {'sample_pk1':'Hangzhou', 'sample_pk2':123456},             # primary key
+            ['sample_pk1', 'sample_col1', 'sample_col2']                # columns to get
+        )
+    
+        #return: 
+        #   consumed                                                    # consumed capacity unit
+        #   {'sample_pk1':'Hangzhou'},                                  # primary key columns
+        #   {'sample_col1':True, 'sample_col2':3.14}                    # attribute_columns
+    
+    请注意：
+    
+        (1) 用python doc的console模式去查看本文档时，比较长的行会出现显示问题。遇到这样的情况，请用PageUp/PageDown键进行翻页。
+
+PACKAGE CONTENTS
+    client
+    connection
+    error
+    metadata
+    protobuf (package)
+    protocol
+    retry
+    test (package)
+
+CLASSES
+    __builtin__.object
+        ots2.client.OTSClient
+        ots2.metadata.BatchWriteRowResponseItem
+        ots2.metadata.CapacityUnit
+        ots2.metadata.Condition
+        ots2.metadata.DeleteRowItem
+        ots2.metadata.DescribeTableResponse
+        ots2.metadata.INF_MAX
+        ots2.metadata.INF_MIN
+        ots2.metadata.PutRowItem
+        ots2.metadata.ReservedThroughput
+        ots2.metadata.ReservedThroughputDetails
+        ots2.metadata.RowDataItem
+        ots2.metadata.TableMeta
+        ots2.metadata.UpdateRowItem
+        ots2.metadata.UpdateTableResponse
+    ots2.error.OTSError(exceptions.Exception)
+        ots2.error.OTSClientError
+        ots2.error.OTSServiceError
+    ots2.retry.RetryPolicy
+        ots2.retry.DefaultRetryPolicy
+    
+    class BatchWriteRowResponseItem(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, is_ok, error_code, error_message, consumed)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class CapacityUnit(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, read=None, write=None)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class Condition(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, row_existence_expectation)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class DefaultRetryPolicy(RetryPolicy)
+     |  默认重试策略
+     |  最大重试次数为3，最大重试间隔为2000毫秒，对流控类错误以及读操作相关的服务端内部错误进行了重试。
+     |  
+     |  Methods defined here:
+     |  
+     |  get_retry_delay(self, retry_times, exception, api_name)
+     |  
+     |  should_retry(self, retry_times, exception, api_name)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  max_retry_delay = 2
+     |  
+     |  max_retry_times = 3
+     |  
+     |  scale_factor = 2
+     |  
+     |  server_throttling_exception_delay_factor = 0.5
+     |  
+     |  stability_exception_delay_factor = 0.2
+    
+    class DeleteRowItem(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, condition, primary_key)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class DescribeTableResponse(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, table_meta, reserved_throughput_details)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class INF_MAX(__builtin__.object)
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class INF_MIN(__builtin__.object)
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class OTSClient(__builtin__.object)
+     |  ``OTSClient``实现了OTS服务的所有接口。用户可以通过创建``OTSClient``的实例，并调用它的
+     |  方法来访问OTS服务的所有功能。用户可以在初始化方法``__init__()``中设置各种权限、连接等参数。
+     |  
+     |  除非另外说明，``OTSClient``的所有接口都以抛异常的方式处理错误(请参考模块``ots.error``
+     |  )，即如果某个函数有返回值，则会在描述中说明；否则返回None。
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, end_point, accessid, accesskey, instance_name, **kwargs)
+     |      初始化``OTSClient``实例。
+     |      
+     |      ``end_point``是OTS服务的地址（例如 'http://instance.cn-hangzhou.ots.aliyun.com:80'），必须以'http://'开头。
+     |      
+     |      ``accessid``是访问OTS服务的accessid，通过官方网站申请或通过管理员获取。
+     |      
+     |      ``accesskey``是访问OTS服务的accesskey，通过官方网站申请或通过管理员获取。
+     |      
+     |      ``instance_name``是要访问的实例名，通过官方网站控制台创建或通过管理员获取。
+     |      
+     |      ``encoding``请求参数的字符串编码类型，默认是utf8。
+     |      
+     |      ``socket_timeout``是连接池中每个连接的Socket超时，单位为秒，可以为int或float。默认值为50。
+     |      
+     |      ``max_connection``是连接池的最大连接数。默认为50，
+     |      
+     |      ``logger_name``用来在请求中打DEBUG日志，或者在出错时打ERROR日志。
+     |      
+     |      ``retry_policy``定义了重试策略，默认的重试策略为 DefaultRetryPolicy。你可以继承 RetryPolicy 来实现自己的重试策略，请参考 DefaultRetryPolicy 的代码。
+     |      
+     |      
+     |      示例：创建一个OTSClient实例
+     |      
+     |          from ots2.client import OTSClient
+     |      
+     |          ots_client = OTSClient('your_instance_endpoint', 'your_user_id', 'your_user_key', 'your_instance_name')
+     |  
+     |  batch_get_row(self, batch_list)
+     |      说明：批量获取多行数据。
+     |      
+     |      ``batch_list``表示获取多行的条件列表，格式如下：
+     |      [
+     |          (table_name0, [row0_primary_key, row1_primary_key, ...], [column_name0, column_name1, ...]),
+     |          (table_name1, [row0_primary_key, row1_primary_key, ...], [column_name0, column_name1, ...])
+     |          ...
+     |      ]
+     |      其中，row0_primary_key, row1_primary_key为主键，类型为dict。
+     |      
+     |      返回：对应行的结果列表。
+     |      
+     |      ``response_rows_list``为返回的结果列表，与请求的顺序一一对应，格式如下：
+     |      [
+     |          [row_data_item0, row_data_item1, ...],      # for table_name0
+     |          [row_data_item0, row_data_item1, ...],      # for table_name1
+     |          ...
+     |      ]
+     |      其中，row_data_item0, row_data_item1为ots2.metadata.RowDataItem的实例。
+     |      
+     |      示例：
+     |      
+     |          row1_primary_key = {'gid':1, 'uid':101}
+     |          row2_primary_key = {'gid':2, 'uid':202}
+     |          row3_primary_key = {'gid':3, 'uid':303}
+     |          columns_to_get = ['name', 'address', 'mobile', 'age']
+     |          batch_list = [('myTable', [row1_primary_key, row2_primary_key, row3_primary_key], columns_to_get)]
+     |          batch_list = [('notExistTable', [row1_primary_key, row2_primary_key, row3_primary_key], columns_to_get)]
+     |          batch_get_response = ots_client.batch_get_row(batch_list)
+     |  
+     |  batch_write_row(self, batch_list)
+     |      说明：批量修改多行数据。
+     |      
+     |      ``batch_list``表示获取多行的条件列表，格式如下：
+     |      [
+     |          {
+     |              'table_name':table_name0,
+     |              'put':[put_row_item, ...],
+     |              'update':[update_row_item, ...],
+     |              'delete':[delete_row_item, ..]
+     |          },
+     |          {
+     |              'table_name':table_name1,
+     |              'put':[put_row_item, ...],
+     |              'update':[update_row_item, ...],
+     |              'delete':[delete_row_item, ..]
+     |          },
+     |          ...
+     |      ]
+     |      其中，put_row_item, 是ots2.metadata.PutRowItem类的实例；
+     |            update_row_item, 是ots2.metadata.UpdateRowItem类的实例；
+     |            delete_row_item, 是ots2.metadata.DeleteRowItem类的实例。
+     |      
+     |      返回：对应行的修改结果列表。
+     |      
+     |      ``response_items_list``为返回的结果列表，与请求的顺序一一对应，格式如下：
+     |      [
+     |          {                                       # for table_name0
+     |              'put':[put_row_resp, ...],
+     |              'update':[update_row_resp, ...],
+     |              'delete':[delete_row_resp, ..])
+     |          },
+     |          {                                       # for table_name1
+     |              'put':[put_row_resp, ...],
+     |              'update':[update_row_resp, ...],
+     |              'delete':[delete_row_resp, ..]
+     |          },
+     |          ...
+     |      ]
+     |      其中put_row_resp，update_row_resp和delete_row_resp都是ots2.metadata.BatchWriteRowResponseItem类的实例。
+     |      
+     |      示例：
+     |      
+     |          primary_key = {'gid':2, 'uid':202}
+     |          attribute_columns = {'name':'李四', 'address':'中国某地', 'age':20}
+     |          condition = Condition('EXPECT_NOT_EXIST')
+     |          put_row_item = PutRowItem(condition, primary_key, attribute_columns)
+     |          
+     |          primary_key = {'gid':3, 'uid':303}
+     |          condition = Condition('IGNORE')
+     |          update_of_attribute_columns = {
+     |              'put' : {'name':'张三', 'address':'中国某地'},
+     |              'delete' : ['mobile', 'age'],
+     |          }
+     |          update_row_item = UpdateRowItem(condition, primary_key, update_of_attribute_columns)
+     |          
+     |          primary_key = {'gid':4, 'uid':404}
+     |          condition = Condition('IGNORE')
+     |          delete_row_item = DeleteRowItem(condition, primary_key)
+     |          
+     |          table_item1  = {'table_name':'myTable', 'put':[put_row_item], 'update':[update_row_item], 'delete':[delete_row_item]}
+     |          table_item2  = {'table_name':'notExistTable', 'put':[put_row_item], 'update':[update_row_item], 'delete':[delete_row_item]}
+     |          batch_list = [table_item1, table_item2]
+     |          batch_write_response = ots_client.batch_write_row(batch_list)
+     |  
+     |  create_table(self, table_meta, reserved_throughput)
+     |      说明：根据表信息创建表。
+     |      
+     |      ``table_meta``是``ots.metadata.TableMeta``类的实例，它包含表名和PrimaryKey的schema，
+     |      请参考``TableMeta``类的文档。当创建了一个表之后，通常要等待1分钟时间使partition load
+     |      完成，才能进行各种操作。
+     |      ``reserved_throughput``是``ots.metadata.ReservedThroughput``类的实例，表示预留读写吞吐量。
+     |      
+     |      返回：无。
+     |      
+     |      示例：
+     |      
+     |          schema_of_primary_key = [('gid', 'INTEGER'), ('uid', 'INTEGER')]
+     |          table_meta = TableMeta('myTable', schema_of_primary_key)
+     |          reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
+     |          ots_client.create_table(table_meta, reserved_throughput)
+     |  
+     |  delete_row(self, table_name, condition, primary_key)
+     |      说明：删除一行数据。
+     |      
+     |      ``table_name``是对应的表名。
+     |      ``condition``表示执行操作前做条件检查，满足条件才执行，是ots2.metadata.Condition类的实例。
+     |      目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
+     |      ``primary_key``表示主键，类型为dict。
+     |      
+     |      返回：本次操作消耗的CapacityUnit。
+     |      
+     |      consumed表示消耗的CapacityUnit，是ots2.metadata.CapacityUnit类的实例。
+     |      
+     |      示例：
+     |      
+     |          primary_key = {'gid':1, 'uid':101}
+     |          condition = Condition('IGNORE')
+     |          consumed = ots_client.delete_row('myTable', condition, primary_key)
+     |  
+     |  delete_table(self, table_name)
+     |      说明：根据表名删除表。
+     |      
+     |      ``table_name``是对应的表名。
+     |      
+     |      返回：无。
+     |      
+     |      示例：
+     |      
+     |          ots_client.delete_table('myTable')
+     |  
+     |  describe_table(self, table_name)
+     |      说明：获取表的描述信息。
+     |      
+     |      ``table_name``是对应的表名。
+     |      
+     |      返回：表的描述信息。
+     |      
+     |      ``describe_table_response``表示表的描述信息，是ots2.metadata.DescribeTableResponse类的实例。
+     |      
+     |      示例：
+     |      
+     |          describe_table_response = ots_client.describe_table('myTable')
+     |  
+     |  get_range(self, table_name, direction, inclusive_start_primary_key, exclusive_end_primary_key, columns_to_get=None, limit=None)
+     |      说明：根据范围条件获取多行数据。
+     |      
+     |      ``table_name``是对应的表名。
+     |      ``direction``表示范围的方向，字符串格式，取值包括'FORWARD'和'BACKWARD'。
+     |      ``inclusive_start_primary_key``表示范围的起始主键（在范围内）。
+     |      ``exclusive_end_primary_key``表示范围的结束主键（不在范围内）。
+     |      ``columns_to_get``是可选参数，表示要获取的列的名称列表，类型为list；如果不填，表示获取所有列。
+     |      ``limit``是可选参数，表示最多读取多少行；如果不填，则没有限制。
+     |      
+     |      返回：符合条件的结果列表。
+     |      
+     |      ``consumed``表示本次操作消耗的CapacityUnit，是ots2.metadata.CapacityUnit类的实例。
+     |      ``next_start_primary_key``表示下次get_range操作的起始点的主健列，类型为dict。
+     |      ``row_list``表示本次操作返回的行数据列表，格式为：[(primary_key_columns，attribute_columns), ...]。
+     |      
+     |      示例：
+     |      
+     |          inclusive_start_primary_key = {'gid':1, 'uid':INF_MIN} 
+     |          exclusive_end_primary_key = {'gid':4, 'uid':INF_MAX} 
+     |          columns_to_get = ['name', 'address', 'mobile', 'age']
+     |          consumed, next_start_primary_key, row_list = ots_client.get_range(
+     |                      'myTable', 'FORWARD', 
+     |                      inclusive_start_primary_key, exclusive_end_primary_key,
+     |                      columns_to_get, 100
+     |          )
+     |  
+     |  get_row(self, table_name, primary_key, columns_to_get=None)
+     |      说明：获取一行数据。
+     |      
+     |      ``table_name``是对应的表名。
+     |      ``primary_key``是主键，类型为dict。
+     |      ``columns_to_get``是可选参数，表示要获取的列的名称列表，类型为list；如果不填，表示获取所有列。
+     |      
+     |      返回：本次操作消耗的CapacityUnit、主键列和属性列。
+     |      
+     |      ``consumed``表示消耗的CapacityUnit，是ots2.metadata.CapacityUnit类的实例。
+     |      ``primary_key_columns``表示主键列，类型为dict，如：{'PK0':value0, 'PK1':value1}。
+     |      ``attribute_columns``表示属性列，类型为dict，如：{'COL0':value0, 'COL1':value1}。
+     |      
+     |      示例：
+     |      
+     |          primary_key = {'gid':1, 'uid':101}
+     |          columns_to_get = ['name', 'address', 'age']
+     |          consumed, primary_key_columns, attribute_columns = ots_client.get_row('myTable', primary_key, columns_to_get)
+     |  
+     |  list_table(self)
+     |      说明：获取所有表名的列表。
+     |      
+     |      返回：表名列表。
+     |      
+     |      ``table_list``表示获取的表名列表，类型为tuple，如：('MyTable1', 'MyTable2')。
+     |      
+     |      示例：
+     |      
+     |          table_list = ots_client.list_table()
+     |  
+     |  put_row(self, table_name, condition, primary_key, attribute_columns)
+     |      说明：写入一行数据。返回本次操作消耗的CapacityUnit。
+     |      
+     |      ``table_name``是对应的表名。
+     |      ``condition``表示执行操作前做条件检查，满足条件才执行，是ots2.metadata.Condition类的实例。
+     |      目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
+     |      ``primary_key``表示主键，类型为dict。
+     |      ``attribute_columns``表示属性列，类型为dict。
+     |      
+     |      返回：本次操作消耗的CapacityUnit。
+     |      
+     |      consumed表示消耗的CapacityUnit，是ots2.metadata.CapacityUnit类的实例。
+     |      
+     |      示例：
+     |      
+     |          primary_key = {'gid':1, 'uid':101}
+     |          attribute_columns = {'name':'张三', 'mobile':111111111, 'address':'中国A地', 'age':20}
+     |          condition = Condition('EXPECT_NOT_EXIST')
+     |          consumed = ots_client.put_row('myTable', condition, primary_key, attribute_columns)
+     |  
+     |  update_row(self, table_name, condition, primary_key, update_of_attribute_columns)
+     |      说明：更新一行数据。
+     |      
+     |      ``table_name``是对应的表名。
+     |      ``condition``表示执行操作前做条件检查，满足条件才执行，是ots2.metadata.Condition类的实例。
+     |      目前只支持对行的存在性进行检查，检查条件包括：'IGNORE'，'EXPECT_EXIST'和'EXPECT_NOT_EXIST'。
+     |      ``primary_key``表示主键，类型为dict。
+     |      ``update_of_attribute_columns``表示属性列，类型为dict，可以包含put和delete操作。其中put是dict
+     |      表示属性列的写入；delete是list，表示要删除的属性列的列名，见示例。
+     |      
+     |      返回：本次操作消耗的CapacityUnit。
+     |      
+     |      consumed表示消耗的CapacityUnit，是ots2.metadata.CapacityUnit类的实例。
+     |      
+     |      示例：
+     |      
+     |          primary_key = {'gid':1, 'uid':101}
+     |          update_of_attribute_columns = {
+     |              'put' : {'name':'张三丰', 'address':'中国B地'},
+     |              'delete' : ['mobile', 'age'],
+     |          }
+     |          condition = Condition('EXPECT_EXIST')
+     |          consumed = ots_client.update_row('myTable', condition, primary_key, update_of_attribute_columns)
+     |  
+     |  update_table(self, table_name, reserved_throughput)
+     |      说明：更新表属性，目前只支持修改预留读写吞吐量。
+     |      
+     |      ``table_name``是对应的表名。
+     |      ``reserved_throughput``是``ots2.metadata.ReservedThroughput``类的实例，表示预留读写吞吐量。
+     |      
+     |      返回：针对该表的预留读写吞吐量的最近上调时间、最近下调时间和当天下调次数。
+     |      
+     |      ``update_table_response``表示更新的结果，是ots2.metadata.UpdateTableResponse类的实例。
+     |      
+     |      示例：
+     |      
+     |          reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
+     |          update_response = ots_client.update_table('myTable', reserved_throughput)
+     |  
+     |  xget_range(self, table_name, direction, inclusive_start_primary_key, exclusive_end_primary_key, consumed_counter, columns_to_get=None, count=None)
+     |      说明：根据范围条件获取多行数据，iterator版本。
+     |      
+     |      ``table_name``是对应的表名。
+     |      ``direction``表示范围的方向，字符串格式，取值包括'FORWARD'和'BACKWARD'。
+     |      ``inclusive_start_primary_key``表示范围的起始主键（在范围内）。
+     |      ``exclusive_end_primary_key``表示范围的结束主键（不在范围内）。
+     |      ``consumed_counter``用于消耗的CapacityUnit统计，是ots2.metadata.CapacityUnit类的实例。
+     |      ``columns_to_get``是可选参数，表示要获取的列的名称列表，类型为list；如果不填，表示获取所有列。
+     |      ``count``是可选参数，表示最多读取多少行；如果不填，则尽量读取整个范围内的所有行。
+     |      
+     |      返回：符合条件的结果列表。
+     |      
+     |      ``range_iterator``用于获取符合范围条件的行数据的iterator，每次取出的元素格式为：
+     |      (primary_key_columns，attribute_columns)。其中，primary_key_columns为主键列，dict类型，
+     |      attribute_columns为属性列，dict类型。其它用法见iter类型说明。
+     |      
+     |      示例：
+     |      
+     |          consumed_counter = CapacityUnit(0, 0)
+     |          inclusive_start_primary_key = {'gid':1, 'uid':INF_MIN} 
+     |          exclusive_end_primary_key = {'gid':4, 'uid':INF_MAX} 
+     |          columns_to_get = ['name', 'address', 'mobile', 'age']
+     |          range_iterator = client.xget_range(
+     |                      'myTable', 'FORWARD', 
+     |                      inclusive_start_primary_key, exclusive_end_primary_key,
+     |                      consumed_counter, columns_to_get, 100
+     |          )
+     |          for row in range_iterator:
+     |             pass
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  DEFAULT_ENCODING = 'utf8'
+     |  
+     |  DEFAULT_LOGGER_NAME = 'ots2-client'
+     |  
+     |  DEFAULT_MAX_CONNECTION = 50
+     |  
+     |  DEFAULT_SOCKET_TIMEOUT = 50
+     |  
+     |  connection_pool_class = <class ots2.connection.ConnectionPool>
+     |  
+     |  protocol_class = <class ots2.protocol.OTSProtocol>
+    
+    class OTSClientError(OTSError)
+     |  Method resolution order:
+     |      OTSClientError
+     |      OTSError
+     |      exceptions.Exception
+     |      exceptions.BaseException
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, message, http_status=None)
+     |  
+     |  __str__(self)
+     |  
+     |  get_error_message(self)
+     |  
+     |  get_http_status(self)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from OTSError:
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from exceptions.Exception:
+     |  
+     |  __new__ = <built-in method __new__ of type object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from exceptions.BaseException:
+     |  
+     |  __delattr__(...)
+     |      x.__delattr__('name') <==> del x.name
+     |  
+     |  __getattribute__(...)
+     |      x.__getattribute__('name') <==> x.name
+     |  
+     |  __getitem__(...)
+     |      x.__getitem__(y) <==> x[y]
+     |  
+     |  __getslice__(...)
+     |      x.__getslice__(i, j) <==> x[i:j]
+     |      
+     |      Use of negative indices is not supported.
+     |  
+     |  __reduce__(...)
+     |  
+     |  __repr__(...)
+     |      x.__repr__() <==> repr(x)
+     |  
+     |  __setattr__(...)
+     |      x.__setattr__('name', value) <==> x.name = value
+     |  
+     |  __setstate__(...)
+     |  
+     |  __unicode__(...)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from exceptions.BaseException:
+     |  
+     |  __dict__
+     |  
+     |  args
+     |  
+     |  message
+    
+    class OTSServiceError(OTSError)
+     |  Method resolution order:
+     |      OTSServiceError
+     |      OTSError
+     |      exceptions.Exception
+     |      exceptions.BaseException
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, http_status, code, message, request_id='')
+     |  
+     |  __str__(self)
+     |  
+     |  get_error_code(self)
+     |  
+     |  get_error_message(self)
+     |  
+     |  get_http_status(self)
+     |  
+     |  get_request_id(self)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from OTSError:
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from exceptions.Exception:
+     |  
+     |  __new__ = <built-in method __new__ of type object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from exceptions.BaseException:
+     |  
+     |  __delattr__(...)
+     |      x.__delattr__('name') <==> del x.name
+     |  
+     |  __getattribute__(...)
+     |      x.__getattribute__('name') <==> x.name
+     |  
+     |  __getitem__(...)
+     |      x.__getitem__(y) <==> x[y]
+     |  
+     |  __getslice__(...)
+     |      x.__getslice__(i, j) <==> x[i:j]
+     |      
+     |      Use of negative indices is not supported.
+     |  
+     |  __reduce__(...)
+     |  
+     |  __repr__(...)
+     |      x.__repr__() <==> repr(x)
+     |  
+     |  __setattr__(...)
+     |      x.__setattr__('name', value) <==> x.name = value
+     |  
+     |  __setstate__(...)
+     |  
+     |  __unicode__(...)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from exceptions.BaseException:
+     |  
+     |  __dict__
+     |  
+     |  args
+     |  
+     |  message
+    
+    class PutRowItem(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, condition, primary_key, attribute_columns)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class ReservedThroughput(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, capacity_unit)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class ReservedThroughputDetails(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, capacity_unit, last_increase_time, last_decrease_time, number_of_decreases_today)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class RowDataItem(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, is_ok, error_code, error_message, consumed, primary_key_columns, attribute_columns)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class TableMeta(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, table_name, schema_of_primary_key)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class UpdateRowItem(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, condition, primary_key, update_of_attribute_columns)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class UpdateTableResponse(__builtin__.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, reserved_throughput_details)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+DATA
+    __all__ = ['OTSClient', 'INF_MIN', 'INF_MAX', 'TableMeta', 'CapacityUn...
+    __author__ = 'Haowei YAO <haowei.yao@aliyun-inc.com>; Kunpeng HAN <kun...
+    __version__ = '2.0.5'
+
+VERSION
+    2.0.5
+
+AUTHOR
+    Haowei YAO <haowei.yao@aliyun-inc.com>; Kunpeng HAN <kunpeng.hkp@aliyun-inc.com>
+
+
