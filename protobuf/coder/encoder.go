@@ -566,9 +566,9 @@ func _make_capacity_unit(pb *CapacityUnit, capacity_unit interface{}) error {
 		pb.Write = NewInt32(_get_int32(*capacity_unit.(CapacityUnit).Write))
 
 	case OTSCapacityUnit:
-		if capacity_unit.(OTSCapacityUnit).Read == 0 || capacity_unit.(OTSCapacityUnit).Write == 0 {
-			return (OTSClientError{}.Set("both of read and write of CapacityUnit are required"))
-		}
+		// if capacity_unit.(OTSCapacityUnit).Read == 0 || capacity_unit.(OTSCapacityUnit).Write == 0 {
+		// 	return (OTSClientError{}.Set("both of read and write of CapacityUnit are required"))
+		// }
 		pb.Read = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Read))
 		pb.Write = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Write))
 	}
