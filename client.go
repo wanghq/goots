@@ -6,6 +6,7 @@
 package goots
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -416,7 +417,13 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 
 	for {
 		// 2. http send_receive
-		req := urllib.Post(o.EndPoint + query)
+		var req *urllib.HttpRequest
+		end_point_url, _ := url.Parse(o.EndPoint)
+		if end_point_url.Scheme == "https" {
+			req = urllib.Post(o.EndPoint + query).SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+		} else {
+			req = urllib.Post(o.EndPoint + query)
+		}
 		if OTSHttpDebugEnable {
 			req.Debug(true)
 		} else {
