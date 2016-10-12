@@ -17,7 +17,6 @@ import (
 
 	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
-	// . "github.com/GiterLab/goots/protobuf"
 	"github.com/GiterLab/goots/urllib"
 )
 
@@ -574,7 +573,7 @@ func (o *OTSClient) _check_request_helper_error(resp []reflect.Value) (r interfa
 // 		}
 //
 // 		reserved_throughput := &OTSReservedThroughput{
-// 			OTSCapacityUnit{100, 100},
+// 			OTSCapacityUnit{0, 0},
 // 		}
 //
 // 		ots_err := ots_client.CreateTable(table_meta, reserved_throughput)
@@ -670,7 +669,7 @@ func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError
 //
 // 		示例：
 // 		reserved_throughput := &OTSReservedThroughput{
-// 		 OTSCapacityUnit{5000, 5000},
+// 		 OTSCapacityUnit{0, 0},
 // 		}
 //
 // 		// 每次调整操作的间隔应大于10分钟

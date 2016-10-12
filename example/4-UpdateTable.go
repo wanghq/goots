@@ -38,10 +38,10 @@ func main() {
 	// update_table
 	//
 	// 每次调整操作的间隔应大于10分钟
-	// 如果是刚创建表，需要10分钟之后才能调整表的预留读写吞吐量。
+	// 如果是刚创建表，需要2分钟之后才能调整表的预留读写吞吐量。
 	// 注意：OTS是按设置的ReservedThroughput计量收费，即使没有读写也会产生费用。
 	reserved_throughput := &OTSReservedThroughput{
-		OTSCapacityUnit{5, 5},
+		OTSCapacityUnit{0, 0},
 	}
 
 	// 每次调整操作的间隔应大于10分钟

@@ -1323,7 +1323,7 @@ func TestEncoder() {
 	// func _make_capacity_unit(pb *CapacityUnit, capacity_unit interface{}) error
 	// pb := new(CapacityUnit)
 	// fmt.Println(pb)
-	// capacity_unit := OTSCapacityUnit{100, 100}
+	// capacity_unit := OTSCapacityUnit{0, 0}
 	// _make_capacity_unit(pb, capacity_unit)
 	// fmt.Println(pb)
 
@@ -1331,7 +1331,7 @@ func TestEncoder() {
 	// pb := new(ReservedThroughput)
 	// fmt.Println(pb)
 	// reserved_throughput := OTSReservedThroughput{
-	// 	OTSCapacityUnit{100, 100},
+	// 	OTSCapacityUnit{0, 0},
 	// }
 	// _make_reserved_throughput(pb, reserved_throughput)
 	// fmt.Println(pb)
@@ -1339,7 +1339,7 @@ func TestEncoder() {
 	// func _make_update_capacity_unit(pb *CapacityUnit, capacity_unit interface{}) error
 	// pb := new(CapacityUnit)
 	// fmt.Println(pb)
-	// capacity_unit := OTSCapacityUnit{Read: 100}
+	// capacity_unit := OTSCapacityUnit{Read: 0}
 	// _make_update_capacity_unit(pb, capacity_unit)
 	// fmt.Println(pb)
 
@@ -1347,7 +1347,7 @@ func TestEncoder() {
 	// pb := new(ReservedThroughput)
 	// fmt.Println(pb)
 	// reserved_throughput := OTSReservedThroughput{
-	// 	OTSCapacityUnit{Read: 100, Write: 100},
+	// 	OTSCapacityUnit{Read: 0, Write: 0},
 	// }
 	// _make_update_reserved_throughput(pb, reserved_throughput)
 	// fmt.Println(pb)

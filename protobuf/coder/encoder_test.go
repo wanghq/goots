@@ -26,7 +26,7 @@ func Test_encode_create_table(t *testing.T) {
 	}
 
 	reserved_throughput := OTSReservedThroughput{
-		OTSCapacityUnit{100, 100},
+		OTSCapacityUnit{0, 0},
 	}
 
 	req, _ := _encode_create_table(&table_meta, &reserved_throughput)
@@ -60,7 +60,7 @@ func Test_encode_update_table(t *testing.T) {
 	t.Log("testing _encode_update_table...")
 	// ----
 	reserved_throughput := OTSReservedThroughput{
-		OTSCapacityUnit{100, 100},
+		OTSCapacityUnit{0, 0},
 	}
 	req, _ := _encode_update_table("myTable", &reserved_throughput)
 	t.Log("UpdateTableRequest:", req)
@@ -81,7 +81,7 @@ func Test_EncodeRequest(t *testing.T) {
 	}
 
 	reserved_throughput := OTSReservedThroughput{
-		OTSCapacityUnit{100, 100},
+		OTSCapacityUnit{0, 0},
 	}
 
 	req, err := EncodeRequest("CreateTable", &table_meta, &reserved_throughput)

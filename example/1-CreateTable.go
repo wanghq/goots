@@ -46,7 +46,7 @@ func main() {
 	}
 
 	reserved_throughput := &OTSReservedThroughput{
-		OTSCapacityUnit{9, 9},
+		OTSCapacityUnit{0, 0},
 	}
 
 	ots_err := ots_client.CreateTable(table_meta, reserved_throughput)

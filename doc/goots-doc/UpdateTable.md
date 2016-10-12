@@ -13,7 +13,7 @@ UpdateTable
 	//
 	// 示例：
 	// reserved_throughput := &OTSReservedThroughput{
-	//  OTSCapacityUnit{5000, 5000},
+	//  OTSCapacityUnit{0, 0},
 	// }
 	//
 	// // 每次调整操作的间隔应大于10分钟
@@ -60,7 +60,7 @@ Example
 	
 		// update_table
 		reserved_throughput := &OTSReservedThroughput{
-			OTSCapacityUnit{5000, 5000},
+			OTSCapacityUnit{0, 0},
 		}
 	
 		// 每次调整操作的间隔应大于10分钟
