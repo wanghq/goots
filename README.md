@@ -10,6 +10,8 @@ Aliyun OTS <del>(Open Table Service)</del> golang SDK.
 
 - 阿里云表格存储是构建在阿里云飞天分布式系统之上的NoSQL数据存储服务，提供海量结构化数据的存储和实时访问
 
+Tips: 使用OTS前，请参考下[OTS使用限制项](https://help.aliyun.com/document_detail/27301.html?spm=5176.doc27282.6.140.m43gGk)。
+
 [![wercker status](https://app.wercker.com/status/08d83208aa0215a6d6a0383b9b77b81d/m "wercker status")](https://app.wercker.com/project/bykey/08d83208aa0215a6d6a0383b9b77b81d)
 
 [![Build Status](https://travis-ci.org/GiterLab/goots.svg?branch=master)](https://travis-ci.org/GiterLab/goots)
