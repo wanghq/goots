@@ -404,6 +404,7 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 	var status int
 	var resheaders = DictString{}
 	var resbody []byte
+	var req *urllib.HttpRequest
 
 	ots_service_error = new(OTSServiceError)
 
@@ -417,7 +418,6 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 
 	for {
 		// 2. http send_receive
-		var req *urllib.HttpRequest
 		end_point_url, _ := url.Parse(o.EndPoint)
 		if end_point_url.Scheme == "https" {
 			req = urllib.Post(o.EndPoint + query).SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -464,7 +464,7 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 			}
 		}
 		defer response.Body.Close()
-		resbody, err := ioutil.ReadAll(response.Body)
+		resbody, err = ioutil.ReadAll(response.Body)
 		if err != nil {
 			ots_service_error.SetErrorMessage("%s", err)
 			if o.RetryPolicy.ShouldRetry(retry_times, ots_service_error, api_name) {
