@@ -185,8 +185,8 @@ func Test_make_request(t *testing.T) {
 	table_meta := OTSTableMeta{
 		TableName: "myTable",
 		SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
-			"gid": "INTEGER",
-			"uid": "INTEGER",
+			{K: "gid", V: "INTEGER"},
+			{K: "uid", V: "INTEGER"},
 		},
 	}
 

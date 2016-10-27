@@ -1301,8 +1301,8 @@ func TestEncoder() {
 	// table_meta := OTSTableMeta{
 	// 	"tablename",
 	// 	OTSSchemaOfPrimaryKey{
-	// 		"PK1": "INTEGER",
-	// 		"PK2": "STRING",
+	// 		{K: "gid", V: "INTEGER"},
+	// 		{K: "uid", V: "INTEGER"},
 	// 	},
 	// }
 	// _make_table_meta(pb, table_meta)
