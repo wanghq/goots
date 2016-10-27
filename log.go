@@ -3,4 +3,11 @@
 // license that can be found in the LICENSE file.
 
 // Logger for ots2
-package log
+package goots
+
+func LoggerInit() error {
+	// TODO:
+	// open log file
+
+	return nil
+}

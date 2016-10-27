@@ -53,8 +53,7 @@ Tips: 使用OTS前，请参考下[OTS使用限制项](https://help.aliyun.com/do
 		"os"
 
 		ots2 "github.com/GiterLab/goots"
-		"github.com/GiterLab/goots/log"
-		. "github.com/GiterLab/goots/otstype"
+		. "github.com/GiterLab/goots/otstype" // 为了代码干净
 	)
 
 	// modify it to yours
@@ -69,7 +68,7 @@ Tips: 使用OTS前，请参考下[OTS使用限制项](https://help.aliyun.com/do
 		// set running environment
 		ots2.OTSDebugEnable = true
 		ots2.OTSLoggerEnable = true
-		log.OTSErrorPanicMode = true // 默认为开启，如果不喜欢panic则设置此为false
+		ots2.OTSErrorPanicMode = true // 默认为开启，如果不喜欢panic则设置此为false
 
 		fmt.Println("Test goots start ...")
 
@@ -93,11 +92,13 @@ Tips: 使用OTS前，请参考下[OTS使用限制项](https://help.aliyun.com/do
 		table_meta := &OTSTableMeta{
 			TableName: "myTable",
 			SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
-				"gid": "INTEGER",
-				"uid": "INTEGER",
+				{K: "gid", V: "INTEGER"},
+				{K: "uid", V: "INTEGER"},
 			},
 		}
-
+		
+		// 容量型实例: 只能设置为0
+		// 高性能实例: 可设置为其他值（0-5000）
 		reserved_throughput := &OTSReservedThroughput{
 			OTSCapacityUnit{0, 0},
 		}

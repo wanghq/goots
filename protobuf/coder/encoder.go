@@ -6,10 +6,10 @@
 package coder
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 
-	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
 	. "github.com/GiterLab/goots/protobuf"
 )
@@ -48,7 +48,7 @@ func _get_unicode(value interface{}) string {
 	if v, ok := value.(string); ok {
 		return v
 	} else {
-		panic(OTSClientError{}.Set("expect str or unicode type for string, not %v", reflect.TypeOf(value)))
+		panic(errors.New(fmt.Sprintf("expect str or unicode type for string, not %v", reflect.TypeOf(value))))
 	}
 
 	return ""
@@ -57,17 +57,17 @@ func _get_unicode(value interface{}) string {
 func _get_int32(value interface{}) int32 {
 	if v, ok := value.(int); ok {
 		if int32(v) < INT32_MIN || int32(v) > INT32_MAX {
-			panic(OTSClientError{}.Set("%d exceeds the range of int32", v))
+			panic(errors.New(fmt.Sprintf("%d exceeds the range of int32", v)))
 		}
 		return int32(v)
 	} else if v, ok := value.(int32); ok {
 		if v < INT32_MIN || v > INT32_MAX {
-			panic(OTSClientError{}.Set("%d exceeds the range of int32", v))
+			panic(errors.New(fmt.Sprintf("%d exceeds the range of int32", v)))
 		}
 		return v
 	}
 
-	panic(OTSClientError{}.Set("expect int or long for the value, not %v", reflect.TypeOf(value)))
+	panic(errors.New(fmt.Sprintf("expect int or long for the value, not %v", reflect.TypeOf(value))))
 }
 
 func _make_repeated_column_names(pb *[]string, columns_to_get []string) error {
@@ -179,7 +179,7 @@ func _make_column_value(pb *ColumnValue, value interface{}) error {
 			*pcolumn_type = ColumnType_INF_MAX
 			pb.Type = pcolumn_type
 		} else {
-			return (OTSClientError{}.Set("don't expect the value of ColumnType"))
+			return errors.New("don't expect the value of ColumnType")
 		}
 
 	case OTS_INF_MIN:
@@ -193,7 +193,7 @@ func _make_column_value(pb *ColumnValue, value interface{}) error {
 		pb.Type = pcolumn_type
 
 	default:
-		return (OTSClientError{}.Set("expect string, bool, (u)int, (u)int8, (u)int16, (u)int32, (u)int64, (u)float32 or (u)float64 for colum value, not %v", reflect.TypeOf(value)))
+		return errors.New(fmt.Sprintf("expect string, bool, (u)int, (u)int8, (u)int16, (u)int32, (u)int64, (u)float32 or (u)float64 for colum value, not %v", reflect.TypeOf(value)))
 	}
 
 	return nil
@@ -204,7 +204,7 @@ func _get_column_type(type_str string) ColumnType {
 	if ok {
 		return ColumnType(v)
 	} else {
-		panic(OTSClientError{}.Set("column_type should be one of [INF_MIN, INF_MAX, INTEGER, STRING, BOOLEAN, DOUBLE, BINARY], not %s", type_str))
+		panic(errors.New(fmt.Sprintf("column_type should be one of [INF_MIN, INF_MAX, INTEGER, STRING, BOOLEAN, DOUBLE, BINARY], not %s", type_str)))
 	}
 }
 
@@ -217,7 +217,7 @@ func _make_condition(pb *Condition, condition interface{}) error {
 			*item = RowExistenceExpectation(RowExistenceExpectation_value[v])
 			pb.RowExistence = item
 		} else {
-			return (OTSClientError{}.Set("condition value should be one of [IGNORE(0), EXPECT_EXIST(1), EXPECT_NOT_EXIST(2)], not %v", exp))
+			return errors.New(fmt.Sprintf("condition value should be one of [IGNORE(0), EXPECT_EXIST(1), EXPECT_NOT_EXIST(2)], not %v", exp))
 		}
 	case *Condition:
 		exp := *condition.(*Condition).RowExistence
@@ -226,7 +226,7 @@ func _make_condition(pb *Condition, condition interface{}) error {
 			*item = RowExistenceExpectation(RowExistenceExpectation_value[v])
 			pb.RowExistence = item
 		} else {
-			return (OTSClientError{}.Set("condition value should be one of [IGNORE(0), EXPECT_EXIST(1), EXPECT_NOT_EXIST(2)], not %v", exp))
+			return errors.New(fmt.Sprintf("condition value should be one of [IGNORE(0), EXPECT_EXIST(1), EXPECT_NOT_EXIST(2)], not %v", exp))
 		}
 	case string:
 		exp := condition.(string)
@@ -235,10 +235,10 @@ func _make_condition(pb *Condition, condition interface{}) error {
 			*item = RowExistenceExpectation(v)
 			pb.RowExistence = item
 		} else {
-			return (OTSClientError{}.Set("condition value should be one of [IGNORE(0), EXPECT_EXIST(1), EXPECT_NOT_EXIST(2)], not %v", exp))
+			return errors.New(fmt.Sprintf("condition value should be one of [IGNORE(0), EXPECT_EXIST(1), EXPECT_NOT_EXIST(2)], not %v", exp))
 		}
 	default:
-		return (OTSClientError{}.Set("condition should be one of [Condition, *Condition or string], not %v", reflect.TypeOf(condition)))
+		return errors.New(fmt.Sprintf("condition should be one of [Condition, *Condition or string], not %v", reflect.TypeOf(condition)))
 	}
 
 	return nil
@@ -251,7 +251,7 @@ func _get_condition(condition_str string) Condition {
 		conditon := Condition{}
 		conditon.RowExistence = item
 	} else {
-		panic(OTSClientError{}.Set("direction should be one of [IGNORE, EXPECT_EXIST, EXPECT_NOT_EXIST], not %s", condition_str))
+		panic(errors.New(fmt.Sprintf("direction should be one of [IGNORE, EXPECT_EXIST, EXPECT_NOT_EXIST], not %s", condition_str)))
 	}
 
 	return Condition{}
@@ -264,7 +264,7 @@ func _get_direction(direction_str string) *Direction {
 		*dir = Direction(v)
 		return dir
 	} else {
-		panic(OTSClientError{}.Set("direction should be one of [FORWARD, BACKWARD], not %s", direction_str))
+		panic(errors.New(fmt.Sprintf("direction should be one of [FORWARD, BACKWARD], not %s", direction_str)))
 	}
 }
 
@@ -284,10 +284,10 @@ func _make_column_schema(pb *ColumnSchema, schema_tuple interface{}) error {
 		if v, ok := schema_type.(string); ok {
 			*pb.Type = _get_column_type(v)
 		} else {
-			return (OTSClientError{}.Set("schema_tuple should be (string, string), not (string, %v)", reflect.TypeOf(schema_type)))
+			return errors.New(fmt.Sprintf("schema_tuple should be (string, string), not (string, %v)", reflect.TypeOf(schema_type)))
 		}
 	default:
-		return (OTSClientError{}.Set("type of schema_list is shoud be one of [ColumnSchema or TupleString]. not %v", reflect.TypeOf(schema_tuple)))
+		return errors.New(fmt.Sprintf("type of schema_list is shoud be one of [ColumnSchema or TupleString]. not %v", reflect.TypeOf(schema_tuple)))
 	}
 
 	return nil
@@ -302,7 +302,7 @@ func _make_column_schema_python(pb *ColumnSchema, schema_tuple TupleString) erro
 	if v, ok := schema_type.(string); ok {
 		*pb.Type = _get_column_type(v)
 	} else {
-		return (OTSClientError{}.Set("schema_tuple should be (string, string), not (string, %v)", reflect.TypeOf(schema_type)))
+		return errors.New(fmt.Sprintf("schema_tuple should be (string, string), not (string, %v)", reflect.TypeOf(schema_type)))
 	}
 
 	return nil
@@ -312,7 +312,7 @@ func _make_schemas_with_list(pb *[]*ColumnSchema, schema_list interface{}) error
 	switch schema_list.(type) {
 	case []ColumnSchema:
 		if len(schema_list.([]ColumnSchema)) == 0 {
-			return OTSClientError{}.Set("schema_list should not be empty")
+			return errors.New("schema_list should not be empty")
 		}
 		*pb = make([]*ColumnSchema, len(schema_list.([]ColumnSchema)))
 		for k, schema_tuple := range schema_list.([]ColumnSchema) {
@@ -326,7 +326,7 @@ func _make_schemas_with_list(pb *[]*ColumnSchema, schema_list interface{}) error
 
 	case []*ColumnSchema:
 		if len(schema_list.([]*ColumnSchema)) == 0 {
-			return OTSClientError{}.Set("schema_list should not be empty")
+			return errors.New("schema_list should not be empty")
 		}
 		*pb = make([]*ColumnSchema, len(schema_list.([]*ColumnSchema)))
 		for k, schema_tuple := range schema_list.([]*ColumnSchema) {
@@ -340,7 +340,7 @@ func _make_schemas_with_list(pb *[]*ColumnSchema, schema_list interface{}) error
 
 	case []TupleString:
 		if len(schema_list.([]TupleString)) == 0 {
-			return OTSClientError{}.Set("schema_list should not be empty")
+			return errors.New("schema_list should not be empty")
 		}
 		*pb = make([]*ColumnSchema, len(schema_list.([]TupleString)))
 		for k, schema_tuple := range schema_list.([]TupleString) {
@@ -354,7 +354,7 @@ func _make_schemas_with_list(pb *[]*ColumnSchema, schema_list interface{}) error
 		}
 
 	default:
-		return (OTSClientError{}.Set("type of schema_list is shoud be one of [[]ColumnSchema []*ColumnSchema or []TupleString]. not %v", reflect.TypeOf(schema_list)))
+		return errors.New(fmt.Sprintf("type of schema_list is shoud be one of [[]ColumnSchema []*ColumnSchema or []TupleString]. not %v", reflect.TypeOf(schema_list)))
 	}
 	return nil
 }
@@ -363,7 +363,7 @@ func _make_columns_with_dict(pb *[]*Column, column_dict interface{}) error {
 	switch column_dict.(type) {
 	case []Column:
 		if len(column_dict.([]Column)) == 0 {
-			return OTSClientError{}.Set("column_dict should not be empty")
+			return errors.New("column_dict should not be empty")
 		}
 		*pb = make([]*Column, len(column_dict.([]Column)))
 		for k, column := range column_dict.([]Column) {
@@ -376,7 +376,7 @@ func _make_columns_with_dict(pb *[]*Column, column_dict interface{}) error {
 
 	case []*Column:
 		if len(column_dict.([]*Column)) == 0 {
-			return OTSClientError{}.Set("column_dict should not be empty")
+			return errors.New("column_dict should not be empty")
 		}
 		*pb = make([]*Column, len(column_dict.([]*Column)))
 		for k, column := range column_dict.([]*Column) {
@@ -389,7 +389,7 @@ func _make_columns_with_dict(pb *[]*Column, column_dict interface{}) error {
 
 	case DictString:
 		if len(column_dict.(DictString)) == 0 {
-			return OTSClientError{}.Set("column_dict should not be empty")
+			return errors.New("column_dict should not be empty")
 		}
 		*pb = make([]*Column, len(column_dict.(DictString)))
 		i := 0
@@ -403,7 +403,7 @@ func _make_columns_with_dict(pb *[]*Column, column_dict interface{}) error {
 		}
 
 	default:
-		return (OTSClientError{}.Set("type of schema_list is shoud be one of [[]Column []*Column or DictString]. not %v", reflect.TypeOf(column_dict)))
+		return errors.New(fmt.Sprintf("type of schema_list is shoud be one of [[]Column []*Column or DictString]. not %v", reflect.TypeOf(column_dict)))
 	}
 	return nil
 }
@@ -412,7 +412,7 @@ func _make_update_of_attribute_columns_with_dict(pb *[]*ColumnUpdate, column_dic
 	switch column_dict.(type) {
 	case []ColumnUpdate:
 		if len(column_dict.([]ColumnUpdate)) == 0 {
-			return OTSClientError{}.Set("column_dict should not be empty")
+			return errors.New("column_dict should not be empty")
 		}
 		*pb = make([]*ColumnUpdate, len(column_dict.([]ColumnUpdate)))
 		for k, column_update := range column_dict.([]ColumnUpdate) {
@@ -427,7 +427,7 @@ func _make_update_of_attribute_columns_with_dict(pb *[]*ColumnUpdate, column_dic
 		}
 	case []*ColumnUpdate:
 		if len(column_dict.([]*ColumnUpdate)) == 0 {
-			return OTSClientError{}.Set("column_dict should not be empty")
+			return errors.New("column_dict should not be empty")
 		}
 		*pb = make([]*ColumnUpdate, len(column_dict.([]*ColumnUpdate)))
 		for k, column_update := range column_dict.([]*ColumnUpdate) {
@@ -470,7 +470,7 @@ func _make_update_of_attribute_columns_with_dict(pb *[]*ColumnUpdate, column_dic
 						*pb = append(*pb, item)
 					}
 				default:
-					return (OTSClientError{}.Set("expect DictString  or OTSColumnsToPut for put operation in 'update_of_attribute_columns', not %v", reflect.TypeOf(value)))
+					return errors.New(fmt.Sprintf("expect DictString  or OTSColumnsToPut for put operation in 'update_of_attribute_columns', not %v", reflect.TypeOf(value)))
 				}
 
 			} else if key == "DELETE" {
@@ -494,16 +494,16 @@ func _make_update_of_attribute_columns_with_dict(pb *[]*ColumnUpdate, column_dic
 						*pb = append(*pb, item)
 					}
 				default:
-					return (OTSClientError{}.Set("expect list([]string or OTSColumnsToDelete) for delete operation in 'update_of_attribute_columns', not %v", reflect.TypeOf(value)))
+					return errors.New(fmt.Sprintf("expect list([]string or OTSColumnsToDelete) for delete operation in 'update_of_attribute_columns', not %v", reflect.TypeOf(value)))
 				}
 
 			} else {
-				return (OTSClientError{}.Set("operation type in 'update_of_attribute_columns' should be 'PUT' or 'DELETE', not %s", key))
+				return errors.New(fmt.Sprintf("operation type in 'update_of_attribute_columns' should be 'PUT' or 'DELETE', not %s", key))
 			}
 		}
 
 	default:
-		return (OTSClientError{}.Set("expect DictString or []ColumnUpdate for 'update_of_attribute_columns', not %v", reflect.TypeOf(column_dict)))
+		return errors.New(fmt.Sprintf("expect DictString or []ColumnUpdate for 'update_of_attribute_columns', not %v", reflect.TypeOf(column_dict)))
 	}
 	return nil
 }
@@ -530,7 +530,7 @@ func _make_table_meta(pb *TableMeta, table_meta interface{}) error {
 			}
 			pb.PrimaryKey = (*primary_key)[:]
 		} else {
-			return (OTSClientError{}.Set("table_meta.V should be an instance of []TupleString, not %v", reflect.TypeOf(table_meta.(TupleString).V)))
+			return errors.New(fmt.Sprintf("table_meta.V should be an instance of []TupleString, not %v", reflect.TypeOf(table_meta.(TupleString).V)))
 		}
 	case OTSTableMeta:
 		pb.TableName = NewString(table_meta.(OTSTableMeta).TableName)
@@ -539,9 +539,9 @@ func _make_table_meta(pb *TableMeta, table_meta interface{}) error {
 		// change map[string]string to []TupleString
 		tuple_string := make([]TupleString, len(table_meta.(OTSTableMeta).SchemaOfPrimaryKey))
 		i := 0
-		for k, v := range table_meta.(OTSTableMeta).SchemaOfPrimaryKey {
-			tuple_string[i].K = k
-			tuple_string[i].V = v
+		for _, v := range table_meta.(OTSTableMeta).SchemaOfPrimaryKey {
+			tuple_string[i].K = v.GetKey()
+			tuple_string[i].V = v.GetValue()
 			i++
 		}
 		err := _make_schemas_with_list(primary_key, tuple_string)
@@ -550,7 +550,7 @@ func _make_table_meta(pb *TableMeta, table_meta interface{}) error {
 		}
 		pb.PrimaryKey = (*primary_key)[:]
 	default:
-		return (OTSClientError{}.Set("table_meta should be an instance of TableMeta, OTSTableMeta or TupleString, not %v", reflect.TypeOf(table_meta)))
+		return errors.New(fmt.Sprintf("table_meta should be an instance of TableMeta, OTSTableMeta or TupleString, not %v", reflect.TypeOf(table_meta)))
 	}
 
 	return nil
@@ -560,15 +560,12 @@ func _make_capacity_unit(pb *CapacityUnit, capacity_unit interface{}) error {
 	switch capacity_unit.(type) {
 	case CapacityUnit:
 		if capacity_unit.(CapacityUnit).Read == nil || capacity_unit.(CapacityUnit).Write == nil {
-			return (OTSClientError{}.Set("both of read and write of CapacityUnit are required"))
+			return errors.New("both of read and write of CapacityUnit are required")
 		}
 		pb.Read = NewInt32(_get_int32(*capacity_unit.(CapacityUnit).Read))
 		pb.Write = NewInt32(_get_int32(*capacity_unit.(CapacityUnit).Write))
 
 	case OTSCapacityUnit:
-		// if capacity_unit.(OTSCapacityUnit).Read == 0 || capacity_unit.(OTSCapacityUnit).Write == 0 {
-		// 	return (OTSClientError{}.Set("both of read and write of CapacityUnit are required"))
-		// }
 		pb.Read = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Read))
 		pb.Write = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Write))
 	}
@@ -595,7 +592,7 @@ func _make_reserved_throughput(pb *ReservedThroughput, reserved_throughput inter
 		}
 
 	default:
-		return (OTSClientError{}.Set("reserved_throughput should be an instance of [ReservedThroughput, OTSTableMeta or OTSReservedThroughput], not %v", reflect.TypeOf(reserved_throughput)))
+		return errors.New(fmt.Sprintf("reserved_throughput should be an instance of [ReservedThroughput, OTSTableMeta or OTSReservedThroughput], not %v", reflect.TypeOf(reserved_throughput)))
 	}
 
 	return nil
@@ -605,7 +602,7 @@ func _make_update_capacity_unit(pb *CapacityUnit, capacity_unit interface{}) err
 	switch capacity_unit.(type) {
 	case CapacityUnit:
 		if capacity_unit.(CapacityUnit).Read == nil && capacity_unit.(CapacityUnit).Write == nil {
-			return (OTSClientError{}.Set("at least one of read or write of CapacityUnit is required"))
+			return errors.New("at least one of read or write of CapacityUnit is required")
 		}
 
 		if capacity_unit.(CapacityUnit).Read != nil {
@@ -617,17 +614,8 @@ func _make_update_capacity_unit(pb *CapacityUnit, capacity_unit interface{}) err
 		}
 
 	case OTSCapacityUnit:
-		if capacity_unit.(OTSCapacityUnit).Read == 0 && capacity_unit.(OTSCapacityUnit).Write == 0 {
-			return (OTSClientError{}.Set("at least one of read or write of CapacityUnit is required"))
-		}
-
-		if capacity_unit.(OTSCapacityUnit).Read != 0 {
-			pb.Read = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Read))
-		}
-
-		if capacity_unit.(OTSCapacityUnit).Write != 0 {
-			pb.Write = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Write))
-		}
+		pb.Read = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Read))
+		pb.Write = NewInt32(_get_int32(capacity_unit.(OTSCapacityUnit).Write))
 	}
 
 	return nil
@@ -652,7 +640,7 @@ func _make_update_reserved_throughput(pb *ReservedThroughput, reserved_throughpu
 		}
 
 	default:
-		return (OTSClientError{}.Set("reserved_throughput should be an instance of ReservedThroughput, OTSTableMeta or OTSReservedThroughput, not %v", reflect.TypeOf(reserved_throughput)))
+		return errors.New(fmt.Sprintf("reserved_throughput should be an instance of ReservedThroughput, OTSTableMeta or OTSReservedThroughput, not %v", reflect.TypeOf(reserved_throughput)))
 	}
 
 	return nil
@@ -742,7 +730,7 @@ func _make_batch_get_row(pb *BatchGetRowRequest, batch_list interface{}) error {
 		}
 
 	default:
-		return (OTSClientError{}.Set("batch_list should be an instance of [[]TableInBatchGetRowRequest, []*TableInBatchGetRowRequest or OTSBatchGetRowRequest], not %v", reflect.TypeOf(batch_list)))
+		return errors.New(fmt.Sprintf("batch_list should be an instance of [[]TableInBatchGetRowRequest, []*TableInBatchGetRowRequest or OTSBatchGetRowRequest], not %v", reflect.TypeOf(batch_list)))
 	}
 
 	return nil
@@ -808,7 +796,7 @@ func _make_put_row_item(pb *PutRowInBatchWriteRowRequest, put_row_item interface
 		pb.AttributeColumns = *attribute_columns
 
 	default:
-		return (OTSClientError{}.Set("put_row_item should be an instance of [PutRowInBatchWriteRowRequest, *PutRowInBatchWriteRowRequest or OTSPutRowItem], not %v", reflect.TypeOf(put_row_item)))
+		return errors.New(fmt.Sprintf("put_row_item should be an instance of [PutRowInBatchWriteRowRequest, *PutRowInBatchWriteRowRequest or OTSPutRowItem], not %v", reflect.TypeOf(put_row_item)))
 	}
 
 	return nil
@@ -874,7 +862,7 @@ func _make_update_row_item(pb *UpdateRowInBatchWriteRowRequest, update_row_item 
 		pb.AttributeColumns = *attribute_columns
 
 	default:
-		return (OTSClientError{}.Set("update_row_item should be an instance of [UpdateRowInBatchWriteRowRequest, *UpdateRowInBatchWriteRowRequest or OTSUpdateRowItem], not %v", reflect.TypeOf(update_row_item)))
+		return errors.New(fmt.Sprintf("update_row_item should be an instance of [UpdateRowInBatchWriteRowRequest, *UpdateRowInBatchWriteRowRequest or OTSUpdateRowItem], not %v", reflect.TypeOf(update_row_item)))
 	}
 
 	return nil
@@ -922,7 +910,7 @@ func _make_delete_row_item(pb *DeleteRowInBatchWriteRowRequest, delete_row_item 
 		pb.PrimaryKey = *primary_key
 
 	default:
-		return (OTSClientError{}.Set("delete_row_item should be an instance of [DeleteRowInBatchWriteRowRequest, *DeleteRowInBatchWriteRowRequest or OTSDeleteRowItem], not %v", reflect.TypeOf(delete_row_item)))
+		return errors.New(fmt.Sprintf("delete_row_item should be an instance of [DeleteRowInBatchWriteRowRequest, *DeleteRowInBatchWriteRowRequest or OTSDeleteRowItem], not %v", reflect.TypeOf(delete_row_item)))
 	}
 
 	return nil
@@ -1066,7 +1054,7 @@ func _make_batch_write_row(pb *BatchWriteRowRequest, batch_list interface{}) err
 		}
 
 	default:
-		return (OTSClientError{}.Set("batch_list should be an instance of [[]TableInBatchWriteRowRequest, []*TableInBatchWriteRowRequest or OTSBatchWriteRowRequest], not %v", reflect.TypeOf(batch_list)))
+		return errors.New(fmt.Sprintf("batch_list should be an instance of [[]TableInBatchWriteRowRequest, []*TableInBatchWriteRowRequest or OTSBatchWriteRowRequest], not %v", reflect.TypeOf(batch_list)))
 	}
 
 	return nil
@@ -2190,7 +2178,7 @@ func _encode_get_range(table_name string, direction string,
 // request encode for ots2
 func EncodeRequest(api_name string, args ...interface{}) (req []reflect.Value, err error) {
 	if _, ok := api_encode_map[api_name]; !ok {
-		return nil, (OTSClientError{}.Set("No PB encode method for API %s", api_name))
+		return nil, errors.New(fmt.Sprintf("No PB encode method for API %s" + api_name))
 	}
 
 	req, err = api_encode_map.Call(api_name, args...)

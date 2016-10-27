@@ -10,7 +10,6 @@ import (
 	"os"
 
 	ots2 "github.com/GiterLab/goots"
-	"github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
 )
 
@@ -26,7 +25,7 @@ func main() {
 	// set running environment
 	ots2.OTSDebugEnable = true
 	ots2.OTSLoggerEnable = true
-	log.OTSErrorPanicMode = true // 默认为开启，如果不喜欢panic则设置此为false
+	ots2.OTSErrorPanicMode = true // 默认为开启，如果不喜欢panic则设置此为false
 
 	fmt.Println("Test goots start ...")
 

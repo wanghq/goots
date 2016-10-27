@@ -16,6 +16,7 @@ type Tuple []struct {
 	V interface{}
 }
 
+// string tuple
 type TupleString struct {
 	K string
 	V interface{}
@@ -30,7 +31,7 @@ func (t *TupleString) GetKey() string {
 
 func (t *TupleString) SetKey(k string) {
 	if t != nil {
-		(*t).K = k
+		t.K = k
 	}
 }
 
@@ -43,7 +44,7 @@ func (t *TupleString) GetValue() interface{} {
 
 func (t *TupleString) SetValue(v interface{}) {
 	if t != nil {
-		(*t).V = v
+		t.V = v
 	}
 }
 
@@ -72,6 +73,7 @@ func (d *Dict) Get(k interface{}) (v interface{}, err error) {
 	return v, errors.New("key not found")
 }
 
+// string dict
 type DictString map[string]interface{}
 
 func (d DictString) String() string {
@@ -103,5 +105,55 @@ func (d DictString) Get(key string) interface{} {
 func (d DictString) Set(key string, value interface{}) {
 	if d != nil {
 		d[key] = value
+	}
+}
+
+// string dict, orderly dictionary
+type ListString []TupleString
+
+func (d ListString) String() string {
+	result := "["
+	for _, v := range d {
+		result = result + fmt.Sprintf("(%s:%v)", v.K, v.V)
+	}
+
+	return result + "]"
+}
+
+// delete key
+func (d *ListString) Del(key string) {
+	if d != nil {
+		for i, v := range *d {
+			if key == v.GetKey() {
+				*d = append((*d)[:i], (*d)[i+1:]...)
+				fmt.Println("test", d)
+			}
+		}
+	}
+}
+
+// get value by key
+func (d *ListString) Get(key string) interface{} {
+	if d != nil {
+		for _, v := range *d {
+			if key == v.GetKey() {
+				return v.GetValue()
+			}
+		}
+	}
+
+	return nil
+}
+
+// set key and value to map
+func (d *ListString) Set(key string, value interface{}) {
+	if d != nil {
+		for i, v := range *d {
+			if key == v.GetKey() {
+				(*d)[i].SetValue(value)
+				return
+			}
+		}
+		*d = append(*d, TupleString{K: key, V: value})
 	}
 }

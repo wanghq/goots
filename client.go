@@ -16,7 +16,6 @@ import (
 	"sync"
 	"time"
 
-	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
 	"github.com/GiterLab/goots/urllib"
 )
@@ -574,8 +573,8 @@ func (o *OTSClient) _check_request_helper_error(resp []reflect.Value) (r interfa
 // 		table_meta := &OTSTableMeta{
 // 			TableName: "myTable",
 // 			SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
-// 				"gid": "INTEGER",
-// 				"uid": "INTEGER",
+// 				{K: "gid", V: "INTEGER"},
+// 				{K: "uid", V: "INTEGER"},
 // 			},
 // 		}
 //

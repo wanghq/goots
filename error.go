@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // errors for ots2
-package log
+package goots
 
 import (
 	"fmt"
@@ -15,13 +15,6 @@ var OTSErrorPanicMode bool = true // 默认开启panic模式
 type OTSError struct {
 	ClientError  *OTSClientError
 	ServiceError *OTSServiceError
-}
-
-func LoggerInit() error {
-	// TODO:
-	// open log file
-
-	return nil
 }
 
 func (o OTSError) Set(format string, a ...interface{}) (e error) {

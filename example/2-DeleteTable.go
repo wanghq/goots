@@ -13,7 +13,7 @@ import (
 	"github.com/GiterLab/goots/log"
 )
 
-// modify it for yours
+// modify it to yours
 const (
 	ENDPOINT     = "your_instance_address"
 	ACCESSID     = "your_accessid"

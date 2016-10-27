@@ -33,23 +33,22 @@ Example
 		"os"
 	
 		ots2 "github.com/GiterLab/goots"
-		"github.com/GiterLab/goots/log"
 		. "github.com/GiterLab/goots/otstype"
 	)
 	
 	// modify it to yours
 	const (
-		ENDPOINT     = "http://127.0.0.1:8800"
-		ACCESSID     = "OTSMultiUser177_accessid"
-		ACCESSKEY    = "OTSMultiUser177_accesskey"
-		INSTANCENAME = "TestInstance177"
+		ENDPOINT     = "your_instance_address"
+		ACCESSID     = "your_accessid"
+		ACCESSKEY    = "your_accesskey"
+		INSTANCENAME = "your_instance_name"
 	)
 	
 	func main() {
 		// set running environment
 		ots2.OTSDebugEnable = true
 		ots2.OTSLoggerEnable = true
-		log.OTSErrorPanicMode = true // 默认为开启，如果不喜欢panic则设置此为false
+		ots2.OTSErrorPanicMode = true // 默认为开启，如果不喜欢panic则设置此为false
 	
 		fmt.Println("Test goots start ...")
 	
