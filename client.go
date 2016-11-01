@@ -41,7 +41,7 @@ var defaultOTSSetting = OTSClient{
 	DEFAULT_LOGGER_NAME,     // LoggerName
 	DEFAULT_ENCODING,        // Encoding
 	&defaultProtocol,        // default protocol
-	&OTSDefaultRetryPolicy,  // default retry policy
+	OTSDefaultRetryPolicy,   // default retry policy
 }
 var settingMutex sync.Mutex
 
@@ -66,12 +66,16 @@ func New(end_point, accessid, accesskey, instance_name string, kwargs ...interfa
 		return nil, err
 	}
 
-	o = &defaultOTSSetting
+	o = new(OTSClient)
 	o.EndPoint = end_point
 	o.AccessId = accessid
 	o.AccessKey = accesskey
 	o.InstanceName = instance_name
-
+	o.SocketTimeout = defaultOTSSetting.SocketTimeout
+	o.MaxConnection = defaultOTSSetting.MaxConnection
+	o.LoggerName = defaultOTSSetting.LoggerName
+	o.Encoding = defaultOTSSetting.Encoding
+	o.protocol = defaultOTSSetting.protocol
 	// initialize the retry policy
 	if o.RetryPolicy == nil {
 		o.RetryPolicy = OTSDefaultRetryPolicy
@@ -160,12 +164,16 @@ func NewWithRetryPolicy(end_point, accessid, accesskey, instance_name string, re
 		return nil, err
 	}
 
-	o = &defaultOTSSetting
+	o = new(OTSClient)
 	o.EndPoint = end_point
 	o.AccessId = accessid
 	o.AccessKey = accesskey
 	o.InstanceName = instance_name
-
+	o.SocketTimeout = defaultOTSSetting.SocketTimeout
+	o.MaxConnection = defaultOTSSetting.MaxConnection
+	o.LoggerName = defaultOTSSetting.LoggerName
+	o.Encoding = defaultOTSSetting.Encoding
+	o.protocol = defaultOTSSetting.protocol
 	// initialize the retry policy
 	if retry_policy != nil {
 		o.RetryPolicy = retry_policy
