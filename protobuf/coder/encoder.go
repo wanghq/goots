@@ -362,9 +362,9 @@ func _make_schemas_with_list(pb *[]*ColumnSchema, schema_list interface{}) error
 func _make_columns_with_dict(pb *[]*Column, column_dict interface{}) error {
 	switch column_dict.(type) {
 	case []Column:
-		if len(column_dict.([]Column)) == 0 {
-			return errors.New("column_dict should not be empty")
-		}
+		// if len(column_dict.([]Column)) == 0 {
+		// 	return errors.New("column_dict should not be empty")
+		// }
 		*pb = make([]*Column, len(column_dict.([]Column)))
 		for k, column := range column_dict.([]Column) {
 			item := new(Column)
@@ -375,9 +375,9 @@ func _make_columns_with_dict(pb *[]*Column, column_dict interface{}) error {
 		}
 
 	case []*Column:
-		if len(column_dict.([]*Column)) == 0 {
-			return errors.New("column_dict should not be empty")
-		}
+		// if len(column_dict.([]*Column)) == 0 {
+		// 	return errors.New("column_dict should not be empty")
+		// }
 		*pb = make([]*Column, len(column_dict.([]*Column)))
 		for k, column := range column_dict.([]*Column) {
 			item := new(Column)
@@ -388,9 +388,9 @@ func _make_columns_with_dict(pb *[]*Column, column_dict interface{}) error {
 		}
 
 	case DictString:
-		if len(column_dict.(DictString)) == 0 {
-			return errors.New("column_dict should not be empty")
-		}
+		// if len(column_dict.(DictString)) == 0 {
+		// 	return errors.New("column_dict should not be empty")
+		// }
 		*pb = make([]*Column, len(column_dict.(DictString)))
 		i := 0
 		for name, column := range column_dict.(DictString) {
