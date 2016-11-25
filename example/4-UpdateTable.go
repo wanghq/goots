@@ -10,23 +10,22 @@ import (
 	"os"
 
 	ots2 "github.com/GiterLab/goots"
-	"github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
 )
 
 // modify it to yours
 const (
-	ENDPOINT     = "http://127.0.0.1:8800"
-	ACCESSID     = "OTSMultiUser177_accessid"
-	ACCESSKEY    = "OTSMultiUser177_accesskey"
-	INSTANCENAME = "TestInstance177"
+	ENDPOINT     = "your_instance_address"
+	ACCESSID     = "your_accessid"
+	ACCESSKEY    = "your_accesskey"
+	INSTANCENAME = "your_instance_name"
 )
 
 func main() {
 	// set running environment
 	ots2.OTSDebugEnable = true
 	ots2.OTSLoggerEnable = true
-	log.OTSErrorPanicMode = true // 默认为开启，如果不喜欢panic则设置此为false
+	ots2.OTSErrorPanicMode = true // 默认为开启，如果不喜欢panic则设置此为false
 
 	fmt.Println("Test goots start ...")
 
@@ -36,12 +35,14 @@ func main() {
 	}
 
 	// update_table
+	// 容量型实例: 只能设置为0
+	// 高性能实例: 可设置为其他值（0-5000）
 	reserved_throughput := &OTSReservedThroughput{
-		OTSCapacityUnit{5000, 5000},
+		OTSCapacityUnit{0, 0},
 	}
 
 	// 每次调整操作的间隔应大于10分钟
-	// 如果是刚创建表，需要10分钟之后才能调整表的预留读写吞吐量。
+	// 如果是刚创建表，需要2分钟之后才能调整表的预留读写吞吐量。
 	update_response, ots_err := ots_client.UpdateTable("myTable", reserved_throughput)
 	if ots_err != nil {
 		fmt.Println(ots_err)

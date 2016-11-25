@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/protobuf/proto"
 	. "github.com/GiterLab/goots/otstype"
 	"github.com/GiterLab/goots/protobuf"
+	"github.com/golang/protobuf/proto"
 )
 
 func Test_make_headers_string(t *testing.T) {
@@ -185,13 +185,13 @@ func Test_make_request(t *testing.T) {
 	table_meta := OTSTableMeta{
 		TableName: "myTable",
 		SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
-			"gid": "INTEGER",
-			"uid": "INTEGER",
+			{K: "gid", V: "INTEGER"},
+			{K: "uid", V: "INTEGER"},
 		},
 	}
 
 	reserved_throughput := OTSReservedThroughput{
-		OTSCapacityUnit{100, 100},
+		OTSCapacityUnit{0, 0},
 	}
 
 	query, headers, body, err := protocol.make_request("CreateTable", &table_meta, &reserved_throughput)

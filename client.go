@@ -6,6 +6,7 @@
 package goots
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -15,9 +16,7 @@ import (
 	"sync"
 	"time"
 
-	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
-	// . "github.com/GiterLab/goots/protobuf"
 	"github.com/GiterLab/goots/urllib"
 )
 
@@ -33,15 +32,16 @@ const (
 )
 
 var defaultOTSSetting = OTSClient{
-	"http://127.0.0.1:8800",     // EndPoint
-	"OTSMultiUser177_accessid",  // AccessId
-	"OTSMultiUser177_accesskey", // AccessKey
-	"TestInstance177",           // InstanceName
-	DEFAULT_SOCKET_TIMEOUT,      // SocketTimeout
-	DEFAULT_MAX_CONNECTION,      // MaxConnection
-	DEFAULT_LOGGER_NAME,         // LoggerName
-	DEFAULT_ENCODING,            // Encoding
-	&defaultProtocol,
+	"your_instance_address", // EndPoint
+	"your_accessid",         // AccessId
+	"your_accesskey",        // AccessKey
+	"your_instance_name",    // InstanceName
+	DEFAULT_SOCKET_TIMEOUT,  // SocketTimeout
+	DEFAULT_MAX_CONNECTION,  // MaxConnection
+	DEFAULT_LOGGER_NAME,     // LoggerName
+	DEFAULT_ENCODING,        // Encoding
+	&defaultProtocol,        // default protocol
+	OTSDefaultRetryPolicy,   // default retry policy
 }
 var settingMutex sync.Mutex
 
@@ -66,11 +66,120 @@ func New(end_point, accessid, accesskey, instance_name string, kwargs ...interfa
 		return nil, err
 	}
 
-	o = &defaultOTSSetting
+	o = new(OTSClient)
 	o.EndPoint = end_point
 	o.AccessId = accessid
 	o.AccessKey = accesskey
 	o.InstanceName = instance_name
+	o.SocketTimeout = defaultOTSSetting.SocketTimeout
+	o.MaxConnection = defaultOTSSetting.MaxConnection
+	o.LoggerName = defaultOTSSetting.LoggerName
+	o.Encoding = defaultOTSSetting.Encoding
+	o.protocol = defaultOTSSetting.protocol
+	// initialize the retry policy
+	if o.RetryPolicy == nil {
+		o.RetryPolicy = OTSDefaultRetryPolicy
+	}
+
+	for i, v := range kwargs {
+		switch i {
+		case 0: // SocketTimeout --> int32
+			if _, ok := v.(int); ok {
+				o.SocketTimeout = v.(int)
+			} else {
+				return nil, (OTSClientError{}.Set("OTSClient.SocketTimeout should be int type, not %v", reflect.TypeOf(v)))
+			}
+
+		case 1: // MaxConnection --> int32
+			if _, ok := v.(int); ok {
+				o.MaxConnection = v.(int)
+			} else {
+				return nil, (OTSClientError{}.Set("OTSClient.MaxConnection should be int type, not %v", reflect.TypeOf(v)))
+			}
+
+		case 2: // LoggerName --> string
+			if _, ok := v.(string); ok {
+				o.LoggerName = v.(string)
+			} else {
+				return nil, (OTSClientError{}.Set("OTSClient.LoggerName should be string type, not %v", reflect.TypeOf(v)))
+			}
+
+		case 3: // Encoding --> string
+			if _, ok := v.(string); ok {
+				o.Encoding = v.(string)
+			} else {
+				return nil, (OTSClientError{}.Set("OTSClient.Encoding should be string type, not %v", reflect.TypeOf(v)))
+			}
+		}
+	}
+
+	// parse end point
+	end_point_url, err := url.Parse(end_point)
+	if err != nil {
+		return nil, (OTSClientError{}.Set("url parse error", err))
+	}
+	if end_point_url.Scheme != "http" && end_point_url.Scheme != "https" {
+		return nil, (OTSClientError{}.Set("protocol of end_point must be 'http' or 'https', e.g. http://ots.aliyuncs.com:80."))
+	}
+
+	if end_point_url.Host == "" {
+		return nil, (OTSClientError{}.Set("host of end_point should be specified, e.g. http://ots.aliyuncs.com:80."))
+	}
+
+	// set default setting for urllib
+	url_setting := urllib.HttpSettings{
+		false,            // ShowDebug
+		"GiterLab",       // UserAgent
+		60 * time.Second, // ConnectTimeout
+		60 * time.Second, // ReadWriteTimeout
+		nil,              // TlsClientConfig
+		nil,              // Proxy
+		nil,              // Transport
+		false,            // EnableCookie
+		true,             // Gzip
+		true,             // DumpBody
+	}
+	if o.SocketTimeout != 0 {
+		url_setting.ConnectTimeout = time.Duration(o.SocketTimeout) * time.Second
+		url_setting.ReadWriteTimeout = time.Duration(o.SocketTimeout) * time.Second
+	}
+	if OTSHttpDebugEnable {
+		url_setting.ShowDebug = true
+	} else {
+		url_setting.ShowDebug = false
+	}
+	urllib.SetDefaultSetting(url_setting)
+
+	o.protocol = newProtocol(nil)
+	o.protocol.Set(o.AccessId, o.AccessKey, o.InstanceName, o.Encoding, o.LoggerName)
+
+	return o, nil
+}
+
+//		创建一个新的OTSClient实例
+func NewWithRetryPolicy(end_point, accessid, accesskey, instance_name string, retry_policy RetryPolicyInterface, kwargs ...interface{}) (o *OTSClient, err error) {
+	// init logger
+	err = LoggerInit()
+	if err != nil {
+		return nil, err
+	}
+
+	o = new(OTSClient)
+	o.EndPoint = end_point
+	o.AccessId = accessid
+	o.AccessKey = accesskey
+	o.InstanceName = instance_name
+	o.SocketTimeout = defaultOTSSetting.SocketTimeout
+	o.MaxConnection = defaultOTSSetting.MaxConnection
+	o.LoggerName = defaultOTSSetting.LoggerName
+	o.Encoding = defaultOTSSetting.Encoding
+	o.protocol = defaultOTSSetting.protocol
+	// initialize the retry policy
+	if retry_policy != nil {
+		o.RetryPolicy = retry_policy
+	} else {
+		o.RetryPolicy = OTSDefaultRetryPolicy
+	}
 
 	for i, v := range kwargs {
 		switch i {
@@ -172,6 +281,10 @@ type OTSClient struct {
 
 	// protocol
 	protocol *ots_protocol
+
+	// 定义了重试策略，默认的重试策略为 DefaultRetryPolicy。
+	// 你可以继承 RetryPolicy 来实现自己的重试策略，请参考 DefaultRetryPolicy 的代码。
+	RetryPolicy RetryPolicyInterface
 }
 
 func (o *OTSClient) String() string {
@@ -294,6 +407,12 @@ func (o *OTSClient) Set(kwargs DictString) *OTSClient {
 }
 
 func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp []reflect.Value, ots_service_error *OTSServiceError) {
+	var reason string
+	var status int
+	var resheaders = DictString{}
+	var resbody []byte
+	var req *urllib.HttpRequest
+
 	ots_service_error = new(OTSServiceError)
 
 	// 1. make_request
@@ -302,67 +421,105 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 		return nil, ots_service_error.SetErrorMessage("%s", err)
 	}
 
-	// 2. http send_receive
-	req := urllib.Post(o.EndPoint + query)
-	if OTSHttpDebugEnable {
-		req.Debug(true)
-	} else {
-		req.Debug(false)
-	}
-	req.Body(reqbody)
-	if reqheaders != nil {
-		for k, v := range reqheaders {
-			req.Header(k, v.(string))
-		}
-	}
-	response, err := req.Response()
-	if err != nil {
-		return nil, ots_service_error.SetErrorMessage("%s", err)
-	}
-	status := response.StatusCode // e.g. 200
-	reason := response.Status     // e.g. "200 OK"
-	var resheaders = DictString{}
-	if response.Header != nil {
-		for k, v := range response.Header {
-			resheaders[strings.ToLower(k)] = v[0] // map[string][]string
-		}
-	}
-	if response.Body == nil {
-		return nil, ots_service_error.SetErrorMessage("Http body is empty")
-	}
-	defer response.Body.Close()
-	resbody, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, ots_service_error.SetErrorMessage("%s", err)
-	}
+	retry_times := 0
 
-	// for debug
-	if OTSDebugEnable {
-		fmt.Println("==== Aliyun OTS Response ====")
-		fmt.Println("status:", status)
-		fmt.Println("reason:", reason)
-		fmt.Println("headers:", resheaders)
-		// if resbody != nil {
-		// 	if len(resbody) == 0 {
-		// 		fmt.Println("body-raw:", "None")
-		// 		fmt.Println("body-string:", "None")
-		// 	} else {
-		// 		fmt.Println("body-raw:", resbody)
-		// 		fmt.Println("body-string:", string(resbody))
-		// 	}
-		//
-		// } else {
-		// 	fmt.Println("body-raw:", "None")
-		// 	fmt.Println("body-string:", "None")
-		// }
-		// fmt.Println("-----------------------------")
-	}
+	for {
+		// 2. http send_receive
+		end_point_url, _ := url.Parse(o.EndPoint)
+		if end_point_url.Scheme == "https" {
+			req = urllib.Post(o.EndPoint + query).SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+		} else {
+			req = urllib.Post(o.EndPoint + query)
+		}
+		if OTSHttpDebugEnable {
+			req.Debug(true)
+		} else {
+			req.Debug(false)
+		}
+		req.Body(reqbody)
+		if reqheaders != nil {
+			for k, v := range reqheaders {
+				req.Header(k, v.(string))
+			}
+		}
+		response, err := req.Response()
+		if err != nil {
+			ots_service_error.SetErrorMessage("%s", err)
+			if o.RetryPolicy.ShouldRetry(retry_times, ots_service_error, api_name) {
+				retry_delay := o.RetryPolicy.GetRetryDelay(retry_times, ots_service_error, api_name)
+				time.Sleep(time.Duration(retry_delay*1000) * time.Millisecond)
+				retry_times += 1
+			} else {
+				return nil, ots_service_error
+			}
+		}
+		status = response.StatusCode // e.g. 200
+		reason = response.Status     // e.g. "200 OK"
+		if response.Header != nil {
+			for k, v := range response.Header {
+				resheaders[strings.ToLower(k)] = v[0] // map[string][]string
+			}
+		}
+		if response.Body == nil {
+			ots_service_error.SetErrorMessage("Http body is empty")
+			if o.RetryPolicy.ShouldRetry(retry_times, ots_service_error, api_name) {
+				retry_delay := o.RetryPolicy.GetRetryDelay(retry_times, ots_service_error, api_name)
+				time.Sleep(time.Duration(retry_delay*1000) * time.Millisecond)
+				retry_times += 1
+			} else {
+				return nil, ots_service_error
+			}
+		}
+		defer response.Body.Close()
+		resbody, err = ioutil.ReadAll(response.Body)
+		if err != nil {
+			ots_service_error.SetErrorMessage("%s", err)
+			if o.RetryPolicy.ShouldRetry(retry_times, ots_service_error, api_name) {
+				retry_delay := o.RetryPolicy.GetRetryDelay(retry_times, ots_service_error, api_name)
+				time.Sleep(time.Duration(retry_delay*1000) * time.Millisecond)
+				retry_times += 1
+			} else {
+				return nil, ots_service_error
+			}
+		}
 
-	// 3. handle_error
-	ots_service_error = o.protocol.handle_error(api_name, query, reason, status, resheaders, resbody)
-	if ots_service_error != nil {
-		return nil, ots_service_error
-	}
+		// for debug
+		if OTSDebugEnable {
+			fmt.Println("==== Aliyun OTS Response ====")
+			fmt.Println("status:", status)
+			fmt.Println("reason:", reason)
+			fmt.Println("headers:", resheaders)
+			// if resbody != nil {
+			// 	if len(resbody) == 0 {
+			// 		fmt.Println("body-raw:", "None")
+			// 		fmt.Println("body-string:", "None")
+			// 	} else {
+			// 		fmt.Println("body-raw:", resbody)
+			// 		fmt.Println("body-string:", string(resbody))
+			// 	}
+			//
+			// } else {
+			// 	fmt.Println("body-raw:", "None")
+			// 	fmt.Println("body-string:", "None")
+			// }
+			// fmt.Println("-----------------------------")
+		}
+
+		// 3. handle_error
+		ots_service_error = o.protocol.handle_error(api_name, query, reason, status, resheaders, resbody)
+		if ots_service_error != nil {
+			if o.RetryPolicy.ShouldRetry(retry_times, ots_service_error, api_name) {
+				retry_delay := o.RetryPolicy.GetRetryDelay(retry_times, ots_service_error, api_name)
+				fmt.Println(retry_delay, time.Duration(retry_delay*1000)*time.Millisecond)
+				time.Sleep(time.Duration(retry_delay*1000) * time.Millisecond)
+				retry_times += 1
+			} else {
+				return nil, ots_service_error
+			}
+		} else {
+			break
+		}
+	} // end for
 
 	// 4. parse_response
 	resp, ots_service_error = o.protocol.parse_response(api_name, reason, status, resheaders, resbody)
@@ -424,13 +581,13 @@ func (o *OTSClient) _check_request_helper_error(resp []reflect.Value) (r interfa
 // 		table_meta := &OTSTableMeta{
 // 			TableName: "myTable",
 // 			SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
-// 				"gid": "INTEGER",
-// 				"uid": "INTEGER",
+// 				{K: "gid", V: "INTEGER"},
+// 				{K: "uid", V: "INTEGER"},
 // 			},
 // 		}
 //
 // 		reserved_throughput := &OTSReservedThroughput{
-// 			OTSCapacityUnit{100, 100},
+// 			OTSCapacityUnit{0, 0},
 // 		}
 //
 // 		ots_err := ots_client.CreateTable(table_meta, reserved_throughput)
@@ -526,7 +683,7 @@ func (o *OTSClient) ListTable() (table_list *OTSListTableResponse, err *OTSError
 //
 // 		示例：
 // 		reserved_throughput := &OTSReservedThroughput{
-// 		 OTSCapacityUnit{5000, 5000},
+// 		 OTSCapacityUnit{0, 0},
 // 		}
 //
 // 		// 每次调整操作的间隔应大于10分钟
@@ -1139,5 +1296,5 @@ func (o *OTSClient) GetRange(table_name string, direction string,
 // }
 
 func (o *OTSClient) Version() string {
-	return "ots_golang_sdk_2.0.2"
+	return "ots_golang_sdk_" + VERSION
 }

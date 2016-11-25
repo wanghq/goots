@@ -1,0 +1,13 @@
+# -*- mode: python -*-
+
+Import('env')
+
+file_list = [('ots_python_sdk_public/', 'DOCUMENT'),
+    ('ots_python_sdk_public/', 'README.txt'),
+    ('ots_python_sdk_public/', 'setup.py')] + \
+    [('ots_python_sdk_public/ots2', x) for x in env.Glob('ots2/*.py')] + \
+    [('ots_python_sdk_public/ots2/protobuf', x) for x in env.Glob('ots2/protobuf/*')] + \
+    [('ots_python_sdk_public/ots2/example', x) for x in env.Glob('ots2/example/*')] + \
+    [('ots_python_sdk_public/pymodules', x) for x in env.Glob('pymodules/*')]
+
+env.aPackage('ots_python_sdk_public', file_list)

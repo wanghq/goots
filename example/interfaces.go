@@ -11,23 +11,22 @@ import (
 	"time"
 
 	ots2 "github.com/GiterLab/goots"
-	"github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
 )
 
 // modify it to yours
 const (
-	ENDPOINT     = "http://127.0.0.1:8800"
-	ACCESSID     = "OTSMultiUser177_accessid"
-	ACCESSKEY    = "OTSMultiUser177_accesskey"
-	INSTANCENAME = "TestInstance177"
+	ENDPOINT     = "your_instance_address"
+	ACCESSID     = "your_accessid"
+	ACCESSKEY    = "your_accesskey"
+	INSTANCENAME = "your_instance_name"
 )
 
 func main() {
 	// set running environment
 	ots2.OTSDebugEnable = true
 	ots2.OTSLoggerEnable = true
-	log.OTSErrorPanicMode = true // 默认为开启，如果不喜欢panic则设置此为false
+	ots2.OTSErrorPanicMode = true // 默认为开启，如果不喜欢panic则设置此为false
 
 	fmt.Println("Test goots start ...")
 
@@ -45,16 +44,17 @@ func main() {
 	fmt.Println("表已删除")
 
 	// create_table
+	// 注意：OTS是按设置的ReservedThroughput计量收费，即使没有读写也会产生费用。
 	table_meta := &OTSTableMeta{
 		TableName: "myTable",
 		SchemaOfPrimaryKey: OTSSchemaOfPrimaryKey{
-			"gid": "INTEGER",
-			"uid": "INTEGER",
+			{K: "gid", V: "INTEGER"},
+			{K: "uid", V: "INTEGER"},
 		},
 	}
 
 	reserved_throughput := &OTSReservedThroughput{
-		OTSCapacityUnit{100, 100},
+		OTSCapacityUnit{0, 0},
 	}
 
 	ots_err = ots_client.CreateTable(table_meta, reserved_throughput)
@@ -79,15 +79,24 @@ func main() {
 	fmt.Println("list_tables:", list_tables.TableNames)
 
 	// update_table
+	// 只能在高性能实例实例下测试，不要在容量型实例上测试，否则出错
 	//
 	// 每次调整操作的间隔应大于10分钟
-	// 如果是刚创建表，需要10分钟之后才能调整表的预留读写吞吐量。
+	// 如果是刚创建表，需要2分钟之后才能调整表的预留读写吞吐量。
+	// 注意：OTS是按设置的ReservedThroughput计量收费，即使没有读写也会产生费用。
+	//
+	// Note:
+	// 容量型实例: The value of read capacity unit can only be 0
+	//             The value of write capacity unit can only be 0.
+	//             Your instance is forbidden to update capacity unit.
+	// 高性能实例: at least one of read or write of CapacityUnit is required
 	update_reserved_throughput := &OTSReservedThroughput{
-		OTSCapacityUnit{5000, 5000},
+		OTSCapacityUnit{0, 0},
 	}
 
-	fmt.Println("Need to sleep 12 Minute, be patient...")
-	time.Sleep(12 * time.Minute)
+	fmt.Println("Need to sleep 2 Minute, be patient...")
+	time.Sleep(2 * time.Minute)
+	time.Sleep(5 * time.Second)
 	update_response, ots_err := ots_client.UpdateTable("myTable", update_reserved_throughput)
 	if ots_err != nil {
 		fmt.Println(ots_err)
@@ -140,7 +149,8 @@ func main() {
 	columns_to_get := &OTSColumnsToGet{
 		"name", "address", "age",
 	}
-	// columns_to_get = nil // read all
+	// columns_to_get = nil
+	// read all
 	get_row_response, ots_err := ots_client.GetRow("myTable", primary_key, columns_to_get)
 	if ots_err != nil {
 		fmt.Println(ots_err)
@@ -502,7 +512,6 @@ func main() {
 	ots_err = ots_client.DeleteTable("myTable")
 	if ots_err != nil {
 		fmt.Println(ots_err)
-		// os.Exit(1)
 	}
 	fmt.Println("测试完毕，表已删除")
 }

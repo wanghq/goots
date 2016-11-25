@@ -6,13 +6,14 @@
 package coder
 
 import (
+	"errors"
+	"fmt"
 	"reflect"
 	"time"
 
-	"github.com/golang/protobuf/proto"
-	. "github.com/GiterLab/goots/log"
 	. "github.com/GiterLab/goots/otstype"
 	. "github.com/GiterLab/goots/protobuf"
+	"github.com/golang/protobuf/proto"
 )
 
 var api_decode_map = NewFuncmap()
@@ -65,7 +66,7 @@ func _parse_value(value *ColumnValue) interface{} {
 	case ColumnType_BINARY:
 		return value.GetVBinary()
 	default:
-		panic(OTSClientError{}.Set("invalid column value type: %d", value.GetType()))
+		panic(errors.New(fmt.Sprintf("invalid column value type: %d", value.GetType())))
 	}
 
 	return nil
@@ -73,10 +74,11 @@ func _parse_value(value *ColumnValue) interface{} {
 
 func _parse_schema_list(primary_key []*ColumnSchema) OTSSchemaOfPrimaryKey {
 	schema_of_primary_key := make(OTSSchemaOfPrimaryKey, len(primary_key))
-	for _, v := range primary_key {
+	for i, v := range primary_key {
 		key := v.GetName()
 		value := _parse_column_type(v.GetType())
-		schema_of_primary_key[key] = value
+		schema_of_primary_key[i].SetKey(key)
+		schema_of_primary_key[i].SetValue(value)
 	}
 
 	return schema_of_primary_key
@@ -419,7 +421,7 @@ func _decode_get_range(buf []byte) (response_row_list *OTSGetRangeResponse, err 
 // request encode for ots2
 func DecodeRequest(api_name string, args ...interface{}) (req []reflect.Value, err error) {
 	if _, ok := api_decode_map[api_name]; !ok {
-		return nil, (OTSClientError{}.Set("No PB decode method for API %s", api_name))
+		return nil, errors.New(fmt.Sprintf("No PB decode method for API %s" + api_name))
 	}
 
 	req, err = api_decode_map.Call(api_name, args...)

@@ -12,6 +12,7 @@ import (
 
 var OTSColumnType_INF_MIN OTS_INF_MIN // only for GetRange
 var OTSColumnType_INF_MAX OTS_INF_MAX // only for GetRange
+
 const (
 	// OTSColumnType
 	OTSColumnType_INTEGER = "INTEGER"
@@ -45,22 +46,22 @@ type OTSTableMeta struct {
 	// 该表的表名
 	TableName string
 	// 该表全部的主键列描述
-	SchemaOfPrimaryKey OTSSchemaOfPrimaryKey //  map[string]string{"PK0": "STRING", "PK1": "INTEGER", ...}
+	SchemaOfPrimaryKey OTSSchemaOfPrimaryKey
 }
 
 // 表主键列描述
-type OTSSchemaOfPrimaryKey DictString
+type OTSSchemaOfPrimaryKey ListString
 
-func (o OTSSchemaOfPrimaryKey) Del(key string) {
-	DictString(o).Del(key)
+func (o *OTSSchemaOfPrimaryKey) Del(key string) {
+	(*ListString)(o).Del(key)
 }
 
-func (o OTSSchemaOfPrimaryKey) Get(key string) interface{} {
-	return DictString(o).Get(key)
+func (o *OTSSchemaOfPrimaryKey) Get(key string) interface{} {
+	return (*ListString)(o).Get(key)
 }
 
-func (o OTSSchemaOfPrimaryKey) Set(key string, value interface{}) {
-	DictString(o).Set(key, value)
+func (o *OTSSchemaOfPrimaryKey) Set(key string, value interface{}) {
+	(*ListString)(o).Set(key, value)
 }
 
 // 表示一次操作消耗服务能力单元的值或是一个表的预留读写吞吐量的值

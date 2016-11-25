@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // errors for ots2
-package log
+package goots
 
 import (
 	"fmt"
@@ -15,13 +15,6 @@ var OTSErrorPanicMode bool = true // 默认开启panic模式
 type OTSError struct {
 	ClientError  *OTSClientError
 	ServiceError *OTSServiceError
-}
-
-func LoggerInit() error {
-	// TODO:
-	// open log file
-
-	return nil
 }
 
 func (o OTSError) Set(format string, a ...interface{}) (e error) {
@@ -112,7 +105,7 @@ func (o *OTSError) SetServiceMessage(format string, a ...interface{}) *OTSError 
 
 type OTSClientError struct {
 	Message    string
-	HttpStatus string
+	HttpStatus int
 }
 
 func (o OTSClientError) Set(format string, a ...interface{}) (e error) {
@@ -145,13 +138,13 @@ func (o *OTSClientError) String() string {
 	return "[C]-" + o.Message
 }
 
-func (o *OTSClientError) SetHttpStatus(status string) *OTSClientError {
+func (o *OTSClientError) SetHttpStatus(status int) *OTSClientError {
 	o.HttpStatus = status
 
 	return o
 }
 
-func (o *OTSClientError) GetHttpStatus() string {
+func (o *OTSClientError) GetHttpStatus() int {
 	return o.HttpStatus
 }
 
@@ -166,7 +159,7 @@ func (o *OTSClientError) GetErrorMessage() string {
 }
 
 type OTSServiceError struct {
-	HttpStatus string
+	HttpStatus int
 	Code       string
 	Message    string
 	RequestId  string
@@ -204,12 +197,12 @@ func (o *OTSServiceError) String() string {
 		o.Code, o.Message, o.RequestId)
 }
 
-func (o *OTSServiceError) SetHttpStatus(status string) *OTSServiceError {
+func (o *OTSServiceError) SetHttpStatus(status int) *OTSServiceError {
 	o.HttpStatus = status
 
 	return o
 }
-func (o *OTSServiceError) GetHttpStatus() string {
+func (o *OTSServiceError) GetHttpStatus() int {
 	return o.HttpStatus
 }
 
