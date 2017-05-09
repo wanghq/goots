@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
@@ -142,6 +143,9 @@ func New(end_point, accessid, accesskey, instance_name string, kwargs ...interfa
 	if o.SocketTimeout != 0 {
 		url_setting.ConnectTimeout = time.Duration(o.SocketTimeout) * time.Second
 		url_setting.ReadWriteTimeout = time.Duration(o.SocketTimeout) * time.Second
+		url_setting.Transport = &http.Transport{Dial: urllib.TimeoutDialer(url_setting.ConnectTimeout, url_setting.ReadWriteTimeout)}
+	} else {
+		url_setting.Transport = &http.Transport{Dial: urllib.TimeoutDialer(60*time.Second, 60*time.Second)}
 	}
 	if OTSHttpDebugEnable {
 		url_setting.ShowDebug = true
@@ -242,6 +246,9 @@ func NewWithRetryPolicy(end_point, accessid, accesskey, instance_name string, re
 	if o.SocketTimeout != 0 {
 		url_setting.ConnectTimeout = time.Duration(o.SocketTimeout) * time.Second
 		url_setting.ReadWriteTimeout = time.Duration(o.SocketTimeout) * time.Second
+		url_setting.Transport = &http.Transport{Dial: urllib.TimeoutDialer(url_setting.ConnectTimeout, url_setting.ReadWriteTimeout)}
+	} else {
+		url_setting.Transport = &http.Transport{Dial: urllib.TimeoutDialer(60*time.Second, 60*time.Second)}
 	}
 	if OTSHttpDebugEnable {
 		url_setting.ShowDebug = true
