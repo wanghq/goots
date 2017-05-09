@@ -392,7 +392,7 @@ func (b *HttpRequest) SendOut() (*http.Response, error) {
 		trans = &http.Transport{
 			TLSClientConfig: b.setting.TlsClientConfig,
 			Proxy:           b.setting.Proxy,
-			Dial:            TimeoutDialer(b.setting.ConnectTimeout, b.setting.ReadWriteTimeout),
+			Dial:            TimeoutDialer(b.setting.ConnectTimeout),
 		}
 	} else {
 		// if b.transport is *http.Transport then set the settings.
@@ -404,7 +404,7 @@ func (b *HttpRequest) SendOut() (*http.Response, error) {
 				t.Proxy = b.setting.Proxy
 			}
 			if t.Dial == nil {
-				t.Dial = TimeoutDialer(b.setting.ConnectTimeout, b.setting.ReadWriteTimeout)
+				t.Dial = TimeoutDialer(b.setting.ConnectTimeout)
 			}
 		}
 	}
@@ -420,6 +420,7 @@ func (b *HttpRequest) SendOut() (*http.Response, error) {
 	client := &http.Client{
 		Transport: trans,
 		Jar:       jar,
+		Timeout:   b.setting.ReadWriteTimeout,
 	}
 
 	if b.setting.UserAgent != "" && b.req.Header.Get("User-Agent") == "" {
@@ -433,6 +434,7 @@ func (b *HttpRequest) SendOut() (*http.Response, error) {
 		}
 		b.dump = dump
 	}
+
 	return client.Do(b.req)
 }
 
@@ -520,13 +522,12 @@ func (b *HttpRequest) Response() (*http.Response, error) {
 }
 
 // TimeoutDialer returns functions of connection dialer with timeout settings for http.Transport Dial field.
-func TimeoutDialer(cTimeout time.Duration, rwTimeout time.Duration) func(net, addr string) (c net.Conn, err error) {
+func TimeoutDialer(cTimeout time.Duration) func(net, addr string) (c net.Conn, err error) {
 	return func(netw, addr string) (net.Conn, error) {
 		conn, err := net.DialTimeout(netw, addr, cTimeout)
 		if err != nil {
 			return nil, err
 		}
-		err = conn.SetDeadline(time.Now().Add(rwTimeout))
 		return conn, err
 	}
 }
