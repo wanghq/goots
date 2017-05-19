@@ -59,6 +59,24 @@ func SetDefaultSetting(setting OTSClient) {
 	}
 }
 
+const (
+	defaultConnTimeout = 60 * time.Second
+	// NOTE: TableStore server has a keepalive timeout of 60s, the
+	// idle timeout on client side must be less than this value.
+	defaultIdleTimeout = 50 * time.Second
+)
+
+func getTransport(connTimeout time.Duration) *http.Transport {
+	if connTimeout == 0 {
+		connTimeout = defaultConnTimeout
+	}
+
+	return &http.Transport{
+		Dial:            urllib.TimeoutDialer(connTimeout),
+		IdleConnTimeout: defaultIdleTimeout,
+	}
+}
+
 //		创建一个新的OTSClient实例
 func New(end_point, accessid, accesskey, instance_name string, kwargs ...interface{}) (o *OTSClient, err error) {
 	// init logger
@@ -143,10 +161,9 @@ func New(end_point, accessid, accesskey, instance_name string, kwargs ...interfa
 	if o.SocketTimeout != 0 {
 		url_setting.ConnectTimeout = time.Duration(o.SocketTimeout) * time.Second
 		url_setting.ReadWriteTimeout = time.Duration(o.SocketTimeout) * time.Second
-		url_setting.Transport = &http.Transport{Dial: urllib.TimeoutDialer(url_setting.ConnectTimeout)}
-	} else {
-		url_setting.Transport = &http.Transport{Dial: urllib.TimeoutDialer(60 * time.Second)}
 	}
+	url_setting.Transport = getTransport(url_setting.ConnectTimeout)
+
 	if OTSHttpDebugEnable {
 		url_setting.ShowDebug = true
 	} else {
@@ -247,10 +264,9 @@ func NewWithRetryPolicy(end_point, accessid, accesskey, instance_name string, re
 	if o.SocketTimeout != 0 {
 		url_setting.ConnectTimeout = time.Duration(o.SocketTimeout) * time.Second
 		url_setting.ReadWriteTimeout = time.Duration(o.SocketTimeout) * time.Second
-		url_setting.Transport = &http.Transport{Dial: urllib.TimeoutDialer(url_setting.ConnectTimeout)}
-	} else {
-		url_setting.Transport = &http.Transport{Dial: urllib.TimeoutDialer(60 * time.Second)}
 	}
+	url_setting.Transport = getTransport(url_setting.ConnectTimeout)
+
 	if OTSHttpDebugEnable {
 		url_setting.ShowDebug = true
 	} else {
