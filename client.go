@@ -61,9 +61,9 @@ func SetDefaultSetting(setting OTSClient) {
 
 const (
 	defaultConnTimeout = 60 * time.Second
-	// NOTE: TableStore server has a keepalive timeout of 60s, the
+	// NOTE: TableStore server has a keepalive timeout of 30s, the
 	// idle timeout on client side must be less than this value.
-	defaultIdleTimeout = 50 * time.Second
+	defaultIdleTimeout = 20 * time.Second
 )
 
 func getTransport(connTimeout time.Duration) *http.Transport {
