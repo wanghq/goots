@@ -44,6 +44,21 @@ Tips: 使用OTS前，请参考下[OTS使用限制项](https://help.aliyun.com/do
 	$ go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
 	$ go get github.com/GiterLab/goots
 
+## Test
+set ENV first
+```
+OTS_TEST_ACCESS_KEY_ID=<AK_ID>
+OTS_TEST_ACCESS_KEY_SECRET=<AK_SECRET>
+OTS_TEST_INSTANCE=<ots-instance>
+OTS_TEST_HOST=<ots.aliyuncs.com>
+OTS_TEST_REGION=<cn-shanghai>
+```
+
+run
+```
+go test -v -x -tags=unittest ./
+```
+
 ## Usage
 
 	package main
