@@ -8,6 +8,7 @@ package goots
 import (
 	"math"
 	"math/rand"
+	"net"
 	"time"
 )
 
@@ -97,6 +98,13 @@ func is_repeatable_api(api_name string) bool {
 
 func should_retry_when_api_repeatable(retry_times int, exception *OTSServiceError, api_name string) bool {
 	if exception != nil {
+		if exception.Err != nil {
+			if _, ok := exception.Err.(net.Error); ok {
+				return true
+			} else if exception.Err == ErrNonResponseBody || exception.Err == ErrReadResponse {
+				return true
+			}
+		}
 
 		error_code := exception.Code
 		//error_message := exception.Message

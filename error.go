@@ -12,6 +12,9 @@ import (
 // 如果用户不希望使用panic模式，则设置此为false
 var OTSErrorPanicMode bool = true // 默认开启panic模式
 
+var ErrNonResponseBody = fmt.Errorf("response body not found")
+var ErrReadResponse = fmt.Errorf("response body read fail")
+
 type OTSError struct {
 	ClientError  *OTSClientError
 	ServiceError *OTSServiceError
@@ -163,6 +166,7 @@ type OTSServiceError struct {
 	Code       string
 	Message    string
 	RequestId  string
+	Err        error
 }
 
 func (o OTSServiceError) Set(format string, a ...interface{}) (e error) {

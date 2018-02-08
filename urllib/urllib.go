@@ -516,11 +516,6 @@ func (b *HttpRequest) ToXml(v interface{}) error {
 	return xml.Unmarshal(data, v)
 }
 
-// Response executes request client gets response mannually.
-func (b *HttpRequest) Response() (*http.Response, error) {
-	return b.getResponse()
-}
-
 // TimeoutDialer returns functions of connection dialer with timeout settings for http.Transport Dial field.
 func TimeoutDialer(cTimeout time.Duration) func(net, addr string) (c net.Conn, err error) {
 	return func(netw, addr string) (net.Conn, error) {

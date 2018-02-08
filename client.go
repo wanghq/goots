@@ -470,16 +470,19 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 		response, err := req.Response()
 		if err != nil {
 			ots_service_error.SetErrorMessage("%s", err)
+			ots_service_error.Err = err
 			if o.RetryPolicy.ShouldRetry(retry_times, ots_service_error, api_name) {
 				retry_delay := o.RetryPolicy.GetRetryDelay(retry_times, ots_service_error, api_name)
 				time.Sleep(time.Duration(retry_delay*1000) * time.Millisecond)
 				retry_times += 1
+				continue
 			} else {
 				return nil, ots_service_error
 			}
 		}
 		status = response.StatusCode // e.g. 200
 		reason = response.Status     // e.g. "200 OK"
+		ots_service_error.SetHttpStatus(status)
 		if response.Header != nil {
 			for k, v := range response.Header {
 				resheaders[strings.ToLower(k)] = v[0] // map[string][]string
@@ -487,10 +490,12 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 		}
 		if response.Body == nil {
 			ots_service_error.SetErrorMessage("Http body is empty")
+			ots_service_error.Err = ErrNonResponseBody
 			if o.RetryPolicy.ShouldRetry(retry_times, ots_service_error, api_name) {
 				retry_delay := o.RetryPolicy.GetRetryDelay(retry_times, ots_service_error, api_name)
 				time.Sleep(time.Duration(retry_delay*1000) * time.Millisecond)
 				retry_times += 1
+				continue
 			} else {
 				return nil, ots_service_error
 			}
@@ -499,10 +504,12 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 		resbody, err = ioutil.ReadAll(response.Body)
 		if err != nil {
 			ots_service_error.SetErrorMessage("%s", err)
+			ots_service_error.Err = ErrReadResponse
 			if o.RetryPolicy.ShouldRetry(retry_times, ots_service_error, api_name) {
 				retry_delay := o.RetryPolicy.GetRetryDelay(retry_times, ots_service_error, api_name)
 				time.Sleep(time.Duration(retry_delay*1000) * time.Millisecond)
 				retry_times += 1
+				continue
 			} else {
 				return nil, ots_service_error
 			}
@@ -535,9 +542,9 @@ func (o *OTSClient) _request_helper(api_name string, args ...interface{}) (resp 
 		if ots_service_error != nil {
 			if o.RetryPolicy.ShouldRetry(retry_times, ots_service_error, api_name) {
 				retry_delay := o.RetryPolicy.GetRetryDelay(retry_times, ots_service_error, api_name)
-				fmt.Println(retry_delay, time.Duration(retry_delay*1000)*time.Millisecond)
 				time.Sleep(time.Duration(retry_delay*1000) * time.Millisecond)
 				retry_times += 1
+				continue
 			} else {
 				return nil, ots_service_error
 			}
