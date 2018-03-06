@@ -55,7 +55,7 @@ func (o *OTSError) Error() string {
 	if o.ServiceError == nil {
 		service_message = "[S]-None"
 	} else {
-		service_message = "[S]-" + o.ServiceError.Code + " @ " + o.ServiceError.Message
+		service_message = "[S]-" + o.ServiceError.Code + " @ " + o.ServiceError.Message + " on " + o.ServiceError.RequestId
 	}
 
 	return client_message + " <--> " + service_message
@@ -74,7 +74,7 @@ func (o *OTSError) String() string {
 	if o.ServiceError == nil {
 		service_message = "[S]-None"
 	} else {
-		service_message = "[S]-" + o.ServiceError.Code + " @ " + o.ServiceError.Message
+		service_message = "[S]-" + o.ServiceError.Code + " @ " + o.ServiceError.Message + " on " + o.ServiceError.RequestId
 	}
 
 	return client_message + " <--> " + service_message
