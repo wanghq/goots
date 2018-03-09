@@ -50,7 +50,7 @@ var OTSNoRetryPolicy NoRetryPolicy
 var OTSNoDelayRetryPolicy NoDelayRetryPolicy
 
 func init() {
-	OTSDefaultRetryPolicy.MaxRetryTimes = 3
+	OTSDefaultRetryPolicy.MaxRetryTimes = 6
 	OTSDefaultRetryPolicy.MaxRetryDelay = 2
 	OTSDefaultRetryPolicy.ScaleFactor = 2
 	OTSDefaultRetryPolicy.ServerThrottlingExceptionDelayFactor = 0.5
